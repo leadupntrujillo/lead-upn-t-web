@@ -1,3 +1,5 @@
+  ![Lead UPN Trujillo](./public/portada-lead.png)
+  
   # LEAD UPN Trujillo - Landing Page 🚀
 
   **El sitio web oficial de la organización estudiantil LEAD UPN Trujillo.**
