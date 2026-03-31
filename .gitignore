@@ -1,26 +1,67 @@
-# build output
+# Build output
 dist/
-# generated types
+build/
+.next/
+out/
+
+# Generated types and cache
 .astro/
+*.tsbuildinfo
 
-# dependencies
+# Dependencies
 node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
 
-# logs
+# Logs
 npm-debug.log*
+npm-error.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-
-# environment variables
+# Environment variables
 .env
 .env.production
 .env.local
 .env.*.local
+.env.test
 
-# macOS-specific files
-.DS_Store
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# jetbrains setting folder
+# Editor settings
+.vscode/
 .idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# OS files
+Thumbs.db
+.DS_Store*
+ehthumbs.db
+
+# IDE specific
+*.sublime-workspace
+*.sublime-project
+
+# Miscellaneous
+.cache/
+.turbo/
+dist-ssr/
+.nuxt
