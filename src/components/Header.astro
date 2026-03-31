@@ -1,0 +1,312 @@
+---
+---
+<header class="header">
+  <div class="logo">
+    <a href="/">
+      <span class="magenta-l">L</span>EAD
+    </a>
+  </div>
+
+  <div class="hero-text-loop">
+    <span class="loop-word active">LEARN</span>
+    <span class="loop-word">EXPLORE</span>
+    <span class="loop-word">ASPIRE</span>
+    <span class="loop-word">DISCOVER</span>
+  </div>
+
+  <div class="header-actions">
+    <a href="/unete" target="_blank" rel="noopener noreferrer" class="btn-primary">
+      ÚNETE
+    </a>
+    
+    <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+  </div>
+</header>
+
+<!-- Menú desplegable -->
+<div id="mobile-menu" class="mobile-menu crystal-fx" role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="close-menu" aria-label="Cerrar menú">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+  <nav class="mobile-nav">
+    <!-- Enlaces vacíos por ahora según instrucción -->
+    <a href="#" class="nav-link">Home</a>
+    <a href="#" class="nav-link">About</a>
+    <a href="#" class="nav-link">Events</a>
+    <a href="#" class="nav-link">Contact</a>
+  </nav>
+</div>
+
+<script>
+  // Script para manejar el menú
+  const menuToggle = document.querySelector('.menu-toggle');
+  const closeMenu = document.querySelector('.close-menu');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  const openMenu = () => {
+    mobileMenu.setAttribute('aria-hidden', 'false');
+    menuToggle.setAttribute('aria-expanded', 'true');
+    mobileMenu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeMenuFunc = () => {
+    mobileMenu.setAttribute('aria-hidden', 'true');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  menuToggle?.addEventListener('click', openMenu);
+  closeMenu?.addEventListener('click', closeMenuFunc);
+
+  // Script para el hero text loop
+  const words = document.querySelectorAll('.loop-word');
+  let currentWord = 0;
+
+  setInterval(() => {
+    words[currentWord].classList.remove('active');
+    words[currentWord].classList.add('exit');
+    
+    // Cleanup de la clase exit después de la animación
+    const exitedWord = words[currentWord];
+    setTimeout(() => {
+      exitedWord.classList.remove('exit');
+    }, 500); // 500ms debe ser igual a la duración de la transición CSS
+    
+    currentWord = (currentWord + 1) % words.length;
+    words[currentWord].classList.add('active');
+  }, 3000);
+</script>
+
+<style>
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .logo {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  
+  .magenta-l {
+    color: var(--magenta);
+    text-shadow: 0 0 10px rgba(230, 42, 107, 0.5); /* Resplandor neón */
+  }
+
+  /* Animated Hero Text Loop */
+  .hero-text-loop {
+    position: relative;
+    height: 32px;
+    width: 200px; /* Ancho fijo para evitar shifts */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .loop-word {
+    position: absolute;
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .loop-word.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .loop-word.exit {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  /* CTA Secundario - Tool recomendation para hover states / a11y click size */
+  .btn-primary {
+    display: inline-block;
+    padding: 10px 24px;
+    background: linear-gradient(90deg, var(--magenta), var(--cyan));
+    color: white;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 4px 15px rgba(230, 42, 107, 0.2);
+    /* a11y min size */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    border-radius: 8px;
+  }
+
+  .btn-primary:focus,
+  .btn-primary:active {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(42, 246, 255, 0.3);
+  }
+
+  .btn-primary:hover::after {
+    opacity: 1;
+  }
+
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+
+  /* Hamburger Menu */
+  .menu-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    z-index: 100;
+  }
+
+  .menu-toggle:focus {
+    outline: 2px solid var(--cyan);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  .menu-toggle .bar {
+    width: 24px;
+    height: 2px;
+    background-color: var(--text-title);
+    border-radius: 2px;
+    transition: all 0.3s linear;
+  }
+
+  .menu-toggle:hover .bar {
+    background-color: var(--cyan);
+  }
+
+  /* Mobile Menu Off-Canvas */
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 320px;
+    max-width: 100%;
+    height: 100vh;
+    z-index: 1000;
+    padding: var(--space-5) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 0; /* Override crystal-fx for full height */
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    visibility: hidden; /* Para a11y */
+  }
+
+  .mobile-menu.open {
+    right: 0;
+    visibility: visible;
+  }
+
+  .close-menu {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-4);
+    background: none;
+    border: none;
+    color: var(--text-title);
+    cursor: pointer;
+    padding: 8px; /* a11y hit area */
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .close-menu:hover {
+    color: var(--magenta);
+    transform: rotate(90deg);
+  }
+
+  .close-menu:focus {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .nav-link {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    color: var(--text-body);
+    font-weight: 500;
+    transition: color 0.2s, transform 0.2s;
+    text-decoration: none;
+  }
+
+  .nav-link:hover, .nav-link:focus {
+    color: var(--cyan);
+    transform: translateX(10px);
+    outline: none;
+  }
+
+  /* Responsive fixes */
+  @media (max-width: 768px) {
+    .hero-text-loop {
+      display: none; /* Ocultar loop de texto en mobile para no saturar header */
+    }
+  }
+</style>

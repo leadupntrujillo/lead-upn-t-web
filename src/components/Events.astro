@@ -1,0 +1,205 @@
+---
+---
+
+<section class="events-section" aria-labelledby="events-heading">
+  <div class="events-container">
+    <h2 id="events-heading" class="section-title">UPCOMING EVENTS</h2>
+    
+    <div class="events-grid">
+      <!-- Event 1 -->
+      <article class="event-card crystal-fx" tabindex="0">
+        <div class="card-image gala-img">
+          <!-- Placeholder Gradient for Image -->
+          <div class="image-gradient"></div>
+        </div>
+        <div class="card-content">
+          <span class="event-badge magenta-badge">Nov 15, 2026</span>
+          <h3 class="event-title">LEAD GALA</h3>
+          <p class="event-desc">An elegant evening celebrating the achievements of our community, networking with industry leaders, and inspiring future tech talents.</p>
+          <a href="#" class="btn-link">Ver detalles &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Event 2 -->
+      <article class="event-card crystal-fx" tabindex="0">
+        <div class="card-image conv-img">
+          <!-- Placeholder Gradient for Image -->
+          <div class="image-gradient cyan-grad"></div>
+        </div>
+        <div class="card-content">
+          <span class="event-badge cyan-badge">Dic 01, 2026</span>
+          <h3 class="event-title">CONVOCATORIA 2026</h3>
+          <p class="event-desc">Join the next generation of innovators. Open applications for our exclusive tech programs, designed to accelerate your career.</p>
+          <a href="#" class="btn-link cyan-link">Aplicar ahora &rarr;</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Intersection Observer for scroll reveal micro-animation
+  const eventObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.event-card').forEach(card => {
+    eventObserver.observe(card);
+  });
+</script>
+
+<style>
+  .events-section {
+    padding: var(--space-6) var(--space-3);
+    overflow: hidden; /* Evitar scrollbar horizontal subyacente */
+  }
+
+  .events-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: var(--space-5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .event-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+    cursor: pointer;
+    /* Entrance animation setup */
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .event-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .event-card:hover, .event-card:focus-visible {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    outline: none; /* Focus outline on container */
+  }
+
+  .event-card:focus-visible {
+    box-shadow: 0 0 0 3px var(--cyan);
+    border-radius: 16px;
+  }
+
+  .card-image {
+    width: 100%;
+    height: 200px;
+    position: relative;
+    background: #0F172A;
+    overflow: hidden;
+  }
+
+  .image-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(230,42,107,0.2) 0%, transparent 100%);
+    mix-blend-mode: overlay;
+    transition: opacity 0.3s ease, transform 0.5s ease;
+  }
+  
+  .image-gradient.cyan-grad {
+    background: linear-gradient(180deg, rgba(42,246,255,0.2) 0%, transparent 100%);
+  }
+
+  /* Animación de imagen en hover (zoom suave) */
+  .event-card:hover .image-gradient {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+
+  .card-content {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Rellenar el espacio sobrante */
+  }
+
+  .event-badge {
+    align-self: flex-start;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--space-3);
+  }
+
+  .magenta-badge {
+    background: rgba(230, 42, 107, 0.15);
+    color: var(--magenta);
+    border: 1px solid rgba(230, 42, 107, 0.3);
+  }
+
+  .cyan-badge {
+    background: rgba(42, 246, 255, 0.15);
+    color: var(--cyan);
+    border: 1px solid rgba(42, 246, 255, 0.3);
+  }
+
+  .event-title {
+    font-size: 24px;
+    margin-bottom: var(--space-2);
+  }
+
+  .event-desc {
+    color: var(--text-body);
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: var(--space-4);
+    flex-grow: 1; /* Empujará el botón al fondo si las tarjetas difieren en altura */
+  }
+
+  .btn-link {
+    font-family: var(--font-heading);
+    color: var(--magenta);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 14px;
+    letter-spacing: 1px;
+    align-self: flex-start;
+    padding-bottom: 2px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .cyan-link {
+    color: var(--cyan);
+  }
+
+  .event-card:hover .btn-link {
+    border-bottom-color: var(--magenta);
+  }
+  .event-card:hover .cyan-link {
+    border-bottom-color: var(--cyan);
+  }
+  
+  .btn-link:focus-visible {
+    outline: 2px solid currentColor;
+    border-radius: 2px;
+  }
+</style>

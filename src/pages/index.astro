@@ -1,17 +1,136 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Metrics from '../components/Metrics.astro';
+import CtaButtons from '../components/CtaButtons.astro';
+import Events from '../components/Events.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/lead-tr-upn.svg" />
-		<link rel="icon" href="/lead-tr-upn.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>LEAD UPN TRUJILLO</title>
-	</head>
-	<body>
-		<h1>LEAD UPN TRUJILLO</h1>
-	</body>
-</html>
+<Layout title="LEAD UPN Trujillo - Learn, Explore, Aspire, Discover">
+  
+  <Header />
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero" aria-label="Hero Section">
+      <div class="hero-content">
+        <h1 class="main-title">
+          <span class="highlight magenta">TRANSFORMANDO</span> 
+          EL FUTURO DE LA
+          <span class="highlight cyan">TECNOLOGÍA</span>
+        </h1>
+        <p class="hero-description">
+          Únete a la comunidad líder en innovación, desarrollo y emprendimiento universitario. Construye tu camino tech con nosotros en LEAD UPN.
+        </p>
+      </div>
+    </section>
+
+    <!-- METRICS -->
+    <Metrics />
+
+    <!-- SECONDARY CTAs -->
+    <CtaButtons />
+
+    <!-- EVENTS -->
+    <Events />
+
+  </main>
+
+  <footer class="footer crystal-fx">
+    <div class="footer-content">
+      <p>&copy; 2026 LEAD UPN Trujillo. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</Layout>
+
+<script>
+  // Simple scroll padding para anchors si se usan después
+  document.documentElement.style.setProperty('--scroll-padding', '80px');
+</script>
+
+<style>
+  main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-bottom: var(--space-8);
+  }
+
+  .hero {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+    position: relative;
+    z-index: 10;
+  }
+
+  .hero-content {
+    max-width: 900px;
+    animation: fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .main-title {
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 1.1;
+    margin-bottom: var(--space-4);
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Legibility */
+  }
+
+  .highlight {
+    display: block;
+    line-height: 1.2;
+  }
+
+  .highlight.magenta {
+    color: var(--magenta);
+    text-shadow: 0 0 30px rgba(230, 42, 107, 0.5);
+  }
+
+  .highlight.cyan {
+    color: var(--cyan);
+    text-shadow: 0 0 30px rgba(42, 246, 255, 0.5);
+  }
+
+  .hero-description {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--text-body);
+    max-width: 600px;
+    margin: 0 auto;
+    text-wrap: balance;
+  }
+
+  .footer {
+    border-radius: 0; /* Reset border radius for footer */
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    padding: var(--space-4) var(--space-3);
+    text-align: center;
+    margin-top: var(--space-6);
+  }
+
+  .footer-content p {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  /* Focus rings for main level components */
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 4px;
+  }
+</style>
