@@ -1,29 +1,21 @@
 ---
 ---
-<header class="header">
-  <div class="logo">
-    <a href="/">
-      <span class="magenta-l">L</span>EAD
-    </a>
-  </div>
-
-  <div class="hero-text-loop">
-    <span class="loop-word active">LEARN</span>
-    <span class="loop-word">EXPLORE</span>
-    <span class="loop-word">ASPIRE</span>
-    <span class="loop-word">DISCOVER</span>
-  </div>
-
-  <div class="header-actions">
-    <a href="/unete" target="_blank" rel="noopener noreferrer" class="btn-primary">
-      ÚNETE
-    </a>
-    
+<header class="header-wrapper">
+  <div class="header-block">
     <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
       <span class="bar"></span>
       <span class="bar"></span>
       <span class="bar"></span>
     </button>
+
+    <div class="hero-text-loop">
+      <span class="loop-word active">LEARN</span>
+      <span class="loop-word">EXPLORE</span>
+      <span class="loop-word">ASPIRE</span>
+      <span class="loop-word">DISCOVER</span>
+    </div>
+
+    <a href="#novedades" class="novedades-btn">Novedades</a>
   </div>
 </header>
 
@@ -51,6 +43,7 @@
   const mobileMenu = document.getElementById('mobile-menu');
 
   const openMenu = () => {
+    if (!mobileMenu || !menuToggle) return;
     mobileMenu.setAttribute('aria-hidden', 'false');
     menuToggle.setAttribute('aria-expanded', 'true');
     mobileMenu.classList.add('open');
@@ -58,6 +51,7 @@
   };
 
   const closeMenuFunc = () => {
+    if (!mobileMenu || !menuToggle) return;
     mobileMenu.setAttribute('aria-hidden', 'true');
     menuToggle.setAttribute('aria-expanded', 'false');
     mobileMenu.classList.remove('open');
@@ -87,36 +81,31 @@
 </script>
 
 <style>
-  .header {
+  .header-wrapper {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-3) var(--space-4);
+    justify-content: center;
+    padding: var(--space-4);
     position: sticky;
     top: 0;
     z-index: 50;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .logo {
-    font-family: var(--font-heading);
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 2px;
-  }
-  
-  .magenta-l {
-    color: var(--magenta);
-    text-shadow: 0 0 10px rgba(230, 42, 107, 0.5); /* Resplandor neón */
+  .header-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F59E0B; /* Naranja central */
+    padding: 8px 16px;
+    border-radius: 4px;
+    gap: var(--space-4);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
   }
 
   /* Animated Hero Text Loop */
   .hero-text-loop {
     position: relative;
     height: 32px;
-    width: 200px; /* Ancho fijo para evitar shifts */
+    width: 110px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -127,12 +116,12 @@
     position: absolute;
     font-family: var(--font-heading);
     font-size: 20px;
-    font-weight: 600;
-    color: var(--cyan);
-    letter-spacing: 3px;
+    font-weight: 700;
+    color: #ffffff; /* Contrast against orange */
+    letter-spacing: 2px;
     opacity: 0;
     transform: translateY(20px);
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
   }
 
   .loop-word.active {
@@ -145,68 +134,32 @@
     transform: translateY(-20px);
   }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  /* CTA Secundario - Tool recomendation para hover states / a11y click size */
-  .btn-primary {
-    display: inline-block;
-    padding: 10px 24px;
-    background: linear-gradient(90deg, var(--magenta), var(--cyan));
+  .novedades-btn {
+    background-color: #111; /* Dark background */
     color: white;
-    font-family: var(--font-heading);
+    text-decoration: none;
+    padding: 6px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-size: 13px;
     font-weight: 600;
-    border-radius: 8px;
-    font-size: 14px;
-    letter-spacing: 1px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-    box-shadow: 0 4px 15px rgba(230, 42, 107, 0.2);
-    /* a11y min size */
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-primary::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(90deg, var(--cyan), var(--magenta));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    border-radius: 8px;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
   }
 
-  .btn-primary:focus,
-  .btn-primary:active {
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(42, 246, 255, 0.3);
-  }
-
-  .btn-primary:hover::after {
-    opacity: 1;
-  }
-
-  .btn-primary:active {
-    transform: translateY(1px);
+  .novedades-btn:hover {
+    background-color: #000;
+    border-color: #fff;
   }
 
   /* Hamburger Menu */
   .menu-toggle {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
     width: 32px;
     height: 32px;
     background: transparent;
@@ -217,21 +170,21 @@
   }
 
   .menu-toggle:focus {
-    outline: 2px solid var(--cyan);
+    outline: 2px solid white;
     outline-offset: 4px;
     border-radius: 4px;
   }
 
   .menu-toggle .bar {
     width: 24px;
-    height: 2px;
-    background-color: var(--text-title);
+    height: 3px;
+    background-color: white;
     border-radius: 2px;
     transition: all 0.3s linear;
   }
 
   .menu-toggle:hover .bar {
-    background-color: var(--cyan);
+    background-color: var(--bg-deep);
   }
 
   /* Mobile Menu Off-Canvas */
