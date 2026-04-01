@@ -75,10 +75,15 @@ const { title } = Astro.props;
 		padding: 0;
 	}
 
+	html {
+		background-color: var(--bg-deep);
+		background-image: radial-gradient(circle at center, var(--bg-core) 0%, var(--bg-deep) 100%);
+		background-attachment: fixed;
+	}
+
 	body {
 		font-family: var(--font-body);
-		background: radial-gradient(circle at center, var(--bg-core) 0%, var(--bg-deep) 100%);
-		background-attachment: fixed;
+		background: transparent;
 		color: var(--text-body);
 		min-height: 100vh;
 		overflow-x: hidden;
