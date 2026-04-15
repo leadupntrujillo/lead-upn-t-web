@@ -1,0 +1,78 @@
+---
+---
+
+<div class="cta-container">
+  <button class="secondary-btn">OUR PILARS</button>
+  <button class="secondary-btn">OUR PROGRS</button>
+  <button class="secondary-btn apply">APPLY NOW</button>
+</div>
+
+<style>
+  .cta-container {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin: var(--space-5) auto;
+    padding: 0 var(--space-3);
+    max-width: 1000px;
+  }
+
+  .secondary-btn {
+    position: relative;
+    padding: 16px 32px;
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-title);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 1.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5); /* Legibility */
+    /* Accessibilty target size */
+    min-height: 48px;
+    min-width: 160px;
+  }
+
+  /* Micro-interactions: Gradient Hover Reveal */
+  .secondary-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, var(--magenta) 0%, var(--cyan) 100%);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+  }
+
+  .secondary-btn:hover, .secondary-btn:focus-visible {
+    border-color: transparent;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(230, 42, 107, 0.3); /* Mezcla de glow */
+    color: #fff; /* Asegurar contraste */
+  }
+
+  .secondary-btn:hover::before, .secondary-btn:focus-visible::before {
+    opacity: 1;
+  }
+
+  .secondary-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(230, 42, 107, 0.2);
+  }
+
+  .secondary-btn:focus-visible {
+    outline: 2px solid var(--gold); /* Accesibilidad focus indicator visible */
+    outline-offset: 4px;
+  }
+
+  /* El botón APPLY NOW puede ser diferente o primario */
+  .apply {
+    background: rgba(255, 255, 255, 0.05); /* Ligeramente destacado */
+    border-color: rgba(42, 246, 255, 0.4);
+  }
+</style>
