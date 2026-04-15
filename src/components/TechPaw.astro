@@ -1,0 +1,139 @@
+---
+// TechPaw.astro
+// Componente SVG que simula una huella de tigrillo tecnológica (3D tech style)
+---
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 700" width="100%" height="100%" class="tech-paw">
+  <defs>
+    <!-- GLOoOOW -->
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-magenta" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-gold" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-light" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <radialGradient id="pad-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#161B3D" />
+      <stop offset="80%" stop-color="#0A0F2C" />
+      <stop offset="100%" stop-color="#050818" />
+    </radialGradient>
+
+    <linearGradient id="paw-border-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2AF6FF" />
+      <stop offset="100%" stop-color="#E62A6B" />
+    </linearGradient>
+    
+    <pattern id="dot-grid" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#2AF6FF" opacity="0.08" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo de dots decorativos -->
+  <rect width="100%" height="100%" fill="url(#dot-grid)" />
+
+  <!-- Connection Lines (Circuitos a la palma) -->
+  <g fill="none" stroke-width="2" opacity="0.5" filter="url(#glow-light)">
+    <path d="M 160 270 L 160 380 L 260 480" stroke="#2AF6FF" stroke-dasharray="6 6" />
+    <circle cx="260" cy="480" r="4" fill="#2AF6FF" />
+    
+    <path d="M 280 180 L 280 350 L 320 390 L 320 450" stroke="#E62A6B" stroke-dasharray="6 6" />
+    <circle cx="320" cy="450" r="4" fill="#E62A6B" />
+    
+    <path d="M 400 180 L 400 350 L 360 390 L 360 450" stroke="#2AF6FF" stroke-dasharray="6 6" />
+    <circle cx="360" cy="450" r="4" fill="#2AF6FF" />
+    
+    <path d="M 520 270 L 520 380 L 420 480" stroke="#FFD700" stroke-dasharray="6 6" />
+    <circle cx="420" cy="480" r="4" fill="#FFD700" />
+  </g>
+
+  <!-- ALMOHADILLA PALMAR -->
+  <g transform="translate(0, 0)">
+    <path d="M 340 340 
+             C 420 340, 480 370, 510 430 
+             C 540 500, 490 580, 420 600 
+             C 380 610, 360 570, 340 570 
+             C 320 570, 300 610, 260 600 
+             C 190 580, 140 500, 170 430 
+             C 200 370, 260 340, 340 340 Z" 
+          fill="url(#pad-grad)" stroke="url(#paw-border-grad)" stroke-width="4" filter="url(#glow-cyan)"/>
+    
+    <!-- Inner Circuit Lines Minimalist -->
+    <g fill="none" stroke="#2AF6FF" stroke-width="2" opacity="0.3">
+      <path d="M 340 530 L 340 480 L 280 420 L 280 400" />
+      <circle cx="280" cy="400" r="6" fill="#2AF6FF" />
+      <path d="M 340 530 L 340 480 L 400 420 L 400 400" />
+      <circle cx="400" cy="400" r="6" fill="#2AF6FF" />
+      
+      <circle cx="340" cy="530" r="8" fill="#E62A6B" />
+      <circle cx="340" cy="530" r="3" fill="#0A0F2C" />
+      
+      <path d="M 230 460 L 250 480 L 250 510" stroke="#E62A6B"/>
+      <circle cx="230" cy="460" r="4" fill="#E62A6B"/>
+      
+      <path d="M 450 460 L 430 480 L 430 510" stroke="#FFD700"/>
+      <circle cx="450" cy="460" r="4" fill="#FFD700"/>
+    </g>
+  </g>
+
+  <!-- GARRAS (CLAWS) -->
+  <!-- Claw S (Cyan) -->
+  <g transform="translate(170, 260) rotate(-35)">
+    <!-- Base outer shape -->
+    <path d="M -40,25 C -40,90 40,90 40,25 L 20,-45 L 0,-85 L -20,-45 Z" fill="#0A0F2C" stroke="#2AF6FF" stroke-width="4" filter="url(#glow-cyan)"/>
+    <!-- Inner ring -->
+    <path d="M -25,20 C -25,70 25,70 25,20 L 12,-35 L 0,-60 L -12,-35 Z" fill="none" stroke="#E62A6B" stroke-width="2" opacity="0.8"/>
+    <!-- Letter -->
+    <text x="0" y="45" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="42" fill="#2AF6FF" text-anchor="middle" filter="url(#glow-light)">S</text>
+  </g>
+
+  <!-- Claw T (Magenta) -->
+  <g transform="translate(280, 160) rotate(-12)">
+    <path d="M -40,25 C -40,90 40,90 40,25 L 20,-45 L 0,-85 L -20,-45 Z" fill="#0A0F2C" stroke="#E62A6B" stroke-width="4" filter="url(#glow-magenta)"/>
+    <path d="M -25,20 C -25,70 25,70 25,20 L 12,-35 L 0,-60 L -12,-35 Z" fill="none" stroke="#2AF6FF" stroke-width="2" opacity="0.8"/>
+    <text x="0" y="45" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="42" fill="#E62A6B" text-anchor="middle" filter="url(#glow-light)">T</text>
+  </g>
+
+  <!-- Claw E (Cyan) -->
+  <g transform="translate(400, 160) rotate(12)">
+    <path d="M -40,25 C -40,90 40,90 40,25 L 20,-45 L 0,-85 L -20,-45 Z" fill="#0A0F2C" stroke="#2AF6FF" stroke-width="4" filter="url(#glow-cyan)"/>
+    <path d="M -25,20 C -25,70 25,70 25,20 L 12,-35 L 0,-60 L -12,-35 Z" fill="none" stroke="#E62A6B" stroke-width="2" opacity="0.8"/>
+    <text x="0" y="45" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="42" fill="#2AF6FF" text-anchor="middle" filter="url(#glow-light)">E</text>
+  </g>
+
+  <!-- Claw M (Gold) -->
+  <g transform="translate(510, 260) rotate(35)">
+    <path d="M -40,25 C -40,90 40,90 40,25 L 20,-45 L 0,-85 L -20,-45 Z" fill="#0A0F2C" stroke="#FFD700" stroke-width="4" filter="url(#glow-gold)"/>
+    <path d="M -25,20 C -25,70 25,70 25,20 L 12,-35 L 0,-60 L -12,-35 Z" fill="none" stroke="#2AF6FF" stroke-width="2" opacity="0.8"/>
+    <text x="0" y="45" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="42" fill="#FFD700" text-anchor="middle" filter="url(#glow-light)">M</text>
+  </g>
+</svg>
+
+<style>
+  .tech-paw {
+    width: 100%;
+    height: 100%;
+    /* Aseguramos proporciones estables en el contenedor del hero */
+    min-height: 400px;
+    max-height: 600px;
+    object-fit: contain;
+    animation: float-paw 6s ease-in-out infinite;
+    transform-origin: center;
+    /* Ajuste para que se vea claro sobre fondo oscuro */
+    filter: drop-shadow(0 0 20px rgba(42, 246, 255, 0.15));
+  }
+  
+  @keyframes float-paw {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-15px) scale(1.02); }
+  }
+</style>
