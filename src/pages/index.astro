@@ -1,14 +1,13 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import Metrics from '../components/Metrics.astro';
-import CtaButtons from '../components/CtaButtons.astro';
-import Events from '../components/Events.astro';
-import TechPaw from '../components/TechPaw.astro';
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Metrics from "../components/Metrics.astro";
+import CtaButtons from "../components/CtaButtons.astro";
+import Events from "../components/Events.astro";
+import TechPaw from "../components/TechPaw.astro";
 ---
 
 <Layout title="LEAD UPN Trujillo - Learn, Explore, Aspire, Discover">
-  
   <Header />
 
   <main>
@@ -18,10 +17,15 @@ import TechPaw from '../components/TechPaw.astro';
         <!-- Content Left -->
         <div class="hero-content">
           <h1 class="main-title">
-            Donde el talento <span class="highlight cyan">STEM</span><br/> encuentra su <span class="highlight gold">liderazgo.</span>
+            Donde el talento <span class="highlight cyan">STEM</span><br /> encuentra
+            su <span class="highlight gold">liderazgo.</span>
           </h1>
           <p class="hero-description">
-            Únete a la nueva generación de creadores. Un espacio diseñado para conectar tu pasión por la ingeniería y el desarrollo con el crecimiento profesional. Colabora, aprende y construye soluciones que impactan. Tu camino hacia la excelencia tecnológica comienza aquí.
+            Únete a la nueva generación de creadores. Un espacio diseñado para
+            conectar tu pasión por la ingeniería y el desarrollo con el
+            crecimiento profesional. Colabora, aprende y construye soluciones
+            que impactan. Tu camino hacia la excelencia tecnológica comienza
+            aquí.
           </p>
           <div class="hero-cta-wrapper">
             <a href="/unete" class="btn-hero">
@@ -29,7 +33,7 @@ import TechPaw from '../components/TechPaw.astro';
             </a>
           </div>
         </div>
-        
+
         <!-- Animation Wrapper Right -->
         <div class="hero-animation-wrapper" id="hero-animation-container">
           <TechPaw />
@@ -45,7 +49,6 @@ import TechPaw from '../components/TechPaw.astro';
 
     <!-- EVENTS -->
     <Events />
-
   </main>
 
   <footer class="footer crystal-fx">
@@ -57,7 +60,7 @@ import TechPaw from '../components/TechPaw.astro';
 
 <script>
   // Simple scroll padding para anchors si se usan después
-  document.documentElement.style.setProperty('--scroll-padding', '80px');
+  document.documentElement.style.setProperty("--scroll-padding", "80px");
 </script>
 
 <style>
@@ -92,25 +95,34 @@ import TechPaw from '../components/TechPaw.astro';
   }
 
   @keyframes fade-right {
-    from { opacity: 0; transform: translateX(-40px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .hero-animation-wrapper {
     width: 100%;
-    height: 450px;
-    background: rgba(255, 255, 255, 0.02); /* Subtle placeholder base */
-    border-radius: 24px;
+    height: 600px;
     display: flex;
     align-items: center;
     justify-content: center;
     animation: fade-left 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05); /* Soft border */
   }
 
   @keyframes fade-left {
-    from { opacity: 0; transform: translateX(40px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .main-title {
@@ -124,9 +136,15 @@ import TechPaw from '../components/TechPaw.astro';
     display: inline-block;
   }
 
-  .highlight.cyan { color: var(--cyan); text-shadow: 0 0 20px rgba(42, 246, 255, 0.4); }
-  .highlight.gold { color: var(--gold); text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
-  
+  .highlight.cyan {
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(42, 246, 255, 0.4);
+  }
+  .highlight.gold {
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  }
+
   .hero-description {
     font-size: clamp(16px, 1.5vw, 18px);
     color: var(--text-body);
@@ -161,7 +179,7 @@ import TechPaw from '../components/TechPaw.astro';
   }
 
   .btn-hero::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, var(--gold), var(--cyan));
@@ -201,7 +219,7 @@ import TechPaw from '../components/TechPaw.astro';
       margin: 0 auto var(--space-4) auto;
     }
     .hero-animation-wrapper {
-      height: 350px;
+      height: 400px;
     }
   }
 
