@@ -1,4 +1,5 @@
-# LEAD UPN Trujillo — Web Oficial 🚀
+![Lead UPN Trujillo](./public/portada-lead.png) 
+#  LEAD UPN Trujillo — Web Oficial 🚀
 
 > **Documento de contexto para agentes de vibe coding.**
 > Lee TODO esto antes de escribir una sola línea de código. Aquí está todo lo que necesitas saber para trabajar en este proyecto sin preguntar nada.
