@@ -1,0 +1,112 @@
+---
+// PurposeSection.astro
+---
+
+<section class="purpose-section" id="proposito">
+  <div class="section-header">
+    <h2 class="section-title">Nuestro <span class="font-serif-italic highlight teal">Propósito</span></h2>
+  </div>
+
+  <div class="purpose-cards">
+    <!-- Card Misión -->
+    <div class="purpose-card crystal-fx">
+      <div class="card-icon bg-orange-light">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="orange-icon"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+      </div>
+      <h3 class="card-title">Misión</h3>
+      <p class="card-text">
+        Impulsar el desarrollo integral de los estudiantes mediante espacios de aprendizaje, acción y reflexión que fortalezcan competencias profesionales, tecnológicas y de liderazgo con propósito 💡, promoviendo una participación activa, ética y consciente.
+      </p>
+    </div>
+
+    <!-- Card Visión -->
+    <div class="purpose-card crystal-fx">
+      <div class="card-icon bg-teal-light">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="teal-icon"><path d="M2 12h4l3-9 5 18 3-9h5"></path></svg>
+      </div>
+      <h3 class="card-title">Visión</h3>
+      <p class="card-text">
+        Formar a los estudiantes líderes con un perfil profesional de excelencia, fortaleciendo de manera integral sus habilidades técnicas y blandas. Aspiramos a impulsar jóvenes visionarios capaces de concebir y ejecutar proyectos de tecnología y emprendimiento con impacto real y sostenible 🌱, que trasciendan fronteras y dejen huella a nivel nacional e internacional.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .purpose-section {
+    padding: var(--space-6) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-2);
+  }
+
+  .section-title {
+    font-size: clamp(32px, 6vw, 46px);
+  }
+
+  .highlight.teal { color: var(--teal); }
+
+  .purpose-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .purpose-card {
+    position: relative;
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .purpose-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-1);
+  }
+
+  .bg-orange-light { background: var(--orange-light); }
+  .bg-teal-light { background: var(--teal-light); }
+
+  .orange-icon { color: var(--orange); }
+  .teal-icon { color: var(--teal); }
+
+  .card-title {
+    font-size: 26px;
+    margin: 0;
+  }
+
+  .card-text {
+    font-size: 16px;
+    color: var(--text-body);
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  @media (min-width: 768px) {
+    .purpose-cards {
+      flex-direction: row;
+    }
+    .purpose-card {
+      flex: 1;
+    }
+  }
+</style>

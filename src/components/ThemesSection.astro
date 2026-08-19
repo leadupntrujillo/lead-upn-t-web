@@ -1,0 +1,103 @@
+---
+// ThemesSection.astro
+---
+
+<section class="themes-section">
+  <div class="section-header">
+    <h2 class="section-title">Ejes <span class="font-serif-italic highlight orange">Temáticos</span></h2>
+    <p class="section-subtitle">Nuestros pilares fundamentales</p>
+  </div>
+
+  <div class="themes-container">
+    <div class="theme-item crystal-fx">
+      <div class="theme-icon bg-orange-light text-orange">💼</div>
+      <h3>Empleabilidad</h3>
+    </div>
+    
+    <div class="theme-item crystal-fx">
+      <div class="theme-icon bg-teal-light text-teal">💻</div>
+      <h3>Tecnología</h3>
+    </div>
+    
+    <div class="theme-item crystal-fx">
+      <div class="theme-icon bg-orange-light text-orange">🤝</div>
+      <h3>Comunidad</h3>
+    </div>
+  </div>
+</section>
+
+<style>
+  .themes-section {
+    padding: var(--space-4) var(--space-4) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .section-header {
+    text-align: center;
+  }
+
+  .section-title {
+    font-size: clamp(32px, 6vw, 46px);
+    margin-bottom: var(--space-2);
+  }
+
+  .section-subtitle {
+    font-size: 15px;
+    color: var(--text-body);
+    font-weight: 500;
+  }
+
+  .highlight.orange { color: var(--orange); }
+
+  .themes-container {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .theme-item {
+    flex: 1;
+    min-width: 250px;
+    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .theme-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+  }
+
+  .theme-icon {
+    font-size: 28px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+  }
+
+  .bg-orange-light { background: var(--orange-light); }
+  .text-orange { color: var(--orange); }
+  
+  .bg-teal-light { background: var(--teal-light); }
+  .text-teal { color: var(--teal); }
+
+  .theme-item h3 {
+    font-size: 22px;
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .themes-container { flex-direction: column; }
+    .theme-item { width: 100%; }
+  }
+</style>

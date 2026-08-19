@@ -10,7 +10,7 @@ const { title } = Astro.props;
 <html lang="es">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<link rel="icon" type="image/svg+xml" href="/lead-tr-upn.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<meta
@@ -19,49 +19,35 @@ const { title } = Astro.props;
 		/>
 		<title>{title}</title>
 
-		<!-- Google Fonts for Tech Aesthetic (from UI-UX-PRO-MAX) -->
+		<!-- Google Fonts: Inter (Sans-serif) & Playfair Display (Serif) -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:labels@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap"
 			rel="stylesheet"
 		/>
 	</head>
 	<body>
-		<div class="particles" id="particles"></div>
 		<slot />
-		<script>
-			// Simple particle JS background for subtle floating effect
-			const createParticles = () => {
-				const container = document.getElementById("particles");
-				if (!container) return;
-				for (let i = 0; i < 70; i++) {
-					const particle = document.createElement("div");
-					particle.className = "particle";
-					particle.style.left = `${Math.random() * 100}%`;
-					particle.style.top = `${Math.random() * 100}%`;
-					particle.style.animationDuration = `${Math.random() * 20 + 15}s`;
-					particle.style.animationDelay = `${Math.random() * 5}s`;
-					container.appendChild(particle);
-				}
-			};
-			createParticles();
-		</script>
 	</body>
 </html>
 
 <style is:global>
 	:root {
-		/* Colors */
-		--bg-deep: #0a0f2c;
-		--bg-core: #161b3d;
-		--text-title: #ffffff;
-		--text-body: #bcc1d4;
-		--magenta: #e62a6b;
-		--cyan: #2af6ff;
-		--gold: #ffd700;
-
-		/* Spacing System (8px base) */
+		/* EDU-US Color Palette Homologation */
+		--bg-page: #f8fafc; /* Slate 50 - Very light gray */
+		--bg-card: #ffffff; /* White */
+		
+		--text-dark: #0f172a; /* Slate 900 - Dark blue/gray for headings */
+		--text-body: #475569; /* Slate 600 - Muted gray for body */
+		
+		--orange: #ea580c; /* Primary Action Color */
+		--orange-light: #ffedd5;
+		
+		--teal: #0d9488; /* Secondary Color */
+		--teal-light: #ccfbf1;
+		
+		/* Spacing System */
 		--space-1: 8px;
 		--space-2: 16px;
 		--space-3: 24px;
@@ -71,8 +57,8 @@ const { title } = Astro.props;
 		--space-8: 96px;
 
 		/* Fonts */
-		--font-heading: "Space Grotesk", sans-serif;
-		--font-body: "DM Sans", sans-serif;
+		--font-sans: "Inter", sans-serif;
+		--font-serif: "Playfair Display", serif;
 	}
 
 	*,
@@ -84,34 +70,33 @@ const { title } = Astro.props;
 	}
 
 	html {
-		background-color: var(--bg-deep);
-		background-image: radial-gradient(
-			circle at center,
-			var(--bg-core) 0%,
-			var(--bg-deep) 100%
-		);
-		background-attachment: fixed;
+		background-color: var(--bg-page);
 	}
 
 	body {
-		font-family: var(--font-body);
+		font-family: var(--font-sans);
 		background: transparent;
 		color: var(--text-body);
 		min-height: 100vh;
 		overflow-x: hidden;
 		line-height: 1.6;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
 	}
 
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		font-family: var(--font-heading);
-		color: var(--text-title);
+	h1, h2, h3, h4, h5, h6 {
+		font-family: var(--font-sans);
+		color: var(--text-dark);
 		line-height: 1.2;
 		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	/* Accent Serif Class for elegant emphasis like EDU-US */
+	.font-serif-italic {
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-weight: 600;
 	}
 
 	a {
@@ -126,49 +111,12 @@ const { title } = Astro.props;
 		outline: none;
 	}
 
-	/* Glassmorphism utility */
+	/* Homologated Card Style (Clean, White, Shadows, Very Rounded) */
 	.crystal-fx {
-		background: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		backdrop-filter: blur(15px);
-		-webkit-backdrop-filter: blur(15px);
-		border-radius: 16px;
-	}
-
-	/* Subtle Particle Animations */
-	#particles {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
-		pointer-events: none;
-		overflow: hidden;
-	}
-
-	.particle {
-		position: absolute;
-		width: 3px;
-		height: 3px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 50%;
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-		animation: float infinite ease-in-out alternate;
-	}
-
-	@keyframes float {
-		0% {
-			transform: translateY(0) translateX(0) scale(1);
-			opacity: 0.2;
-		}
-		50% {
-			transform: translateY(-50px) translateX(20px) scale(1.5);
-			opacity: 0.6;
-		}
-		100% {
-			transform: translateY(-100px) translateX(-20px) scale(1);
-			opacity: 0.2;
-		}
+		background: var(--bg-card);
+		border: 1px solid rgba(0, 0, 0, 0.05);
+		border-radius: 24px; /* EDU-US signature extreme rounding */
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
 	}
 </style>

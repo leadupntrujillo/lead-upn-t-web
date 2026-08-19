@@ -1,0 +1,157 @@
+---
+// ChaptersGrid.astro
+
+const chapters = [
+  {
+    title: "Desarrollo Profesional",
+    desc: "Potencia las habilidades y el liderazgo de los miembros mediante eventos tecnológicos, programas de innovación, networking y mentorías que los preparen para el mundo laboral.",
+    icon: "📈",
+    bgClass: "bg-teal-light",
+    textClass: "text-teal"
+  },
+  {
+    title: "Desarrollo de Capítulo",
+    desc: "Fortalecer la comunidad y la identidad del capítulo mediante actividades de integración, colaboración entre estudiantes y la incorporación del enfoque STEM para todos.",
+    icon: "🤝",
+    bgClass: "bg-orange-light",
+    textClass: "text-orange"
+  },
+  {
+    title: "Excelencia Femenina",
+    desc: "Empodera y visibiliza el talento de las mujeres en la comunidad universitaria mediante espacios de formación, redes de apoyo y el reconocimiento de sus logros.",
+    icon: "✨",
+    bgClass: "bg-slate-100",
+    textClass: "text-slate"
+  },
+  {
+    title: "Impacto Comunitario",
+    desc: "Genera soluciones a problemáticas sociales, ambientales y educativas mediante proyectos con enfoque social y STEM, formando líderes comprometidos con la comunidad.",
+    icon: "🌍",
+    bgClass: "bg-teal-light",
+    textClass: "text-teal"
+  },
+  {
+    title: "LEAD Academia",
+    desc: "Transformar el potencial de los estudiantes en liderazgo activo, capacitándolos para crear comunidades sólidas y generar un impacto social positivo desde la etapa escolar.",
+    icon: "📚",
+    bgClass: "bg-orange-light",
+    textClass: "text-orange"
+  },
+  {
+    title: "Marketing",
+    desc: "Genera visibilidad y comunicación del capítulo mediante Instagram, LinkedIn y WhatsApp, difundiendo actividades, logros y manteniendo conectada a la comunidad.",
+    icon: "📱",
+    bgClass: "bg-slate-100",
+    textClass: "text-slate"
+  },
+  {
+    title: "Alianzas y Convenios",
+    desc: "Impulsa el crecimiento del capítulo mediante vínculos estratégicos con empresas, instituciones y organizaciones, generando oportunidades de colaboración.",
+    icon: "🏢",
+    bgClass: "bg-teal-light",
+    textClass: "text-teal"
+  }
+];
+---
+
+<section class="chapters-section" id="capitulos">
+  <div class="section-header">
+    <h2 class="section-title">Nuestros <span class="font-serif-italic highlight teal">Capítulos</span></h2>
+    <p class="section-subtitle">Áreas de desarrollo y especialización</p>
+  </div>
+
+  <div class="chapters-grid">
+    {chapters.map((chapter) => (
+      <div class="chapter-card crystal-fx">
+        <div class={`chapter-icon ${chapter.bgClass} ${chapter.textClass}`}>{chapter.icon}</div>
+        <div class="chapter-content">
+          <h3 class="chapter-title">{chapter.title}</h3>
+          <p class="chapter-desc">{chapter.desc}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .chapters-section {
+    padding: var(--space-6) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .section-header {
+    text-align: center;
+  }
+
+  .section-title {
+    font-size: clamp(32px, 6vw, 46px);
+    margin-bottom: var(--space-2);
+  }
+
+  .section-subtitle {
+    font-size: 15px;
+    color: var(--text-body);
+    font-weight: 500;
+  }
+
+  .highlight.teal { color: var(--teal); }
+
+  .chapters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-4);
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  .chapter-card {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .chapter-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+  }
+
+  .chapter-icon {
+    font-size: 28px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+  }
+
+  .bg-teal-light { background: var(--teal-light); }
+  .text-teal { color: var(--teal); }
+  
+  .bg-orange-light { background: var(--orange-light); }
+  .text-orange { color: var(--orange); }
+
+  .bg-slate-100 { background: #f1f5f9; }
+  .text-slate { color: var(--text-dark); }
+
+  .chapter-title {
+    font-size: 22px;
+    margin-bottom: var(--space-2);
+    color: var(--text-dark);
+  }
+
+  .chapter-desc {
+    font-size: 15px;
+    color: var(--text-body);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .chapters-grid { grid-template-columns: 1fr; }
+  }
+</style>
