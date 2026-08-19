@@ -39,6 +39,28 @@
     z-index: 10;
     text-align: center;
     margin-top: -80px;
+    background-image: url('/background.png');
+    background-size: 150% 150%;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation: pan-bg-right-left 30s linear infinite alternate;
+    overflow: hidden;
+  }
+
+  /* Capa superpuesta premium con glassmorphism (UI/UX Pro Max) */
+  .mobile-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.75) 0%, rgba(248, 250, 252, 0.6) 100%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: -1;
+  }
+
+  @keyframes pan-bg-right-left {
+    0% { background-position: 100% 50%; } /* Derecha */
+    100% { background-position: 0% 50%; } /* Izquierda */
   }
 
   .hero-content {
