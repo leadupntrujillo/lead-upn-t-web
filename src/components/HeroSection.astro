@@ -40,10 +40,10 @@
     text-align: center;
     margin-top: -80px;
     background-image: url('/background.png');
-    background-size: 150% 150%;
+    background-size: cover; /* Mantiene proporción y recorta lo que sobra */
     background-position: center;
     background-repeat: no-repeat;
-    animation: pan-bg-right-left 30s linear infinite alternate;
+    animation: pan-bg-left-right 30s ease-in-out infinite alternate;
     overflow: hidden;
   }
 
@@ -52,15 +52,16 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(248, 250, 252, 0.75) 0%, rgba(248, 250, 252, 0.6) 100%);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    /* Reducida drásticamente la opacidad para que la imagen se vea más viva */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: -1;
   }
 
-  @keyframes pan-bg-right-left {
-    0% { background-position: 100% 50%; } /* Derecha */
-    100% { background-position: 0% 50%; } /* Izquierda */
+  @keyframes pan-bg-left-right {
+    0% { background-position: 0% 50%; } /* Izquierda */
+    100% { background-position: 100% 50%; } /* Derecha */
   }
 
   .hero-content {
@@ -68,7 +69,8 @@
     flex-direction: column;
     align-items: center;
     gap: var(--space-3);
-    max-width: 600px;
+    max-width: 1000px; /* Aumentado de 600px a 1000px para que no sea tan compacto */
+    width: 100%;
     animation: fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
@@ -77,8 +79,8 @@
   }
 
   .light-badge {
-    background: var(--teal-light);
-    color: var(--teal);
+    background: var(--stem-light);
+    color: var(--stem-blue);
     padding: 6px 16px;
     border-radius: 50px;
     font-size: 14px;
@@ -93,8 +95,8 @@
     color: var(--text-dark);
   }
 
-  .highlight.teal { color: var(--teal); }
-  .highlight.orange { color: var(--orange); }
+  .highlight.teal { color: var(--stem-blue); }
+  .highlight.orange { color: var(--lead-gold); }
 
   .hero-desc {
     font-size: clamp(16px, 4vw, 20px);
@@ -118,7 +120,7 @@
     width: 100%;
     max-width: 320px;
     padding: 18px 32px;
-    background: var(--orange); /* EDU-US Orange */
+    background: linear-gradient(135deg, var(--purple-dark), var(--magenta-pink));
     color: #fff;
     font-family: var(--font-sans);
     font-weight: 700;
@@ -127,12 +129,12 @@
     text-decoration: none;
     letter-spacing: 0.5px;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 10px 30px rgba(234, 88, 12, 0.3);
+    box-shadow: 0 10px 30px rgba(177, 74, 146, 0.3); /* Magenta shadow */
   }
 
   .btn-primary:hover {
     transform: translateY(-4px);
-    box-shadow: 0 15px 40px rgba(234, 88, 12, 0.4);
+    box-shadow: 0 15px 40px rgba(177, 74, 146, 0.4);
   }
 
   .btn-primary:active {

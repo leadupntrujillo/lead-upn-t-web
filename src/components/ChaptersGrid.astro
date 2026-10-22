@@ -6,15 +6,15 @@ const chapters = [
     title: "Desarrollo Profesional",
     desc: "Potencia las habilidades y el liderazgo de los miembros mediante eventos tecnológicos, programas de innovación, networking y mentorías que los preparen para el mundo laboral.",
     icon: "📈",
-    bgClass: "bg-teal-light",
-    textClass: "text-teal"
+    bgClass: "bg-stem-light",
+    textClass: "text-stem"
   },
   {
     title: "Desarrollo de Capítulo",
     desc: "Fortalecer la comunidad y la identidad del capítulo mediante actividades de integración, colaboración entre estudiantes y la incorporación del enfoque STEM para todos.",
     icon: "🤝",
-    bgClass: "bg-orange-light",
-    textClass: "text-orange"
+    bgClass: "bg-lead-light",
+    textClass: "text-lead"
   },
   {
     title: "Excelencia Femenina",
@@ -27,15 +27,15 @@ const chapters = [
     title: "Impacto Comunitario",
     desc: "Genera soluciones a problemáticas sociales, ambientales y educativas mediante proyectos con enfoque social y STEM, formando líderes comprometidos con la comunidad.",
     icon: "🌍",
-    bgClass: "bg-teal-light",
-    textClass: "text-teal"
+    bgClass: "bg-stem-light",
+    textClass: "text-stem"
   },
   {
     title: "LEAD Academia",
     desc: "Transformar el potencial de los estudiantes en liderazgo activo, capacitándolos para crear comunidades sólidas y generar un impacto social positivo desde la etapa escolar.",
     icon: "📚",
-    bgClass: "bg-orange-light",
-    textClass: "text-orange"
+    bgClass: "bg-lead-light",
+    textClass: "text-lead"
   },
   {
     title: "Marketing",
@@ -48,15 +48,15 @@ const chapters = [
     title: "Alianzas y Convenios",
     desc: "Impulsa el crecimiento del capítulo mediante vínculos estratégicos con empresas, instituciones y organizaciones, generando oportunidades de colaboración.",
     icon: "🏢",
-    bgClass: "bg-teal-light",
-    textClass: "text-teal"
+    bgClass: "bg-stem-light",
+    textClass: "text-stem"
   }
 ];
 ---
 
 <section class="chapters-section" id="capitulos">
   <div class="section-header">
-    <h2 class="section-title">Nuestros <span class="font-serif-italic highlight teal">Capítulos</span></h2>
+    <h2 class="section-title">Nuestros <span class="font-serif-italic highlight stem">Capítulos</span></h2>
     <p class="section-subtitle">Áreas de desarrollo y especialización</p>
   </div>
 
@@ -97,7 +97,7 @@ const chapters = [
     font-weight: 500;
   }
 
-  .highlight.teal { color: var(--teal); }
+  .highlight.stem { color: var(--stem-blue); }
 
   .chapters-grid {
     display: grid;
@@ -129,11 +129,11 @@ const chapters = [
     border-radius: 18px;
   }
 
-  .bg-teal-light { background: var(--teal-light); }
-  .text-teal { color: var(--teal); }
+  .bg-stem-light { background: var(--stem-light); }
+  .text-stem { color: var(--stem-blue); }
   
-  .bg-orange-light { background: var(--orange-light); }
-  .text-orange { color: var(--orange); }
+  .bg-lead-light { background: var(--lead-light); }
+  .text-lead { color: var(--lead-gold); }
 
   .bg-slate-100 { background: #f1f5f9; }
   .text-slate { color: var(--text-dark); }
