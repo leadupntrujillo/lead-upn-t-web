@@ -14,6 +14,16 @@ function loadDotEnv(): void {
 	}
 }
 
+/**
+ * Modo vista previa: incluye novedades en Borrador y En revisión para poder revisarlas en local.
+ * Solo funciona con `NOTION_PREVIEW=true` y NUNCA en un build de producción (`astro build`)
+ * ni en Vercel, aunque la variable esté puesta.
+ */
+export function isPreview(): boolean {
+	loadDotEnv();
+	return process.env.NOTION_PREVIEW === 'true' && process.env.NODE_ENV !== 'production' && !process.env.VERCEL;
+}
+
 export function requireEnv(name: string): string {
 	loadDotEnv();
 	const value = process.env[name]?.trim();

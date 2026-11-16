@@ -43,6 +43,7 @@ function novedadProps(over: Record<string, unknown> = {}) {
 
 function deps(over: Partial<NovedadDeps> = {}): NovedadDeps & { warn: ReturnType<typeof vi.fn> } {
 	return {
+		preview: false,
 		pilarIds: new Set([PILAR]),
 		miembroIds: new Set([AUTOR]),
 		usedSlugs: new Set<string>(),
@@ -151,6 +152,33 @@ describe('mapNovedad', () => {
 		expect(texto!.data.lugar).toMatchObject({ nombre: 'Auditorio UPN', lat: null });
 		const raro = await mapNovedad(page('b', novedadProps({ Lugar: { id: 'p', type: 'unsupported' } })), deps());
 		expect(raro!.data.lugar).toBeNull();
+	});
+
+	it('solo publica "Publicado": Archivado nunca; Borrador y En revisión solo en vista previa', async () => {
+		for (const estado of ['Archivado', 'Borrador', 'En revisión']) {
+			expect(await mapNovedad(page('a', novedadProps({ Estado: prop.status(estado) })), deps())).toBeNull();
+		}
+		const rev = await mapNovedad(page('b', novedadProps({ Estado: prop.status('En revisión') })), deps({ preview: true }));
+		expect(rev!.data.estado).toBe('en-revision');
+		expect(await mapNovedad(page('c', novedadProps({ Estado: prop.status('Archivado') })), deps({ preview: true }))).toBeNull();
+	});
+
+	it('en vista previa acepta borradores sin fecha de publicación (usa hoy)', async () => {
+		const sinFecha = novedadProps({ Estado: prop.status('Borrador'), 'Fecha de publicación': prop.date(null) });
+		expect(await mapNovedad(page('a', sinFecha), deps())).toBeNull();
+		const out = await mapNovedad(page('b', sinFecha), deps({ preview: true }));
+		expect(out!.data.estado).toBe('borrador');
+		expect(novedadSchema.parse(out!.data).fechaPublicacion).toBeInstanceOf(Date);
+	});
+
+	it('avisa (sin ocultar) lo que le falta a cada formato', async () => {
+		const d = deps();
+		const out = await mapNovedad(
+			page('a', novedadProps({ Formato: prop.select('Evento'), 'Fecha del evento': prop.date(null), Modalidad: prop.select(null), Lugar: prop.text('') })),
+			d,
+		);
+		expect(out).not.toBeNull();
+		expect(d.warn).toHaveBeenCalledWith(expect.stringContaining('(formato Evento) está incompleta, le falta: Fecha del evento, Modalidad, Lugar o Link del botón'));
 	});
 
 	it('falla con un mensaje claro si renombran o cambian una columna', async () => {

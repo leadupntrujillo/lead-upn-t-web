@@ -26,7 +26,8 @@ const row = (id: string, titulo: string, resumen = 'Un resumen') =>
 		Título: prop.title(titulo),
 		Slug: prop.text(''),
 		Resumen: prop.text(resumen),
-		Formato: prop.select('Evento'),
+		Estado: prop.status('Publicado'),
+		Formato: prop.select('Periódico'),
 		Pilar: prop.relation([]),
 		Autor: prop.relation([]),
 		'Imagen principal': prop.files([{ name: 'a.jpg', url: 'https://s3/ws/id/a.jpg?sig=1' }]),
@@ -49,7 +50,7 @@ const loaderFor = (rows: ReturnType<typeof row>[], blocks = {}) =>
 		{
 			name: 'novedades',
 			idVar: ID_VAR,
-			begin: async () => ({ pilarIds: new Set<string>(), miembroIds: new Set<string>(), usedSlugs: new Set<string>() }),
+			begin: async () => ({ preview: false, pilarIds: new Set<string>(), miembroIds: new Set<string>(), usedSlugs: new Set<string>() }),
 			map: (p, state, c) =>
 				mapNovedad(p, {
 					...state,
@@ -77,7 +78,7 @@ describe('createNotionLoader', () => {
 		expect([...entries.keys()]).toEqual(['gran-final']);
 		const entry = entries.get('gran-final')!;
 		expect(entry.rendered?.html).toBe('<h2 id="hola">Hola</h2><p>Texto de la noticia.</p>');
-		expect(entry.data).toMatchObject({ titulo: 'Gran Final', formato: 'evento' });
+		expect(entry.data).toMatchObject({ titulo: 'Gran Final', formato: 'periodico', estado: 'publicado' });
 		expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('1 entrada'));
 	});
 

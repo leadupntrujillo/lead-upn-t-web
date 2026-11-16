@@ -13,6 +13,10 @@ export const FORMATOS = [
 ] as const;
 export type Formato = (typeof FORMATOS)[number];
 
+/** Estados visibles. En producción todo es "publicado"; los otros solo existen en modo vista previa. */
+export const ESTADOS = ['publicado', 'en-revision', 'borrador'] as const;
+export type Estado = (typeof ESTADOS)[number];
+
 const imagen = z.object({ src: z.string(), alt: z.string() });
 
 const lugar = z.object({
@@ -31,6 +35,7 @@ export const novedadSchema = z.object({
 	slug: z.string(),
 	titulo: z.string().min(1),
 	formato: z.enum(FORMATOS),
+	estado: z.enum(ESTADOS),
 	resumen: z.string().min(1),
 	imagen: imagen.nullable(),
 	galeria: z.array(imagen),

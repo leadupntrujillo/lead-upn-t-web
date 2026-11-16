@@ -1,7 +1,7 @@
 import { resolveFile } from './assets';
 import { fetchBlockTree } from './blocks';
 import { getNotion } from './client';
-import { requireEnv } from './env';
+import { isPreview, requireEnv } from './env';
 import { createNotionLoader } from './loader';
 import { mapAliado, mapCifra, mapMiembro, mapNovedad, mapPilar, mapTestimonio } from './mappers';
 import { queryRows, type QueryOptions } from './query';
@@ -36,19 +36,29 @@ export const novedadesLoader = () =>
 		name: 'novedades',
 		idVar: 'NOTION_NOVEDADES_ID',
 		query: () => ({
-			filter: {
-				and: [
-					{ property: 'Estado', status: { equals: 'Publicado' } },
-					{ property: 'Fecha de publicación', date: { on_or_before: todayInLima() } },
-				],
-			},
+			// Vista previa (solo local): todo menos Archivado. Normal: Publicado con fecha ya cumplida.
+			filter: isPreview()
+				? { property: 'Estado', status: { does_not_equal: 'Archivado' } }
+				: {
+						and: [
+							{ property: 'Estado', status: { equals: 'Publicado' } },
+							{ property: 'Fecha de publicación', date: { on_or_before: todayInLima() } },
+						],
+					},
 			sorts: [{ property: 'Fecha de publicación', direction: 'descending' }],
 		}),
-		begin: async () => ({
-			pilarIds: await activePilarIds(),
-			miembroIds: await allMiembroIds(),
-			usedSlugs: new Set<string>(),
-		}),
+		begin: async (ctx) => {
+			const preview = isPreview();
+			if (preview) {
+				ctx.warn('MODO VISTA PREVIA: se incluyen novedades en Borrador y En revisión. No se aplica a producción.');
+			}
+			return {
+				preview,
+				pilarIds: await activePilarIds(),
+				miembroIds: await allMiembroIds(),
+				usedSlugs: new Set<string>(),
+			};
+		},
 		map: (page, state, ctx) =>
 			mapNovedad(page, {
 				...state,

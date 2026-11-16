@@ -45,6 +45,9 @@ Cada tabla de Notion es una colección de Astro con datos tipados: `novedades`, 
 - **Las imágenes** se descargan en cada build a `public/_notion/` (las URLs de Notion caducan en 1 h).
 - **Si cambia la estructura de Notion** (columna renombrada o de otro tipo) el build falla con un mensaje claro. **Si falta contenido** (novedad sin título o resumen) esa fila se omite con un aviso en el log.
 - El contenido nuevo aparece en la web en el siguiente build (ver Paso 4: recompilación automática).
+- **Los 9 formatos** (Periódico, Anuncio, Post IG, Evento, Convocatoria, Galería, Logros, Entrevista, Breve) están definidos en `src/lib/notion/formatos.ts`. Si a una novedad le falta algo que su formato necesita (p. ej. una Convocatoria sin link para postular), se publica igual y el build avisa.
+- **Vista previa:** con `NOTION_PREVIEW=true` en tu `.env`, `pnpm dev` muestra también Borrador y En revisión para revisarlas antes de publicar. Se ignora en `pnpm build` y en Vercel.
+- **Para las páginas:** pide los datos con `src/lib/queries.ts` (`getNovedades`, `getPortada`, `getPilares`…).
 
 ## Contenido (Notion)
 

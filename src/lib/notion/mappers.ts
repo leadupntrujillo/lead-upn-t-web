@@ -1,6 +1,7 @@
 import type { PageObjectResponse } from '@notionhq/client';
 import type { FileRef } from './assets';
 import { renderBlocks, type BlockNode } from './blocks';
+import { FORMATOS_INFO, faltantes } from './formatos';
 import * as p from './props';
 import {
 	FORMATOS,
@@ -12,7 +13,7 @@ import {
 	type PilarData,
 	type TestimonioData,
 } from './schemas';
-import { countWords, normalizeId, readingMinutes, safeWebUrl, slugify, stripTags } from './util';
+import { countWords, normalizeId, readingMinutes, safeWebUrl, slugify, stripTags, todayInLima } from './util';
 
 /**
  * Cada mapeador convierte una fila de Notion en un dato limpio. Los nombres de columna son
@@ -32,6 +33,8 @@ export interface BaseDeps {
 }
 
 export interface NovedadDeps extends BaseDeps {
+	/** Modo vista previa: acepta Borrador y En revisión (nunca activo en producción). */
+	preview: boolean;
 	/** Ids (sin guiones) de los pilares activos. */
 	pilarIds: ReadonlySet<string>;
 	/** Ids (sin guiones) de todos los miembros. */
@@ -81,9 +84,15 @@ export async function mapNovedad(
 	const pilarId = p.relation(props, 'Pilar')[0] ?? null;
 	const autorId = p.relation(props, 'Autor')[0] ?? null;
 
+	const estadoSlug = slugify(p.status(props, 'Estado') ?? '');
+	const estado = estadoSlug === 'publicado' || estadoSlug === 'en-revision' || estadoSlug === 'borrador' ? estadoSlug : null;
+
+	// Archivado (u otro estado) nunca se publica; Borrador y En revisión solo en vista previa.
+	if (!estado || (estado !== 'publicado' && !deps.preview)) return null;
 	if (!titulo) return deps.warn(`Novedad sin Título, se omite: ${page.url}`), null;
 	if (!resumen) return deps.warn(`"${titulo}" no tiene Resumen, se omite.`), null;
-	if (!publicacion?.start) return deps.warn(`"${titulo}" no tiene Fecha de publicación, se omite.`), null;
+	const fechaPublicacion = publicacion?.start ?? (deps.preview ? todayInLima() : null);
+	if (!fechaPublicacion) return deps.warn(`"${titulo}" no tiene Fecha de publicación, se omite.`), null;
 
 	// Slug único
 	const base = slugify(slugManual) || slugify(titulo) || normalizeId(page.id).slice(0, 8);
@@ -123,6 +132,20 @@ export async function mapNovedad(
 	const destacado = slugify(destacadoNombre ?? '');
 	const url = safeWebUrl(botonUrl);
 
+	// Cada formato exige cosas distintas: si falta algo se avisa, pero la novedad igual se publica.
+	const falta = faltantes(formato, {
+		imagen,
+		galeria,
+		fechaEvento: evento?.start ?? null,
+		modalidad: modalidad || null,
+		lugar,
+		boton: url,
+		textoVacio: countWords(stripTags(body)) === 0,
+	});
+	if (falta.length) {
+		deps.warn(`"${titulo}" (formato ${FORMATOS_INFO[formato].nombre}) está incompleta, le falta: ${falta.join(', ')}.`);
+	}
+
 	return {
 		id: slug,
 		html: body,
@@ -131,10 +154,11 @@ export async function mapNovedad(
 			slug,
 			titulo,
 			formato,
+			estado,
 			resumen,
 			imagen,
 			galeria,
-			fechaPublicacion: publicacion.start,
+			fechaPublicacion,
 			fechaEvento: evento?.start ? { inicio: evento.start, fin: evento.end, conHora: evento.start.includes('T') } : null,
 			modalidad: modalidad === 'presencial' || modalidad === 'virtual' || modalidad === 'hibrido' ? modalidad : null,
 			lugar,
