@@ -29,7 +29,7 @@ export function requireEnv(name: string): string {
 	const value = process.env[name]?.trim();
 	if (!value) {
 		throw new Error(
-			`La variable ${name} no está definida o está vacía. Abre .env, pega su valor y guarda el archivo (ver .env.example). En Vercel: Settings → Environment Variables.`,
+			`La variable ${name} no está definida o está vacía. Abre .env, pega su valor y guarda el archivo (lista de variables en el README). En Vercel: Settings → Environment Variables.`,
 		);
 	}
 	return value;

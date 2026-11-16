@@ -20,15 +20,32 @@
 
 ```bash
 pnpm install
-cp .env.example .env   # en Windows: copy .env.example .env
-pnpm dev               # http://localhost:4321
+pnpm dev               # http://localhost:4321 (necesita el archivo .env, ver abajo)
 ```
 
 Otros comandos: `pnpm build`, `pnpm preview`, `pnpm check` (tipos), `pnpm test` (pruebas), `pnpm sync` (vuelve a leer Notion).
 
 ## Variables de entorno
 
-Ver [.env.example](./.env.example). El archivo `.env` real está en `.gitignore` y no se sube nunca.
+Crea un archivo `.env` en la raíz con estas variables (está en `.gitignore`: nunca se sube):
+
+```env
+# Token de la integración de Notion (https://www.notion.so/profile/integrations).
+# La integración debe estar conectada a la página "Centro de Datos - LEAD", de preferencia solo lectura.
+NOTION_TOKEN=
+
+# IDs de las bases de datos (data sources) de Notion
+NOTION_NOVEDADES_ID=
+NOTION_PILARES_ID=
+NOTION_MIEMBROS_ID=
+NOTION_TESTIMONIOS_ID=
+NOTION_ALIADOS_ID=
+NOTION_CIFRAS_ID=
+
+# OPCIONAL, solo en tu computadora: `pnpm dev` también muestra Borrador y En revisión.
+# Se ignora en `pnpm build` y en Vercel.
+# NOTION_PREVIEW=true
+```
 
 **`pnpm dev` y `pnpm build` leen Notion**, así que necesitan `.env` completo (el token y los 6 IDs). Si falta algo, fallan con un mensaje que indica qué variable falta. En Vercel se cargan en *Settings → Environment Variables*.
 

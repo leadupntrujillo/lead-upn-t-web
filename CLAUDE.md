@@ -25,7 +25,7 @@ Notion (Centro de Datos - LEAD)
 - **Vista previa** (solo local): con `NOTION_PREVIEW=true` en `.env`, `pnpm dev` incluye Borrador y En revisión (`data.estado` ≠ `publicado`; mostrar un aviso "Vista previa" en la UI). Se ignora en `pnpm build` y en Vercel.
 
 ## Notion: nombres exactos (no renombrar columnas)
-Variables en `.env` (ver `.env.example`): `NOTION_TOKEN` y un ID por tabla (`NOTION_NOVEDADES_ID`, `_PILARES_`, `_MIEMBROS_`, `_TESTIMONIOS_`, `_ALIADOS_`, `_CIFRAS_`). Son IDs de *data source*.
+Variables en `.env` (lista en el README): `NOTION_TOKEN` y un ID por tabla (`NOTION_NOVEDADES_ID`, `_PILARES_`, `_MIEMBROS_`, `_TESTIMONIOS_`, `_ALIADOS_`, `_CIFRAS_`). Son IDs de *data source*.
 
 - **Novedades:** Título, Slug, Resumen, Estado, Formato, Pilar, Autor, Responsable, Imagen principal, Galería, Texto alternativo, Fecha de publicación, Fecha del evento, Modalidad, Lugar, Texto del botón, Link del botón, Etiquetas, Destacado, Tiempo de lectura, Descripción SEO.
 - **Pilares:** Nombre, Descripción, Imagen, Color, Orden, Activo, Correo del pilar.
