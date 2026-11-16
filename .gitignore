@@ -65,3 +65,7 @@ ehthumbs.db
 .turbo/
 dist-ssr/
 .nuxt
+
+# Archivos descargados de Notion en build y config local de Claude
+public/_notion/
+.claude/settings.local.json
