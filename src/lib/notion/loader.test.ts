@@ -98,7 +98,7 @@ describe('createNotionLoader', () => {
 	it('falla el build si falta la variable de entorno del ID', async () => {
 		delete process.env[ID_VAR];
 		const { ctx } = context();
-		await expect(loaderFor([]).load(ctx)).rejects.toThrow(`Falta la variable de entorno ${ID_VAR}`);
+		await expect(loaderFor([]).load(ctx)).rejects.toThrow(`La variable ${ID_VAR} no está definida o está vacía`);
 	});
 
 	it('falla el build si TODAS las filas mapeadas son inválidas', async () => {
