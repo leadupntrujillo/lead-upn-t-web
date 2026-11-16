@@ -10,7 +10,6 @@ out/
 
 # Dependencies
 node_modules/
-pnpm-lock.yaml
 yarn.lock
 package-lock.json
 
@@ -28,6 +27,7 @@ lerna-debug.log*
 .env.local
 .env.*.local
 .env.test
+.env.example
 
 # Python cache and bytecode
 __pycache__/

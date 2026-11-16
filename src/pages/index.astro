@@ -1,67 +1,10 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
-import HeroSection from "../components/HeroSection.astro";
-import MarqueePartners from "../components/MarqueePartners.astro";
-import PurposeSection from "../components/PurposeSection.astro";
-import SocialMetrics from "../components/SocialMetrics.astro";
-import ChaptersGrid from "../components/ChaptersGrid.astro";
-import ThemesSection from "../components/ThemesSection.astro";
+import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="LEAD UPN Trujillo - Learn, Explore, Aspire, Discover">
-  <Header />
-
-  <main>
-    <HeroSection />
-    <MarqueePartners />
-    <PurposeSection />
-    <SocialMetrics />
-    <ChaptersGrid />
-    <ThemesSection />
-  </main>
-
-  <footer class="footer crystal-fx">
-    <div class="footer-content">
-      <p>&copy; 2026 LEAD UPN Trujillo. Todos los derechos reservados.</p>
-    </div>
-  </footer>
+<Layout>
+	<main>
+		<h1>LEAD UPN Trujillo</h1>
+		<p>Sitio en reconstrucción.</p>
+	</main>
 </Layout>
-
-<script>
-  // Simple scroll padding para anchors si se usan después
-  document.documentElement.style.setProperty("--scroll-padding", "80px");
-</script>
-
-<style>
-  main {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding-bottom: var(--space-8);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4); /* Space between sections */
-  }
-
-  .footer {
-    border-radius: 0;
-    border-bottom: none;
-    border-left: none;
-    border-right: none;
-    padding: var(--space-4) var(--space-3);
-    text-align: center;
-    margin-top: var(--space-6);
-  }
-
-  .footer-content p {
-    font-size: 14px;
-    opacity: 0.7;
-    margin: 0;
-  }
-
-  /* Focus rings for main level components */
-  :focus-visible {
-    outline: 2px solid var(--cyan);
-    outline-offset: 4px;
-  }
-</style>

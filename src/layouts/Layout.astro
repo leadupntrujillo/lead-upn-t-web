@@ -1,127 +1,26 @@
 ---
-export interface Props {
-	title: string;
+interface Props {
+	title?: string;
+	description?: string;
 }
 
-const { title } = Astro.props;
+const {
+	title = 'LEAD UPN Trujillo',
+	description = 'LEAD UPN Trujillo - Learn, Explore, Aspire, Discover.',
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="es">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<link rel="icon" type="image/svg+xml" href="/lead-tr-upn.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" href="/lead-tr-upn.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<meta
-			name="description"
-			content="LEAD UPN Trujillo - Learn, Explore, Aspire, Discover."
-		/>
+		<meta name="description" content={description} />
 		<title>{title}</title>
-
-		<!-- Google Fonts: Inter (Sans-serif) & Playfair Display (Serif) -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap"
-			rel="stylesheet"
-		/>
 	</head>
 	<body>
 		<slot />
 	</body>
 </html>
-
-<style is:global>
-	:root {
-		/* Nueva Paleta de Colores LEAD UPN */
-		--bg-page: #FFFFFF; /* Blanco puro */
-		--bg-card: #FFFFFF; 
-		
-		--text-dark: #001F5C; /* Azul medianoche oscuro */
-		--text-body: #475569; /* Gris pizarra para textos largos */
-		
-		--stem-blue: #3451D1; /* Azul eléctrico (Acento STEM) */
-		--stem-light: #eff2fe;
-		
-		--lead-gold: #C7952E; /* Ocre dorado (Acento Liderazgo) */
-		--lead-light: #fdf8ef;
-		
-		--guinda: #7D1B36; /* Burdeos (Botón Novedades) */
-		
-		--purple-dark: #4A148C; /* Morado oscuro para degradado */
-		--magenta-pink: #B14A92; /* Magenta/Rosado para degradado */
-		
-		/* Spacing System */
-		--space-1: 8px;
-		--space-2: 16px;
-		--space-3: 24px;
-		--space-4: 32px;
-		--space-5: 48px;
-		--space-6: 64px;
-		--space-8: 96px;
-
-		/* Fonts */
-		--font-sans: "Inter", sans-serif;
-		--font-serif: "Playfair Display", serif;
-	}
-
-	*,
-	*::before,
-	*::after {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
-
-	html {
-		background-color: var(--bg-page);
-	}
-
-	body {
-		font-family: var(--font-sans);
-		background: transparent;
-		color: var(--text-body);
-		min-height: 100vh;
-		overflow-x: hidden;
-		line-height: 1.6;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-	}
-
-	h1, h2, h3, h4, h5, h6 {
-		font-family: var(--font-sans);
-		color: var(--text-dark);
-		line-height: 1.2;
-		font-weight: 700;
-		letter-spacing: -0.02em;
-	}
-
-	/* Accent Serif Class for elegant emphasis like EDU-US */
-	.font-serif-italic {
-		font-family: var(--font-serif);
-		font-style: italic;
-		font-weight: 600;
-	}
-
-	a {
-		color: inherit;
-		text-decoration: none;
-	}
-
-	button {
-		font-family: inherit;
-		border: none;
-		cursor: pointer;
-		outline: none;
-	}
-
-	/* Homologated Card Style (Clean, White, Shadows, Very Rounded) */
-	.crystal-fx {
-		background: var(--bg-card);
-		border: 1px solid rgba(0, 0, 0, 0.05);
-		border-radius: 24px; /* EDU-US signature extreme rounding */
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
-	}
-</style>
