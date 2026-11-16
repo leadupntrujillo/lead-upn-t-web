@@ -1,0 +1,64 @@
+---
+import Logo from './Logo.astro';
+
+const ruta = Astro.url.pathname;
+const enNovedades = ruta.startsWith('/novedades');
+---
+
+<header class="sitio">
+	<div class="contenedor sitio__fila">
+		<Logo />
+		<nav class="sitio__nav" aria-label="Principal">
+			<a href="/novedades" aria-current={enNovedades ? 'page' : undefined}>Novedades</a>
+			<a href="/#pilares" class="sitio__extra">Pilares</a>
+			<a
+				class="btn btn--primario btn--chico"
+				href="https://www.instagram.com/leadupn_trujillo/"
+				rel="noopener noreferrer"
+				target="_blank">Síguenos</a
+			>
+		</nav>
+	</div>
+</header>
+
+<style>
+	.sitio {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		background: var(--marino);
+		color: var(--blanco);
+		border-bottom: 1px solid rgb(255 255 255 / 0.1);
+	}
+	.sitio__fila {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		min-height: 4rem;
+	}
+	.sitio__nav {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+	}
+	.sitio__nav a:not(.btn) {
+		text-decoration: none;
+		font-weight: 500;
+		font-size: 0.95rem;
+		padding-block: 0.4rem;
+		border-bottom: 2px solid transparent;
+	}
+	.sitio__nav a:not(.btn):hover,
+	.sitio__nav a[aria-current='page'] {
+		border-bottom-color: var(--magenta-claro);
+	}
+	@media (max-width: 34rem) {
+		.sitio__extra {
+			display: none;
+		}
+		.sitio__nav {
+			gap: 1rem;
+		}
+	}
+</style>

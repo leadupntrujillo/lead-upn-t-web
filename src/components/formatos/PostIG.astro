@@ -1,0 +1,151 @@
+---
+import Cover from '../Cover.astro';
+import { fechaLarga, isoDia } from '../../lib/format';
+import Pie from './Pie.astro';
+import type { FormatoProps } from './tipos';
+
+/** Post IG: fotos cuadradas que se deslizan y un texto corto, como una publicación de Instagram. */
+const { entry, pilar, autor, html, relacionadas, pilares } = Astro.props as FormatoProps;
+const d = entry.data;
+const fotos = [d.imagen, ...d.galeria].filter((f): f is NonNullable<typeof f> => f !== null);
+---
+
+<article class="post">
+	<h1 class="titulo">{d.titulo}</h1>
+
+	<div class="marco">
+		<header class="marco__cabeza">
+			<span class="marco__avatar" aria-hidden="true"></span>
+			<div>
+				<p class="marco__usuario">leadupn_trujillo</p>
+				{pilar && <p class="marco__pilar">{pilar.data.nombre}</p>}
+			</div>
+		</header>
+
+		<div class="carrusel" tabindex="0" role="group" aria-label={`Fotos de la publicación (${Math.max(fotos.length, 1)})`}>
+			{
+				fotos.length > 0 ? (
+					fotos.map((f, i) => (
+						<figure class="carrusel__foto">
+							<img src={f.src} alt={f.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+						</figure>
+					))
+				) : (
+					<figure class="carrusel__foto">
+						<Cover imagen={null} ratio="1 / 1" />
+					</figure>
+				)
+			}
+		</div>
+		{fotos.length > 1 && <p class="marco__deslizar flechas">{fotos.length} fotos, desliza</p>}
+
+		<div class="marco__texto">
+			<div class="prose" set:html={html} />
+			<p class="marco__fecha">
+				<time datetime={isoDia(d.fechaPublicacion)}>{fechaLarga(d.fechaPublicacion)}</time>
+			</p>
+			{
+				d.boton && (
+					<a class="btn btn--primario btn--chico" href={d.boton.url} rel="noopener noreferrer" target="_blank">
+						{d.boton.texto}
+					</a>
+				)
+			}
+		</div>
+	</div>
+</article>
+
+<Pie {entry} {autor} {relacionadas} {pilares} sinBoton />
+
+<style>
+	.post {
+		width: min(100% - 2 * var(--gutter), 30rem);
+		margin-inline: auto;
+		padding-top: clamp(2rem, 5vw, 3rem);
+		display: grid;
+		gap: 1.5rem;
+	}
+	h1 {
+		font-size: clamp(2rem, 6vw, 2.8rem);
+		text-align: center;
+	}
+	.marco {
+		background: var(--blanco);
+		border-radius: 0.5rem;
+		box-shadow: var(--sombra);
+		overflow: hidden;
+	}
+	.marco__cabeza {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.8rem 1rem;
+	}
+	.marco__avatar {
+		width: 2.4rem;
+		height: 2.4rem;
+		border-radius: 50%;
+		background: var(--marino);
+		position: relative;
+		flex: none;
+	}
+	.marco__avatar::after {
+		content: '';
+		position: absolute;
+		inset: 22% 14%;
+		background: var(--degradado-vertical);
+		-webkit-mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+		mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+	}
+	.marco__usuario {
+		font-weight: 700;
+		font-size: 0.9rem;
+		line-height: 1.3;
+	}
+	.marco__pilar {
+		font-size: 0.78rem;
+		color: var(--tinta-suave);
+		line-height: 1.3;
+	}
+	.carrusel {
+		display: flex;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+	}
+	.carrusel::-webkit-scrollbar {
+		display: none;
+	}
+	.carrusel__foto {
+		flex: 0 0 100%;
+		margin: 0;
+		scroll-snap-align: center;
+	}
+	.carrusel__foto img {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: cover;
+	}
+	.marco__deslizar {
+		padding: 0.6rem 1rem 0;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--magenta);
+	}
+	.marco__texto {
+		display: grid;
+		gap: 0.9rem;
+		padding: 1rem 1.1rem 1.3rem;
+	}
+	.marco__texto :global(.prose) {
+		font-size: 0.97rem;
+		line-height: 1.65;
+	}
+	.marco__fecha {
+		font-size: 0.8rem;
+		color: var(--tinta-suave);
+	}
+	.marco__texto .btn {
+		justify-self: start;
+	}
+</style>

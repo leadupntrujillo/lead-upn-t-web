@@ -1,0 +1,55 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getEntry } from 'astro:content';
+import Anuncio from '../../components/formatos/Anuncio.astro';
+import Breve from '../../components/formatos/Breve.astro';
+import Convocatoria from '../../components/formatos/Convocatoria.astro';
+import Entrevista from '../../components/formatos/Entrevista.astro';
+import Evento from '../../components/formatos/Evento.astro';
+import Galeria from '../../components/formatos/Galeria.astro';
+import Logros from '../../components/formatos/Logros.astro';
+import Periodico from '../../components/formatos/Periodico.astro';
+import PostIG from '../../components/formatos/PostIG.astro';
+import Layout from '../../layouts/Layout.astro';
+import { relacionadas } from '../../lib/novedades';
+import { getNovedades, getPilaresPorId } from '../../lib/queries';
+
+export const getStaticPaths = (async () => {
+	const todas = await getNovedades();
+	return todas.map((entry) => ({ params: { slug: entry.id }, props: { entry, todas } }));
+}) satisfies GetStaticPaths;
+
+const { entry, todas } = Astro.props;
+const d = entry.data;
+
+const pilares = await getPilaresPorId();
+const pilar = d.pilar ? pilares.get(d.pilar.id) : undefined;
+const autor = d.autor ? await getEntry(d.autor) : undefined;
+
+// Cada formato tiene su propio esqueleto de página
+const plantillas = {
+	periodico: Periodico,
+	anuncio: Anuncio,
+	'post-ig': PostIG,
+	evento: Evento,
+	convocatoria: Convocatoria,
+	galeria: Galeria,
+	logros: Logros,
+	entrevista: Entrevista,
+	breve: Breve,
+} as const;
+const Plantilla = plantillas[d.formato];
+
+const estados = { publicado: null, 'en-revision': 'En revisión', borrador: 'Borrador' } as const;
+---
+
+<Layout title={d.titulo} description={d.seoDescripcion} vistaPrevia={estados[d.estado]}>
+	<Plantilla
+		{entry}
+		{pilar}
+		{autor}
+		html={entry.rendered?.html ?? ''}
+		relacionadas={relacionadas(todas, entry)}
+		{pilares}
+	/>
+</Layout>

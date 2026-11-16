@@ -1,0 +1,57 @@
+---
+/**
+ * Imagen de portada. Si la novedad no tiene imagen se muestra un fondo marino con el
+ * símbolo de LEAD, para que ninguna tarjeta quede en blanco.
+ */
+interface Props {
+	imagen: { src: string; alt: string } | null;
+	/** Proporción CSS, p. ej. "16 / 9", "1 / 1", "4 / 5". */
+	ratio?: string;
+	prioridad?: boolean;
+}
+
+const { imagen, ratio = '16 / 9', prioridad = false } = Astro.props;
+---
+
+{
+	imagen ? (
+		<img
+			class="cover"
+			style={`aspect-ratio:${ratio}`}
+			src={imagen.src}
+			alt={imagen.alt}
+			loading={prioridad ? 'eager' : 'lazy'}
+			decoding="async"
+		/>
+	) : (
+		<div class="cover cover--vacia" style={`aspect-ratio:${ratio}`} aria-hidden="true">
+			<span class="cover__marca"></span>
+		</div>
+	)
+}
+
+<style>
+	.cover {
+		width: 100%;
+		height: auto;
+		object-fit: cover;
+		background: var(--lavanda);
+	}
+	.cover--vacia {
+		display: grid;
+		place-items: center;
+		background:
+			radial-gradient(120% 90% at 85% 0%, rgb(140 63 209 / 0.45), transparent 60%),
+			radial-gradient(90% 80% at 0% 100%, rgb(240 96 106 / 0.28), transparent 60%),
+			var(--marino);
+	}
+	.cover__marca {
+		width: 34%;
+		max-width: 9rem;
+		aspect-ratio: 720 / 430;
+		background: var(--degradado-vertical);
+		opacity: 0.85;
+		-webkit-mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+		mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+	}
+</style>

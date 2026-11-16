@@ -17,6 +17,9 @@ export const getPortada = async () => armarPortada(await getNovedades());
 
 export const getPilares = async () => porOrden(await getCollection('pilares'));
 
+/** Pilares indexados por id (para resolver `novedad.data.pilar.id` sin consultar de nuevo). */
+export const getPilaresPorId = async () => new Map((await getPilares()).map((p) => [p.id, p]));
+
 /** Miembros marcados "Mostrar en la web" (sección Equipo). */
 export const getEquipo = async () => porOrden((await getCollection('miembros')).filter((m) => m.data.mostrar));
 

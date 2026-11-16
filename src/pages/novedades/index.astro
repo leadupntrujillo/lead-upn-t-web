@@ -1,0 +1,226 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import NovedadCard from '../../components/NovedadCard.astro';
+import { FORMATOS_INFO } from '../../lib/notion/formatos';
+import { getNovedades, getPilaresPorId } from '../../lib/queries';
+
+const novedades = await getNovedades();
+const pilares = await getPilaresPorId();
+
+// Solo se ofrecen filtros que tienen resultados
+const pilaresUsados = [...pilares.values()].filter((p) => novedades.some((n) => n.data.pilar?.id === p.id));
+const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.some((n) => n.data.formato === id));
+---
+
+<Layout title="Novedades" description="Noticias, eventos, convocatorias y anuncios de LEAD UPN Trujillo.">
+	<header class="cabeza">
+		<div class="contenedor cabeza__fila">
+			<h1 class="titulo">Novedades</h1>
+			<p>Lo que pasa en LEAD UPN Trujillo: eventos, convocatorias, logros y anuncios de todos los pilares.</p>
+		</div>
+	</header>
+
+	<div class="contenedor listado">
+		<section class="filtros" aria-label="Filtrar novedades">
+			{
+				pilaresUsados.length > 1 && (
+					<div class="filtros__grupo" role="group" aria-label="Pilar">
+						<span class="filtros__titulo">Pilar</span>
+						{pilaresUsados.map((p) => (
+							<a class="pill" href={`?pilar=${p.data.slug}`} data-filtro="pilar" data-valor={p.data.slug}>
+								{p.data.nombre}
+							</a>
+						))}
+					</div>
+				)
+			}
+			{
+				formatosUsados.length > 1 && (
+					<div class="filtros__grupo" role="group" aria-label="Tipo">
+						<span class="filtros__titulo">Tipo</span>
+						{formatosUsados.map(([id, info]) => (
+							<a class="pill" href={`?formato=${id}`} data-filtro="formato" data-valor={id}>
+								{info.nombre}
+							</a>
+						))}
+					</div>
+				)
+			}
+			<p class="filtros__activo" data-etiqueta hidden>
+				Etiqueta: <strong data-etiqueta-nombre></strong>
+				<a href="/novedades">Quitar</a>
+			</p>
+		</section>
+
+		<p class="conteo" role="status" aria-live="polite" data-conteo>
+			{novedades.length === 1 ? '1 novedad' : `${novedades.length} novedades`}
+		</p>
+
+		{
+			novedades.length > 0 ? (
+				<ul class="grilla">
+					{novedades.map((n) => (
+						<li
+							data-item
+							data-pilar={n.data.pilar ? pilares.get(n.data.pilar.id)?.data.slug : ''}
+							data-formato={n.data.formato}
+							data-etiquetas={n.data.etiquetas.join('|')}
+						>
+							<NovedadCard entry={n} pilar={n.data.pilar ? pilares.get(n.data.pilar.id) : undefined} />
+						</li>
+					))}
+				</ul>
+			) : (
+				<p class="vacio">Todavía no hay novedades publicadas. Vuelve pronto.</p>
+			)
+		}
+
+		<p class="vacio" data-sin-resultados hidden>
+			No hay novedades con estos filtros. <a href="/novedades">Quita los filtros</a> para ver todas.
+		</p>
+	</div>
+</Layout>
+
+<script>
+	// Filtros sin recargar la página. Sin JavaScript los enlaces siguen funcionando como índice.
+	type Clave = 'pilar' | 'formato' | 'etiqueta';
+	const claves: Clave[] = ['pilar', 'formato', 'etiqueta'];
+	const activo: Record<Clave, string | null> = { pilar: null, formato: null, etiqueta: null };
+
+	const items = [...document.querySelectorAll<HTMLElement>('[data-item]')];
+	const botones = [...document.querySelectorAll<HTMLAnchorElement>('[data-filtro]')];
+	const conteo = document.querySelector<HTMLElement>('[data-conteo]');
+	const sinResultados = document.querySelector<HTMLElement>('[data-sin-resultados]');
+	const bloqueEtiqueta = document.querySelector<HTMLElement>('[data-etiqueta]');
+
+	function leerUrl() {
+		const params = new URLSearchParams(location.search);
+		for (const c of claves) activo[c] = params.get(c);
+	}
+
+	function pintar() {
+		let visibles = 0;
+		for (const item of items) {
+			const ok =
+				(!activo.pilar || item.dataset.pilar === activo.pilar) &&
+				(!activo.formato || item.dataset.formato === activo.formato) &&
+				(!activo.etiqueta || (item.dataset.etiquetas ?? '').split('|').includes(activo.etiqueta));
+			item.hidden = !ok;
+			if (ok) visibles++;
+		}
+		// El filtro activo se marca con aria-current (los enlaces no admiten aria-pressed)
+		for (const b of botones) {
+			if (activo[b.dataset.filtro as Clave] === b.dataset.valor) b.setAttribute('aria-current', 'true');
+			else b.removeAttribute('aria-current');
+		}
+		if (conteo) conteo.textContent = visibles === 1 ? '1 novedad' : `${visibles} novedades`;
+		if (sinResultados) sinResultados.hidden = visibles !== 0 || items.length === 0;
+		if (bloqueEtiqueta) {
+			bloqueEtiqueta.hidden = !activo.etiqueta;
+			const nombre = bloqueEtiqueta.querySelector('[data-etiqueta-nombre]');
+			if (nombre) nombre.textContent = activo.etiqueta ?? '';
+		}
+	}
+
+	function guardarUrl() {
+		const params = new URLSearchParams();
+		for (const c of claves) if (activo[c]) params.set(c, activo[c]!);
+		const query = params.toString();
+		history.replaceState(null, '', query ? `?${query}` : location.pathname);
+	}
+
+	for (const b of botones) {
+		b.addEventListener('click', (e) => {
+			e.preventDefault();
+			const c = b.dataset.filtro as Clave;
+			activo[c] = activo[c] === b.dataset.valor ? null : (b.dataset.valor ?? null);
+			guardarUrl();
+			pintar();
+		});
+	}
+
+	leerUrl();
+	pintar();
+</script>
+
+<style>
+	.cabeza {
+		background:
+			radial-gradient(60% 140% at 100% 0%, rgb(140 63 209 / 0.4), transparent 65%),
+			var(--marino);
+		color: var(--blanco);
+		padding-block: clamp(2.5rem, 7vw, 4.5rem);
+	}
+	.cabeza__fila {
+		display: grid;
+		gap: 0.75rem;
+	}
+	h1 {
+		font-size: clamp(3rem, 10vw, 6.5rem);
+		line-height: 1;
+	}
+	.cabeza p {
+		max-width: 38rem;
+		font-size: 1.1rem;
+		color: rgb(255 255 255 / 0.85);
+	}
+	.listado {
+		padding-block: 2rem 4rem;
+		display: grid;
+		gap: 1.25rem;
+	}
+	.filtros {
+		display: grid;
+		gap: 0.9rem;
+	}
+	.filtros__grupo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+	.filtros__titulo {
+		min-width: 3rem;
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+	.filtros .pill {
+		text-decoration: none;
+		cursor: pointer;
+		background: var(--blanco);
+		box-shadow: inset 0 0 0 1.5px var(--linea);
+	}
+	.filtros .pill:hover {
+		box-shadow: inset 0 0 0 1.5px var(--marino);
+	}
+	.filtros .pill[aria-current='true'] {
+		background: var(--marino);
+		color: var(--blanco);
+		box-shadow: none;
+	}
+	.filtros__activo {
+		font-size: 0.9rem;
+	}
+	.filtros__activo a {
+		margin-left: 0.5rem;
+		font-weight: 600;
+		color: var(--magenta);
+	}
+	.conteo {
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--tinta-suave);
+	}
+	.grilla {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 1.5rem;
+		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+		align-items: start;
+	}
+	.grilla [data-item][hidden] {
+		display: none;
+	}
+</style>

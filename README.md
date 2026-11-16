@@ -85,8 +85,10 @@ Todo el contenido sale de la carpeta **Centro de Datos - LEAD** en Notion:
 public/             Logos e imágenes de marca
 src/content.config.ts   Colecciones (esquemas + loaders)
 src/lib/notion/     Backend: cliente, loaders, mapeadores, conversor de bloques
-src/layouts/        Layout base
-src/pages/          Rutas
+src/layouts/        Layout base (cabecera, pie, fuentes)
+src/components/     Logo, tarjetas, portada de imagen y una plantilla por formato (formatos/)
+src/styles/         Tokens de marca (global.css) y estilos del texto de Notion (prose.css)
+src/pages/          Inicio, /novedades (con filtros) y /novedades/[slug]
 ```
 
 ## Hoja de ruta
@@ -94,5 +96,5 @@ src/pages/          Rutas
 - [x] Paso 0 — Limpieza del repo
 - [x] Paso 1 — Reorganizar Notion (Formato, Pilares, Miembros, guía y plantilla)
 - [x] Paso 2 — Backend: integración con la API de Notion (pendiente: primera sincronización con el `.env` real)
-- [ ] Paso 3 — Frontend: listado y páginas de novedades por formato
+- [x] Paso 3 — Frontend: portada, listado con filtros y una página por cada uno de los 9 formatos (pendiente: afinar con contenido e imágenes reales)
 - [ ] Paso 4 — Despliegue en Vercel con recompilación automática

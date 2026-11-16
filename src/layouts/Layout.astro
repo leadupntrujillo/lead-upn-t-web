@@ -1,13 +1,29 @@
 ---
+import '@fontsource/anton/400.css';
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '@fontsource/poppins/800.css';
+import '../styles/global.css';
+import '../styles/prose.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+
 interface Props {
 	title?: string;
 	description?: string;
+	/** Texto del estado cuando la página es una vista previa (Borrador, En revisión). */
+	vistaPrevia?: string | null;
 }
 
 const {
-	title = 'LEAD UPN Trujillo',
-	description = 'LEAD UPN Trujillo - Learn, Explore, Aspire, Discover.',
+	title,
+	description = 'LEAD UPN Trujillo: organización estudiantil de liderazgo con propósito de la UPN. Learn, Explore, Aspire, Discover.',
+	vistaPrevia = null,
 } = Astro.props;
+
+const titulo = title ? `${title} | LEAD UPN Trujillo` : 'LEAD UPN Trujillo';
 ---
 
 <!doctype html>
@@ -15,12 +31,41 @@ const {
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#161a4e" />
 		<link rel="icon" href="/lead-tr-upn.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
-		<title>{title}</title>
+		<meta property="og:title" content={titulo} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:locale" content="es_PE" />
+		{vistaPrevia && <meta name="robots" content="noindex" />}
+		<title>{titulo}</title>
 	</head>
 	<body>
-		<slot />
+		<a class="saltar" href="#contenido">Saltar al contenido</a>
+		{
+			vistaPrevia && (
+				<div class="vista-previa" role="status">
+					Vista previa: {vistaPrevia}. Esta novedad no es pública todavía.
+				</div>
+			)
+		}
+		<Header />
+		<main id="contenido">
+			<slot />
+		</main>
+		<Footer />
 	</body>
 </html>
+
+<style>
+	.vista-previa {
+		background: #fdf3cc;
+		color: #5c4300;
+		text-align: center;
+		font-size: 0.85rem;
+		font-weight: 600;
+		padding: 0.5rem var(--gutter);
+	}
+</style>
