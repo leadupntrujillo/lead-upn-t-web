@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import NovedadCard from '../../components/NovedadCard.astro';
 import { FORMATOS_INFO } from '../../lib/notion/formatos';
 import { getNovedades, getPilaresPorId } from '../../lib/queries';
+import { migas } from '../../lib/seo';
 
 const novedades = await getNovedades();
 const pilares = await getPilaresPorId();
@@ -12,7 +13,16 @@ const pilaresUsados = [...pilares.values()].filter((p) => novedades.some((n) => 
 const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.some((n) => n.data.formato === id));
 ---
 
-<Layout title="Novedades" description="Noticias, eventos, convocatorias y anuncios de LEAD UPN Trujillo.">
+<Layout
+	titulo="Novedades"
+	descripcion="Noticias, eventos, convocatorias y anuncios de LEAD UPN Trujillo."
+	jsonLd={[
+		migas([
+			{ nombre: 'Inicio', ruta: '/' },
+			{ nombre: 'Novedades', ruta: '/novedades' },
+		]),
+	]}
+>
 	<header class="cabeza">
 		<div class="contenedor cabeza__fila">
 			<h1 class="titulo">Novedades</h1>
@@ -208,7 +218,7 @@ const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.
 	}
 	.conteo {
 		font-size: 0.85rem;
-		font-weight: 500;
+		font-weight: 400;
 		color: var(--tinta-suave);
 	}
 	.grilla {

@@ -27,7 +27,8 @@ const { cita, html: texto } = extraerCita(html);
 				</p>
 			</div>
 			<div class="retrato">
-				<Cover imagen={d.imagen} ratio="4 / 5" prioridad />
+				<Cover imagen={d.imagen} ratio="4 / 5" prioridad sizes="(min-width: 52rem) 28rem, 100vw" />
+				{d.creditos && <p class="creditos">{d.creditos}</p>}
 			</div>
 		</div>
 	</header>
@@ -108,7 +109,7 @@ const { cita, html: texto } = extraerCita(html);
 	.resumen {
 		margin-bottom: 2rem;
 		font-size: 1.15rem;
-		font-weight: 500;
+		font-weight: 400;
 		color: var(--tinta-suave);
 	}
 

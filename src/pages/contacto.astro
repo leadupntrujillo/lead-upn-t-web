@@ -1,0 +1,120 @@
+---
+import Unete from '../components/Unete.astro';
+import Layout from '../layouts/Layout.astro';
+import { getSitio } from '../lib/queries';
+import { migas } from '../lib/seo';
+
+/**
+ * Contacto: por ahora, los canales oficiales de la tabla "Sitio".
+ * El formulario (con Turnstile) llega en el Sprint 3.
+ */
+const sitio = await getSitio();
+const canales = [
+	sitio.correo && { nombre: 'Correo', valor: sitio.correo, href: `mailto:${sitio.correo}`, nota: 'Para alianzas, prensa y consultas.' },
+	sitio.redes.whatsapp && { nombre: 'WhatsApp', valor: 'Escríbenos', href: sitio.redes.whatsapp, nota: 'La forma más rápida de resolver dudas.' },
+	sitio.redes.instagram && {
+		nombre: 'Instagram',
+		valor: '@' + (sitio.redes.instagram.split('instagram.com/')[1] ?? 'leadupn_trujillo').replace(/\/.*/, ''),
+		href: sitio.redes.instagram,
+		nota: 'Convocatorias, eventos y el día a día de LEAD.',
+	},
+	sitio.redes.linkedin && { nombre: 'LinkedIn', valor: 'LEAD UPN Trujillo', href: sitio.redes.linkedin, nota: 'Logros y alianzas.' },
+	sitio.redes.tiktok && { nombre: 'TikTok', valor: 'LEAD UPN Trujillo', href: sitio.redes.tiktok, nota: '' },
+	sitio.redes.facebook && { nombre: 'Facebook', valor: 'LEAD UPN Trujillo', href: sitio.redes.facebook, nota: '' },
+].filter((c): c is { nombre: string; valor: string; href: string; nota: string } => Boolean(c));
+---
+
+<Layout
+	titulo="Contacto"
+	descripcion="Escríbenos o síguenos en redes: canales oficiales de LEAD UPN Trujillo."
+	jsonLd={[
+		migas([
+			{ nombre: 'Inicio', ruta: '/' },
+			{ nombre: 'Contacto', ruta: '/contacto' },
+		]),
+	]}
+>
+	<header class="cabeza">
+		<div class="contenedor">
+			<h1 class="titulo">Contacto</h1>
+			<p>¿Quieres sumarte, proponer una alianza o tienes una duda? Estos son nuestros canales oficiales.</p>
+		</div>
+	</header>
+
+	<section class="contenedor seccion" aria-label="Canales">
+		<ul class="canales">
+			{
+				canales.map((c) => (
+					<li>
+						<a href={c.href} data-cta={`contacto-${c.nombre.toLowerCase()}`} {...(c.href.startsWith('http') ? { rel: 'noopener noreferrer', target: '_blank' } : {})}>
+							<span class="canal__nombre">{c.nombre}</span>
+							<span class="canal__valor flechas">{c.valor}</span>
+							{c.nota && <span class="canal__nota">{c.nota}</span>}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<Unete />
+</Layout>
+
+<style>
+	.cabeza {
+		background: var(--marino);
+		color: var(--blanco);
+		padding-block: clamp(2.5rem, 7vw, 4.5rem);
+	}
+	.cabeza .contenedor {
+		display: grid;
+		gap: 1rem;
+	}
+	.cabeza h1 {
+		font-size: clamp(2.8rem, 9vw, 5.5rem);
+		line-height: 1;
+	}
+	.cabeza p {
+		max-width: 38rem;
+		font-size: 1.1rem;
+		color: rgb(255 255 255 / 0.88);
+	}
+	.canales {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+	}
+	.canales a {
+		display: grid;
+		gap: 0.3rem;
+		height: 100%;
+		padding: 1.4rem 1.5rem;
+		border-radius: 1rem;
+		background: var(--blanco);
+		box-shadow: var(--sombra);
+		text-decoration: none;
+		transition: transform 0.2s;
+	}
+	.canales a:hover {
+		transform: translateY(-3px);
+	}
+	.canal__nombre {
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--magenta);
+	}
+	.canal__valor {
+		font-weight: 700;
+		font-size: 1.15rem;
+		overflow-wrap: anywhere;
+	}
+	.canal__nota {
+		font-size: 0.9rem;
+		color: var(--tinta-suave);
+	}
+</style>

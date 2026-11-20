@@ -27,7 +27,16 @@ const fotos = [d.imagen, ...d.galeria].filter((f): f is NonNullable<typeof f> =>
 				fotos.length > 0 ? (
 					fotos.map((f, i) => (
 						<figure class="carrusel__foto">
-							<img src={f.src} alt={f.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+							<img
+								src={f.src}
+								srcset={f.srcset || undefined}
+								sizes={f.srcset ? '(min-width: 34rem) 32rem, 100vw' : undefined}
+								width={f.width ?? undefined}
+								height={f.height ?? undefined}
+								alt={f.alt}
+								loading={i === 0 ? 'eager' : 'lazy'}
+								decoding="async"
+							/>
 						</figure>
 					))
 				) : (

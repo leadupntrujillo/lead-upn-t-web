@@ -1,4 +1,4 @@
-![Lead UPN Trujillo](./public/portada-lead.png)
+![LEAD UPN Trujillo](./docs/portada.webp)
 
 # LEAD UPN Trujillo — Web Oficial
 
@@ -23,7 +23,7 @@ pnpm install
 pnpm dev               # http://localhost:4321 (necesita el archivo .env, ver abajo)
 ```
 
-Otros comandos: `pnpm build`, `pnpm preview`, `pnpm check` (tipos), `pnpm test` (pruebas), `pnpm sync` (vuelve a leer Notion).
+Otros comandos: `pnpm build`, `pnpm preview`, `pnpm check` (tipos), `pnpm test` (pruebas), `pnpm sync` (vuelve a leer Notion), `pnpm iconos` (regenera favicon e íconos desde `public/brand/lead-mark.svg`).
 
 ## Variables de entorno
 
@@ -41,13 +41,19 @@ NOTION_MIEMBROS_ID=
 NOTION_TESTIMONIOS_ID=
 NOTION_ALIADOS_ID=
 NOTION_CIFRAS_ID=
+NOTION_SITIO_ID=
+
+# Cloudflare Turnstile (antispam del formulario de contacto, Sprint 3).
+# La clave pública puede verse en el sitio; la secreta solo va en .env y en Vercel.
+PUBLIC_TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
 
 # OPCIONAL, solo en tu computadora: `pnpm dev` también muestra Borrador y En revisión.
 # Se ignora en `pnpm build` y en Vercel.
 # NOTION_PREVIEW=true
 ```
 
-**`pnpm dev` y `pnpm build` leen Notion**, así que necesitan `.env` completo (el token y los 6 IDs). Si falta algo, fallan con un mensaje que indica qué variable falta. En Vercel se cargan en *Settings → Environment Variables*.
+**`pnpm dev` y `pnpm build` leen Notion**, así que necesitan `.env` completo (el token y los 7 IDs). Si falta algo, fallan con un mensaje que indica qué variable falta. En Vercel se cargan en *Settings → Environment Variables*.
 
 ## Cómo funciona el backend
 
@@ -59,7 +65,11 @@ Cada tabla de Notion es una colección de Astro con datos tipados: `novedades`, 
 
 - **Solo se publica lo marcado para la web:** novedades `Publicado` con fecha ≤ hoy; testimonios con `Publicar en la web` y `Autoriza uso de imagen`; aliados y cifras con `Mostrar en la web`; pilares `Activo`.
 - **El cuerpo de la página de Notion** se convierte a HTML seguro (`entry.rendered.html`).
-- **Las imágenes** se descargan en cada build a `public/_notion/` (las URLs de Notion caducan en 1 h).
+- **Las imágenes** se descargan en cada build (las URLs de Notion caducan en 1 h) a `.cache/notion/` y se publican en `public/_notion/` como WebP en 3 anchos (480/960/1600) con su ancho y alto. Una foto de 340 KB queda en unos 30–95 KB según la pantalla.
+- **Tabla "Sitio"**: una sola fila con misión, visión, descripción corta (para Google), redes, correo y el link/texto de "Únete". El cuerpo de esa página es el texto de "Nosotros". Se lee con `getSitio()`.
+- **SEO**: cada página tiene título, descripción, URL canónica, Open Graph, tarjeta de X y datos estructurados (Organización, Noticia o Evento, rutas de navegación). Cada novedad tiene su imagen para compartir (`/og/novedades/<slug>.png`), generada al compilar. También se generan `sitemap-index.xml`, `robots.txt` y `rss.xml`.
+- **Slugs anteriores**: si cambias el Slug de una novedad, pega el anterior en "Slugs anteriores" y el enlace viejo redirige al nuevo.
+- **Avisos de accesibilidad**: el build avisa si una novedad no tiene "Texto alternativo" o si una imagen del texto no tiene pie de foto.
 - **Si cambia la estructura de Notion** (columna renombrada o de otro tipo) el build falla con un mensaje claro. **Si falta contenido** (novedad sin título o resumen) esa fila se omite con un aviso en el log.
 - El contenido nuevo aparece en la web en el siguiente build (ver Paso 4: recompilación automática).
 - **Los 9 formatos** (Periódico, Anuncio, Post IG, Evento, Convocatoria, Galería, Logros, Entrevista, Breve) están definidos en `src/lib/notion/formatos.ts`. Si a una novedad le falta algo que su formato necesita (p. ej. una Convocatoria sin link para postular), se publica igual y el build avisa.
@@ -78,6 +88,7 @@ Todo el contenido sale de la carpeta **Centro de Datos - LEAD** en Notion:
 | Testimonios | Testimonios (solo los marcados `Publicar en la web`) |
 | Aliados | Logos de aliados |
 | Cifras | Números de impacto de la portada |
+| Sitio | Misión, visión, redes, correo y "Únete" (una sola fila) |
 
 ## Estructura
 
@@ -88,7 +99,12 @@ src/lib/notion/     Backend: cliente, loaders, mapeadores, conversor de bloques
 src/layouts/        Layout base (cabecera, pie, fuentes)
 src/components/     Logo, tarjetas, portada de imagen y una plantilla por formato (formatos/)
 src/styles/         Tokens de marca (global.css) y estilos del texto de Notion (prose.css)
-src/pages/          Inicio, /novedades (con filtros) y /novedades/[slug]
+src/pages/          Inicio, /nosotros, /contacto, /novedades (con filtros), /novedades/[slug], 404,
+                    imágenes para compartir (og/), robots.txt y rss.xml
+src/lib/seo.ts      URLs canónicas y datos estructurados (schema.org)
+src/lib/og/         Generador de las imágenes para compartir (satori)
+scripts/iconos.mjs  Favicon, íconos de la app y Auki para móvil
+vercel.json         Encabezados de seguridad (CSP), caché y redirección de www
 ```
 
 ## Hoja de ruta

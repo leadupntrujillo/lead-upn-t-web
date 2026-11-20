@@ -12,14 +12,25 @@ import Periodico from '../../components/formatos/Periodico.astro';
 import PostIG from '../../components/formatos/PostIG.astro';
 import Layout from '../../layouts/Layout.astro';
 import { relacionadas } from '../../lib/novedades';
+import { FORMATOS_INFO } from '../../lib/notion/formatos';
+import { migas, novedadLd } from '../../lib/seo';
 import { getNovedades, getPilaresPorId } from '../../lib/queries';
 
 export const getStaticPaths = (async () => {
 	const todas = await getNovedades();
-	return todas.map((entry) => ({ params: { slug: entry.id }, props: { entry, todas } }));
+	const actuales = new Set(todas.map((n) => n.id));
+	const paginas = todas.map((entry) => ({ params: { slug: entry.id }, props: { entry, todas, redirigeA: null as string | null } }));
+	// "Slugs anteriores": el enlace viejo redirige al nuevo (si no lo usa ya otra novedad).
+	const redirecciones = todas.flatMap((entry) =>
+		entry.data.slugsAnteriores
+			.filter((viejo) => !actuales.has(viejo))
+			.map((viejo) => ({ params: { slug: viejo }, props: { entry, todas, redirigeA: entry.id } })),
+	);
+	return [...paginas, ...redirecciones];
 }) satisfies GetStaticPaths;
 
-const { entry, todas } = Astro.props;
+const { entry, todas, redirigeA } = Astro.props;
+if (redirigeA) return Astro.redirect(`/novedades/${redirigeA}`, 301);
 const d = entry.data;
 
 const pilares = await getPilaresPorId();
@@ -43,7 +54,38 @@ const Plantilla = plantillas[d.formato];
 const estados = { publicado: null, 'en-revision': 'En revisión', borrador: 'Borrador' } as const;
 ---
 
-<Layout title={d.titulo} description={d.seoDescripcion} vistaPrevia={estados[d.estado]}>
+<Layout
+	titulo={d.titulo}
+	descripcion={d.seoDescripcion}
+	vistaPrevia={estados[d.estado]}
+	tipo="article"
+	imagen={`/og/novedades/${entry.id}.png`}
+	imagenAlt={d.imagen?.alt ?? d.titulo}
+	publicado={d.fechaPublicacion}
+	modificado={d.actualizado}
+	jsonLd={[
+		novedadLd({
+			titulo: d.titulo,
+			descripcion: d.seoDescripcion,
+			ruta: `/novedades/${entry.id}`,
+			imagenes: [`/og/novedades/${entry.id}.png`, ...(d.imagen ? [d.imagen.src] : [])],
+			formato: d.formato,
+			fechaPublicacion: d.fechaPublicacion,
+			actualizado: d.actualizado,
+			fechaEvento: d.fechaEvento,
+			modalidad: d.modalidad,
+			lugar: d.lugar,
+			boton: d.boton,
+			autor: autor?.data.nombre ?? null,
+		}),
+		migas([
+			{ nombre: 'Inicio', ruta: '/' },
+			{ nombre: 'Novedades', ruta: '/novedades' },
+			{ nombre: FORMATOS_INFO[d.formato].nombre, ruta: `/novedades?formato=${d.formato}` },
+			{ nombre: d.titulo, ruta: `/novedades/${entry.id}` },
+		]),
+	]}
+>
 	<Plantilla
 		{entry}
 		{pilar}

@@ -1,5 +1,6 @@
 import type { BlockObjectResponse, RichTextItemResponse } from '@notionhq/client';
 import type { FileRef } from './assets';
+import type { ImageRef } from './images';
 import type { NotionLike } from './query';
 import { collectPaginatedAPI, isFullBlock } from './sdk';
 import { escapeHtml as esc, safeHref, slugify } from './util';
@@ -9,6 +10,9 @@ export type BlockNode = BlockObjectResponse & { children?: BlockNode[] };
 export interface RenderCtx {
 	/** Convierte un archivo de Notion en una URL pública (descargándolo si hace falta). */
 	resolveFile(file: FileRef): Promise<string>;
+	/** Si está, las imágenes del texto se optimizan (WebP + srcset + ancho/alto). */
+	resolveImage?(file: FileRef, alt: string): Promise<ImageRef>;
+	warn?(message: string): void;
 }
 
 const MAX_DEPTH = 5;
@@ -134,11 +138,19 @@ async function renderBlock(node: BlockNode, ctx: RenderCtx): Promise<string> {
 			const img = node.image;
 			const file: FileRef =
 				img.type === 'file' ? { url: img.file.url, hosted: true } : { url: img.external.url, hosted: false };
-			const src = await ctx.resolveFile(file);
 			const caption = richText(img.caption);
-			const alt = esc(plainText(img.caption));
+			const altText = plainText(img.caption);
+			// El pie de foto hace de texto alternativo: sin él, la imagen queda sin describir.
+			if (!altText) ctx.warn?.('una imagen del texto no tiene pie de foto (se usa como texto alternativo).');
+			const ref: ImageRef = ctx.resolveImage
+				? await ctx.resolveImage(file, altText)
+				: { src: await ctx.resolveFile(file), alt: altText, width: null, height: null, srcset: '' };
+			const attrs =
+				`src="${esc(ref.src)}" alt="${esc(altText)}"` +
+				(ref.srcset ? ` srcset="${esc(ref.srcset)}" sizes="(min-width: 44rem) 42rem, 100vw"` : '') +
+				(ref.width && ref.height ? ` width="${ref.width}" height="${ref.height}"` : '');
 			return (
-				`<figure><img src="${esc(src)}" alt="${alt}" loading="lazy" decoding="async">` +
+				`<figure><img ${attrs} loading="lazy" decoding="async">` +
 				(caption ? `<figcaption>${caption}</figcaption>` : '') +
 				'</figure>'
 			);

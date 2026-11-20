@@ -1,0 +1,70 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+/** Página no encontrada. Cuando esté lista la imagen de Auki para la 404, reemplaza el símbolo. */
+---
+
+<Layout titulo="Página no encontrada" descripcion="La página que buscas no existe o cambió de dirección." noindex>
+	<section class="error">
+		<div class="contenedor error__fila">
+			<span class="error__marca" aria-hidden="true"></span>
+			<p class="error__codigo titulo" aria-hidden="true">404</p>
+			<h1 class="titulo">Esta página despegó sin nosotros</h1>
+			<p>Puede que el enlace esté mal escrito o que la página haya cambiado de dirección.</p>
+			<div class="error__acciones">
+				<a class="btn btn--primario" href="/">Ir al inicio</a>
+				<a class="btn btn--borde" href="/novedades">Ver novedades</a>
+			</div>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.error {
+		background:
+			radial-gradient(60% 90% at 100% 0%, rgb(140 63 209 / 0.35), transparent 60%),
+			radial-gradient(60% 90% at 0% 100%, rgb(214 41 122 / 0.22), transparent 60%),
+			var(--noche);
+		color: var(--blanco);
+		min-height: min(40rem, 80dvh);
+		display: grid;
+		align-items: center;
+	}
+	.error__fila {
+		display: grid;
+		gap: 1.1rem;
+		justify-items: center;
+		text-align: center;
+		padding-block: 4rem;
+	}
+	.error__marca {
+		width: min(12rem, 45vw);
+		aspect-ratio: 720 / 430;
+		background: var(--degradado-vertical);
+		-webkit-mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+		mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+	}
+	.error__codigo {
+		font-size: clamp(4rem, 14vw, 7rem);
+		line-height: 1;
+		background: var(--degradado);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+	h1 {
+		font-size: clamp(1.8rem, 5vw, 3rem);
+		max-width: 18ch;
+	}
+	p {
+		max-width: 34rem;
+		color: rgb(255 255 255 / 0.85);
+	}
+	.error__acciones {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		justify-content: center;
+		margin-top: 0.5rem;
+	}
+</style>

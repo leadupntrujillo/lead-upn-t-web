@@ -69,3 +69,6 @@ dist-ssr/
 # Archivos descargados de Notion en build y config local de Claude
 public/_notion/
 .claude/settings.local.json
+
+# Archivos fuente pesados (modelos 3D sin optimizar): no van al repo ni a la web
+fuentes-3d/

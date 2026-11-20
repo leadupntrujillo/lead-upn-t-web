@@ -1,46 +1,43 @@
 ---
+// Solo tres pesos de Poppins (400, 600 y 700) y Anton: menos archivos que descargar.
 import '@fontsource/anton/400.css';
 import '@fontsource/poppins/400.css';
-import '@fontsource/poppins/500.css';
 import '@fontsource/poppins/600.css';
 import '@fontsource/poppins/700.css';
-import '@fontsource/poppins/800.css';
 import '../styles/global.css';
 import '../styles/prose.css';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Seo, { type SeoProps } from '../components/Seo.astro';
+import { getSitio } from '../lib/queries';
 
-interface Props {
+interface Props extends SeoProps {
+	/** Alias de `titulo` (compatibilidad con las páginas existentes). */
 	title?: string;
+	/** Alias de `descripcion`. */
 	description?: string;
 	/** Texto del estado cuando la página es una vista previa (Borrador, En revisión). */
 	vistaPrevia?: string | null;
 }
 
-const {
-	title,
-	description = 'LEAD UPN Trujillo: organización estudiantil de liderazgo con propósito de la UPN. Learn, Explore, Aspire, Discover.',
-	vistaPrevia = null,
-} = Astro.props;
-
-const titulo = title ? `${title} | LEAD UPN Trujillo` : 'LEAD UPN Trujillo';
+const { title, description, vistaPrevia = null, titulo = title, descripcion = description, noindex, ...seo } = Astro.props;
+const sitio = await getSitio();
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es-PE">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="theme-color" content="#161a4e" />
-		<link rel="icon" href="/lead-tr-upn.ico" />
+		<meta name="color-scheme" content="light" />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta name="generator" content={Astro.generator} />
-		<meta name="description" content={description} />
-		<meta property="og:title" content={titulo} />
-		<meta property="og:description" content={description} />
-		<meta property="og:type" content="website" />
-		<meta property="og:locale" content="es_PE" />
-		{vistaPrevia && <meta name="robots" content="noindex" />}
-		<title>{titulo}</title>
+		<Seo {sitio} {titulo} {descripcion} noindex={noindex || Boolean(vistaPrevia)} {...seo} />
+		<slot name="head" />
 	</head>
 	<body>
 		<a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -51,11 +48,11 @@ const titulo = title ? `${title} | LEAD UPN Trujillo` : 'LEAD UPN Trujillo';
 				</div>
 			)
 		}
-		<Header />
+		<Header {sitio} />
 		<main id="contenido">
 			<slot />
 		</main>
-		<Footer />
+		<Footer {sitio} />
 	</body>
 </html>
 

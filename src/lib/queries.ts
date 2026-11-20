@@ -1,5 +1,6 @@
 import { getCollection, getEntry } from 'astro:content';
 import { armarPortada, porFecha } from './novedades';
+import { DESCRIPCION_POR_DEFECTO, INSTAGRAM_POR_DEFECTO } from './seo';
 
 /**
  * Punto de entrada de datos para las páginas: todo lo que viene de Notion se pide desde aquí.
@@ -28,3 +29,34 @@ export const getTestimonios = async () => porOrden(await getCollection('testimon
 export const getAliados = async () => porOrden(await getCollection('aliados'));
 
 export const getCifras = async () => porOrden(await getCollection('cifras'));
+
+/**
+ * Datos generales de la tabla "Sitio" (misión, visión, redes, Únete) y el texto de "Nosotros".
+ * Si la tabla está vacía, se usan valores por defecto para que nada se rompa.
+ */
+export const getSitio = async () => {
+	const entry = await getEntry('sitio', 'sitio');
+	const d = entry?.data;
+	return {
+		nombre: d?.nombre ?? 'LEAD UPN Trujillo',
+		mision: d?.mision ?? '',
+		vision: d?.vision ?? '',
+		descripcion: d?.descripcion || DESCRIPCION_POR_DEFECTO,
+		redes: {
+			instagram: d?.redes.instagram ?? INSTAGRAM_POR_DEFECTO,
+			linkedin: d?.redes.linkedin ?? null,
+			tiktok: d?.redes.tiktok ?? null,
+			facebook: d?.redes.facebook ?? null,
+			whatsapp: d?.redes.whatsapp ?? null,
+		},
+		correo: d?.correo ?? null,
+		unete: {
+			// Mientras no haya link de postulación, "Únete" lleva al Instagram.
+			url: d?.unete.url ?? d?.redes.instagram ?? INSTAGRAM_POR_DEFECTO,
+			texto: d?.unete.texto || 'Síguenos para enterarte de las próximas convocatorias y actividades.',
+		},
+		/** Cuerpo de la página de Notion (historia, LEAD Americas…), ya en HTML. */
+		historia: entry?.rendered?.html ?? '',
+	};
+};
+export type Sitio = Awaited<ReturnType<typeof getSitio>>;

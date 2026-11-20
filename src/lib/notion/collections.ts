@@ -2,8 +2,9 @@ import { resolveFile } from './assets';
 import { fetchBlockTree } from './blocks';
 import { getNotion } from './client';
 import { isPreview, requireEnv } from './env';
+import { resolveImage } from './images';
 import { createNotionLoader } from './loader';
-import { mapAliado, mapCifra, mapMiembro, mapNovedad, mapPilar, mapTestimonio } from './mappers';
+import { mapAliado, mapCifra, mapMiembro, mapNovedad, mapPilar, mapSitio, mapTestimonio } from './mappers';
 import { queryRows, type QueryOptions } from './query';
 import { memoTtl, normalizeId, todayInLima } from './util';
 
@@ -63,6 +64,7 @@ export const novedadesLoader = () =>
 			mapNovedad(page, {
 				...state,
 				resolveFile,
+				resolveImage,
 				warn: ctx.warn,
 				getBody: (id) => fetchBlockTree(ctx.client, id),
 			}),
@@ -73,7 +75,7 @@ export const pilaresLoader = () =>
 		name: 'pilares',
 		idVar: 'NOTION_PILARES_ID',
 		query: pilaresQuery,
-		map: (page, _state, ctx) => mapPilar(page, { resolveFile, warn: ctx.warn }),
+		map: (page, _state, ctx) => mapPilar(page, { resolveFile, resolveImage, warn: ctx.warn }),
 	});
 
 export const miembrosLoader = () =>
@@ -83,7 +85,7 @@ export const miembrosLoader = () =>
 		query: () => ({ sorts: byOrden }),
 		begin: activePilarIds,
 		map: async (page, pilarIds, ctx) => {
-			const mapped = await mapMiembro(page, { resolveFile, warn: ctx.warn });
+			const mapped = await mapMiembro(page, { resolveFile, resolveImage, warn: ctx.warn });
 			if (mapped) mapped.data.pilares = only(mapped.data.pilares, pilarIds);
 			return mapped;
 		},
@@ -99,7 +101,7 @@ export const testimoniosLoader = () =>
 		}),
 		begin: activePilarIds,
 		map: async (page, pilarIds, ctx) => {
-			const mapped = await mapTestimonio(page, { resolveFile, warn: ctx.warn });
+			const mapped = await mapTestimonio(page, { resolveFile, resolveImage, warn: ctx.warn });
 			if (mapped) mapped.data.pilar = onlyOne(mapped.data.pilar, pilarIds);
 			return mapped;
 		},
@@ -112,7 +114,7 @@ export const aliadosLoader = () =>
 		query: () => ({ filter: checked('Mostrar en la web'), sorts: byOrden }),
 		begin: activePilarIds,
 		map: async (page, pilarIds, ctx) => {
-			const mapped = await mapAliado(page, { resolveFile, warn: ctx.warn });
+			const mapped = await mapAliado(page, { resolveFile, resolveImage, warn: ctx.warn });
 			if (mapped) mapped.data.pilar = onlyOne(mapped.data.pilar, pilarIds);
 			return mapped;
 		},
@@ -123,5 +125,27 @@ export const cifrasLoader = () =>
 		name: 'cifras',
 		idVar: 'NOTION_CIFRAS_ID',
 		query: () => ({ filter: checked('Mostrar en la web'), sorts: byOrden }),
-		map: (page, _state, ctx) => mapCifra(page, { resolveFile, warn: ctx.warn }),
+		map: (page, _state, ctx) => mapCifra(page, { resolveFile, resolveImage, warn: ctx.warn }),
+	});
+
+/** Tabla "Sitio": se usa solo la primera fila; si hay más, se avisa. */
+export const sitioLoader = () =>
+	createNotionLoader({
+		name: 'sitio',
+		idVar: 'NOTION_SITIO_ID',
+		query: () => ({ sorts: [{ timestamp: 'created_time', direction: 'ascending' }] }),
+		begin: async () => ({ vistas: 0 }),
+		map: async (page, state, ctx) => {
+			state.vistas++;
+			if (state.vistas > 1) {
+				ctx.warn('La tabla Sitio tiene más de una fila: solo se usa la primera (la más antigua).');
+				return null;
+			}
+			return mapSitio(page, {
+				resolveFile,
+				resolveImage,
+				warn: ctx.warn,
+				getBody: (id) => fetchBlockTree(ctx.client, id),
+			});
+		},
 	});

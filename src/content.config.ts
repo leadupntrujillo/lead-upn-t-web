@@ -6,6 +6,7 @@ import {
 	miembrosLoader,
 	novedadesLoader,
 	pilaresLoader,
+	sitioLoader,
 	testimoniosLoader,
 } from './lib/notion/collections';
 import {
@@ -14,6 +15,7 @@ import {
 	miembroSchema,
 	novedadSchema,
 	pilarSchema,
+	sitioSchema,
 	testimonioSchema,
 } from './lib/notion/schemas';
 
@@ -43,4 +45,5 @@ export const collections = {
 		schema: aliadoSchema.extend({ pilar: reference('pilares').nullable() }),
 	}),
 	cifras: defineCollection({ loader: cifrasLoader(), schema: cifraSchema }),
+	sitio: defineCollection({ loader: sitioLoader(), schema: sitioSchema }),
 };

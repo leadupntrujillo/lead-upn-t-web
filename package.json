@@ -12,13 +12,19 @@
     "astro": "astro",
     "check": "astro check",
     "test": "vitest run",
-    "sync": "astro sync"
+    "sync": "astro sync",
+    "iconos": "node scripts/iconos.mjs"
   },
   "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.6",
     "@fontsource/anton": "^5.3.0",
     "@fontsource/poppins": "^5.3.0",
     "@notionhq/client": "^5.31.1",
-    "astro": "^6.0.4"
+    "@resvg/resvg-js": "^2.6.2",
+    "astro": "^6.0.4",
+    "satori": "^0.63.2",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

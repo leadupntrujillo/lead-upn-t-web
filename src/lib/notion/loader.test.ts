@@ -43,6 +43,8 @@ const row = (id: string, titulo: string, resumen = 'Un resumen') =>
 		Destacado: prop.select(null),
 		'Tiempo de lectura': prop.number(null),
 		'Descripción SEO': prop.text(''),
+		'Créditos de foto': prop.text(''),
+		'Slugs anteriores': prop.text(''),
 	});
 
 const loaderFor = (rows: ReturnType<typeof row>[], blocks = {}) =>

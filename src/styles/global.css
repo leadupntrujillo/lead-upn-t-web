@@ -224,7 +224,7 @@ p {
 	content: '>>>';
 	margin-left: 0.55em;
 	letter-spacing: -0.18em;
-	font-weight: 800;
+	font-weight: 700;
 }
 
 /* Caja de palabra clave: la palabra principal dentro de un rectángulo */
@@ -266,4 +266,12 @@ p {
 	border-radius: 1rem;
 	color: var(--tinta-suave);
 	text-align: center;
+}
+
+/* Créditos de foto (columna "Créditos de foto" de Notion) */
+.creditos {
+	margin: 0.4rem 0 0;
+	font-size: 0.75rem;
+	color: var(--tinta-suave);
+	text-align: right;
 }

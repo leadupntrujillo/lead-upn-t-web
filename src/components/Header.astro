@@ -1,25 +1,71 @@
 ---
+import type { Sitio } from '../lib/queries';
 import Logo from './Logo.astro';
 
-const ruta = Astro.url.pathname;
-const enNovedades = ruta.startsWith('/novedades');
+interface Props {
+	sitio: Sitio;
+}
+
+const { sitio } = Astro.props;
+const ruta = Astro.url.pathname.replace(/\.html$/, '');
+const enlaces = [
+	{ href: '/nosotros', texto: 'Nosotros' },
+	{ href: '/novedades', texto: 'Novedades' },
+	{ href: '/#pilares', texto: 'Pilares' },
+	{ href: '/contacto', texto: 'Contacto' },
+];
+const actual = (href: string) => !href.includes('#') && (ruta === href || ruta.startsWith(`${href}/`));
+const uneteExterno = /^https?:/.test(sitio.unete.url);
 ---
 
-<header class="sitio">
+<header class="sitio" data-menu>
 	<div class="contenedor sitio__fila">
 		<Logo />
-		<nav class="sitio__nav" aria-label="Principal">
-			<a href="/novedades" aria-current={enNovedades ? 'page' : undefined}>Novedades</a>
-			<a href="/#pilares" class="sitio__extra">Pilares</a>
+		<button class="sitio__boton" type="button" aria-expanded="false" aria-controls="menu-principal" data-menu-boton>
+			<span class="sitio__hamburguesa" aria-hidden="true"></span>
+			<span class="sr-only">Menú</span>
+		</button>
+		<nav class="sitio__nav" id="menu-principal" aria-label="Principal">
+			<ul>
+				{
+					enlaces.map((e) => (
+						<li>
+							<a href={e.href} aria-current={actual(e.href) ? 'page' : undefined}>
+								{e.texto}
+							</a>
+						</li>
+					))
+				}
+			</ul>
 			<a
-				class="btn btn--primario btn--chico"
-				href="https://www.instagram.com/leadupn_trujillo/"
-				rel="noopener noreferrer"
-				target="_blank">Síguenos</a
+				class="btn btn--primario btn--chico sitio__unete"
+				href={sitio.unete.url}
+				data-cta="unete-cabecera"
+				{...uneteExterno ? { rel: 'noopener noreferrer', target: '_blank' } : {}}>Únete</a
 			>
 		</nav>
 	</div>
 </header>
+
+<script>
+	// Menú móvil: abre y cierra el panel; Escape o un clic en un enlace lo cierran.
+	const cabecera = document.querySelector<HTMLElement>('[data-menu]');
+	const boton = cabecera?.querySelector<HTMLButtonElement>('[data-menu-boton]');
+	if (cabecera && boton) {
+		const poner = (abierto: boolean) => {
+			boton.setAttribute('aria-expanded', String(abierto));
+			cabecera.toggleAttribute('data-abierto', abierto);
+		};
+		boton.addEventListener('click', () => poner(boton.getAttribute('aria-expanded') !== 'true'));
+		cabecera.querySelectorAll('nav a').forEach((a) => a.addEventListener('click', () => poner(false)));
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && cabecera.hasAttribute('data-abierto')) {
+				poner(false);
+				boton.focus();
+			}
+		});
+	}
+</script>
 
 <style>
 	.sitio {
@@ -37,28 +83,114 @@ const enNovedades = ruta.startsWith('/novedades');
 		gap: 1rem;
 		min-height: 4rem;
 	}
-	.sitio__nav {
+	.sitio__nav,
+	.sitio__nav ul {
 		display: flex;
 		align-items: center;
 		gap: 1.5rem;
 	}
-	.sitio__nav a:not(.btn) {
+	.sitio__nav ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.sitio__nav ul a {
 		text-decoration: none;
-		font-weight: 500;
+		font-weight: 400;
 		font-size: 0.95rem;
 		padding-block: 0.4rem;
 		border-bottom: 2px solid transparent;
 	}
-	.sitio__nav a:not(.btn):hover,
-	.sitio__nav a[aria-current='page'] {
+	.sitio__nav ul a:hover,
+	.sitio__nav ul a[aria-current='page'] {
 		border-bottom-color: var(--magenta-claro);
 	}
-	@media (max-width: 34rem) {
-		.sitio__extra {
-			display: none;
+
+	/* Botón del menú: solo en pantallas chicas */
+	.sitio__boton {
+		display: none;
+		width: 2.75rem;
+		height: 2.75rem;
+		place-items: center;
+		padding: 0;
+		border: 0;
+		border-radius: 0.6rem;
+		background: rgb(255 255 255 / 0.08);
+		color: inherit;
+		cursor: pointer;
+	}
+	.sitio__hamburguesa,
+	.sitio__hamburguesa::before,
+	.sitio__hamburguesa::after {
+		display: block;
+		width: 1.25rem;
+		height: 2px;
+		border-radius: 2px;
+		background: currentColor;
+		transition: transform 0.2s, opacity 0.2s;
+	}
+	.sitio__hamburguesa {
+		position: relative;
+	}
+	.sitio__hamburguesa::before,
+	.sitio__hamburguesa::after {
+		content: '';
+		position: absolute;
+		left: 0;
+	}
+	.sitio__hamburguesa::before {
+		top: -6px;
+	}
+	.sitio__hamburguesa::after {
+		top: 6px;
+	}
+	[data-abierto] .sitio__hamburguesa {
+		background: transparent;
+	}
+	[data-abierto] .sitio__hamburguesa::before {
+		transform: translateY(6px) rotate(45deg);
+	}
+	[data-abierto] .sitio__hamburguesa::after {
+		transform: translateY(-6px) rotate(-45deg);
+	}
+
+	@media (max-width: 52rem) {
+		.sitio__boton {
+			display: grid;
 		}
 		.sitio__nav {
+			display: none;
+			position: absolute;
+			inset: 100% 0 auto;
+			flex-direction: column;
+			align-items: stretch;
 			gap: 1rem;
+			padding: 1rem var(--gutter) 1.5rem;
+			background: var(--marino);
+			border-bottom: 1px solid rgb(255 255 255 / 0.1);
+			box-shadow: 0 18px 30px -18px rgb(0 0 0 / 0.6);
+		}
+		[data-abierto] .sitio__nav {
+			display: flex;
+		}
+		.sitio__nav ul {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0;
+		}
+		.sitio__nav ul a {
+			display: block;
+			padding: 0.85rem 0;
+			font-size: 1.05rem;
+			border-bottom: 1px solid rgb(255 255 255 / 0.08);
+		}
+		.sitio__nav ul a[aria-current='page'] {
+			color: var(--magenta-claro);
+			border-bottom-color: rgb(255 255 255 / 0.08);
+		}
+		.sitio__unete {
+			padding-block: 0.8rem;
+			font-size: 1rem;
 		}
 	}
 </style>

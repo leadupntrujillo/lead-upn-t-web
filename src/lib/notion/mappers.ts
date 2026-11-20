@@ -1,5 +1,6 @@
 import type { PageObjectResponse } from '@notionhq/client';
 import type { FileRef } from './assets';
+import type { ImageRef } from './images';
 import { renderBlocks, type BlockNode } from './blocks';
 import { FORMATOS_INFO, faltantes } from './formatos';
 import * as p from './props';
@@ -11,6 +12,7 @@ import {
 	type MiembroData,
 	type NovedadData,
 	type PilarData,
+	type SitioData,
 	type TestimonioData,
 } from './schemas';
 import { countWords, normalizeId, readingMinutes, safeWebUrl, slugify, stripTags, todayInLima } from './util';
@@ -29,6 +31,8 @@ export interface MappedEntry<T> {
 
 export interface BaseDeps {
 	resolveFile(file: FileRef): Promise<string>;
+	/** Descarga y optimiza una imagen (WebP en varios anchos). Sin ella se usa `resolveFile` tal cual. */
+	resolveImage?(file: FileRef, alt: string): Promise<ImageRef>;
 	warn(message: string): void;
 }
 
@@ -46,8 +50,20 @@ export interface NovedadDeps extends BaseDeps {
 
 const NO_ORDER = 999;
 
-async function toImage(file: FileRef | undefined, alt: string, deps: BaseDeps) {
-	return file ? { src: await deps.resolveFile(file), alt } : null;
+async function toImage(file: FileRef | undefined, alt: string, deps: BaseDeps): Promise<ImageRef | null> {
+	if (!file) return null;
+	if (deps.resolveImage) return deps.resolveImage(file, alt);
+	return { src: await deps.resolveFile(file), alt, width: null, height: null, srcset: '' };
+}
+
+/** "viejo-slug, Otro Slug" → ["viejo-slug", "otro-slug"] (sin repetidos ni el slug actual). */
+export function parseSlugsAnteriores(raw: string, actual: string): string[] {
+	const out = new Set<string>();
+	for (const parte of raw.split(/[,\n]+/)) {
+		const slug = slugify(parte.replace(/^.*\/novedades\//, ''));
+		if (slug && slug !== actual) out.add(slug);
+	}
+	return [...out];
 }
 
 /** "@usuario", "instagram.com/usuario" o "usuario" → "usuario" (sin @). */
@@ -81,6 +97,8 @@ export async function mapNovedad(
 	const destacadoNombre = p.select(props, 'Destacado');
 	const tiempoManual = p.number(props, 'Tiempo de lectura');
 	const seo = p.text(props, 'Descripción SEO');
+	const creditos = p.text(props, 'Créditos de foto');
+	const anteriores = p.text(props, 'Slugs anteriores');
 	const pilarId = p.relation(props, 'Pilar')[0] ?? null;
 	const autorId = p.relation(props, 'Autor')[0] ?? null;
 
@@ -113,13 +131,19 @@ export async function mapNovedad(
 	// Imágenes
 	const imagen = await toImage(imagenes[0], textoAlt || titulo, deps);
 	if (!imagen) deps.warn(`"${titulo}" no tiene Imagen principal.`);
-	const galeria = [];
+	else if (!textoAlt) deps.warn(`"${titulo}" no tiene Texto alternativo; se usa el título para describir la imagen.`);
+	const galeria: ImageRef[] = [];
 	for (const [i, file] of galeriaArchivos.entries()) {
-		galeria.push({ src: await deps.resolveFile(file), alt: `${titulo} (foto ${i + 1})` });
+		const foto = await toImage(file, `${titulo} (foto ${i + 1})`, deps);
+		if (foto) galeria.push(foto);
 	}
 
 	// Cuerpo (la página de Notion) y tiempo de lectura
-	const body = await renderBlocks(await deps.getBody(page.id), { resolveFile: deps.resolveFile });
+	const body = await renderBlocks(await deps.getBody(page.id), {
+		resolveFile: deps.resolveFile,
+		resolveImage: deps.resolveImage,
+		warn: (m) => deps.warn(`"${titulo}": ${m}`),
+	});
 	const tiempoLectura =
 		tiempoManual !== null && tiempoManual >= 1 ? Math.round(tiempoManual) : readingMinutes(countWords(stripTags(body)));
 
@@ -157,6 +181,7 @@ export async function mapNovedad(
 			estado,
 			resumen,
 			imagen,
+			creditos,
 			galeria,
 			fechaPublicacion,
 			fechaEvento: evento?.start ? { inicio: evento.start, fin: evento.end, conHora: evento.start.includes('T') } : null,
@@ -169,6 +194,7 @@ export async function mapNovedad(
 			autor,
 			tiempoLectura,
 			seoDescripcion: seo || resumen,
+			slugsAnteriores: parseSlugsAnteriores(anteriores, slug),
 			actualizado: page.last_edited_time,
 		},
 	};
@@ -210,6 +236,8 @@ export async function mapMiembro(page: PageObjectResponse, deps: BaseDeps): Prom
 	const props = page.properties;
 	const nombre = p.title(props, 'Nombre');
 	const fotos = p.files(props, 'Foto');
+	// Igual que en Testimonios: sin permiso explícito, la foto no se publica.
+	const autoriza = p.checkbox(props, 'Autoriza uso de imagen');
 	// Ojo: el correo del miembro NO se lee ni se publica.
 	const data = {
 		cargo: p.text(props, 'Cargo'),
@@ -227,7 +255,7 @@ export async function mapMiembro(page: PageObjectResponse, deps: BaseDeps): Prom
 
 	return {
 		id: normalizeId(page.id),
-		data: { notionId: normalizeId(page.id), nombre, foto: await toImage(fotos[0], nombre, deps), ...data },
+		data: { notionId: normalizeId(page.id), nombre, foto: autoriza ? await toImage(fotos[0], nombre, deps) : null, ...data },
 	};
 }
 
@@ -309,4 +337,41 @@ export async function mapCifra(page: PageObjectResponse, deps: BaseDeps): Promis
 	if (!nombre || valor === null) return deps.warn(`Cifra incompleta (falta Nombre o Valor), se omite: ${page.url}`), null;
 
 	return { id: normalizeId(page.id), data: { notionId: normalizeId(page.id), nombre, valor, ...data } };
+}
+
+// ---------- Sitio ----------
+
+export interface SitioDeps extends BaseDeps {
+	getBody(pageId: string): Promise<BlockNode[]>;
+}
+
+/** La única fila de la tabla "Sitio". El cuerpo de la página es el texto de "Nosotros". */
+export async function mapSitio(page: PageObjectResponse, deps: SitioDeps): Promise<MappedEntry<SitioData>> {
+	const props = page.properties;
+	const red = (name: string) => safeWebUrl(p.url(props, name));
+	const data: SitioData = {
+		nombre: p.title(props, 'Nombre') || 'LEAD UPN Trujillo',
+		mision: p.text(props, 'Misión'),
+		vision: p.text(props, 'Visión'),
+		descripcion: p.text(props, 'Descripción corta'),
+		redes: {
+			instagram: red('Instagram'),
+			linkedin: red('LinkedIn'),
+			tiktok: red('TikTok'),
+			facebook: red('Facebook'),
+			whatsapp: red('WhatsApp'),
+		},
+		correo: p.email(props, 'Correo público'),
+		unete: { url: red('Link de Únete'), texto: p.text(props, 'Texto de Únete') },
+		actualizado: page.last_edited_time,
+	};
+	if (!data.mision || !data.vision) deps.warn('Sitio: falta la Misión o la Visión (la página Nosotros las omite).');
+	if (!data.descripcion) deps.warn('Sitio: falta la Descripción corta (se usa un texto por defecto para Google).');
+
+	const html = await renderBlocks(await deps.getBody(page.id), {
+		resolveFile: deps.resolveFile,
+		resolveImage: deps.resolveImage,
+		warn: (m) => deps.warn(`Sitio: ${m}`),
+	});
+	return { id: 'sitio', data, html };
 }

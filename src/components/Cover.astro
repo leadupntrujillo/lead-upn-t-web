@@ -1,16 +1,20 @@
 ---
+import type { ImageRef } from '../lib/notion/images';
+
 /**
  * Imagen de portada. Si la novedad no tiene imagen se muestra un fondo marino con el
  * símbolo de LEAD, para que ninguna tarjeta quede en blanco.
  */
 interface Props {
-	imagen: { src: string; alt: string } | null;
+	imagen: ImageRef | null;
 	/** Proporción CSS, p. ej. "16 / 9", "1 / 1", "4 / 5". */
 	ratio?: string;
 	prioridad?: boolean;
+	/** Ancho en pantalla para elegir la versión de la imagen. */
+	sizes?: string;
 }
 
-const { imagen, ratio = '16 / 9', prioridad = false } = Astro.props;
+const { imagen, ratio = '16 / 9', prioridad = false, sizes = '(min-width: 72rem) 36rem, (min-width: 40rem) 50vw, 100vw' } = Astro.props;
 ---
 
 {
@@ -19,8 +23,13 @@ const { imagen, ratio = '16 / 9', prioridad = false } = Astro.props;
 			class="cover"
 			style={`aspect-ratio:${ratio}`}
 			src={imagen.src}
+			srcset={imagen.srcset || undefined}
+			sizes={imagen.srcset ? sizes : undefined}
+			width={imagen.width ?? undefined}
+			height={imagen.height ?? undefined}
 			alt={imagen.alt}
 			loading={prioridad ? 'eager' : 'lazy'}
+			fetchpriority={prioridad ? 'high' : undefined}
 			decoding="async"
 		/>
 	) : (

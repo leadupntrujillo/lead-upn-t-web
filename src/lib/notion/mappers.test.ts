@@ -8,6 +8,7 @@ import {
 	mapNovedad,
 	mapPilar,
 	mapTestimonio,
+	parseSlugsAnteriores,
 	type NovedadDeps,
 } from './mappers';
 import { aliadoSchema, cifraSchema, miembroSchema, novedadSchema, pilarSchema, testimonioSchema } from './schemas';
@@ -37,6 +38,8 @@ function novedadProps(over: Record<string, unknown> = {}) {
 		Destacado: prop.select('Portada'),
 		'Tiempo de lectura': prop.number(null),
 		'Descripción SEO': prop.text(''),
+		'Créditos de foto': prop.text(''),
+		'Slugs anteriores': prop.text(''),
 		...over,
 	};
 }
@@ -54,7 +57,41 @@ function deps(over: Partial<NovedadDeps> = {}): NovedadDeps & { warn: ReturnType
 	} as NovedadDeps & { warn: ReturnType<typeof vi.fn> };
 }
 
+describe('parseSlugsAnteriores', () => {
+	it('acepta comas, saltos de línea y URLs completas; quita el slug actual y repetidos', () => {
+		expect(
+			parseSlugsAnteriores('Viejo Título, https://leadupntrujillo.com/novedades/otro-slug\nlead-tars, viejo-titulo', 'lead-tars'),
+		).toEqual(['viejo-titulo', 'otro-slug']);
+		expect(parseSlugsAnteriores('', 'x')).toEqual([]);
+	});
+});
+
 describe('mapNovedad', () => {
+	it('guarda créditos y slugs anteriores, y avisa si falta el texto alternativo', async () => {
+		const d = deps();
+		const out = await mapNovedad(
+			page('a', novedadProps({
+				'Créditos de foto': prop.text('Foto: Ana'),
+				'Slugs anteriores': prop.text('tars-2026'),
+				'Texto alternativo': prop.text(''),
+			})),
+			d,
+		);
+		expect(out!.data).toMatchObject({ creditos: 'Foto: Ana', slugsAnteriores: ['tars-2026'] });
+		expect(d.warn).toHaveBeenCalledWith(expect.stringContaining('no tiene Texto alternativo'));
+	});
+
+	it('usa resolveImage para optimizar la portada y la galería', async () => {
+		const resolveImage = vi.fn(async (_f, alt: string) => ({ src: '/_notion/x-960.webp', alt, width: 1600, height: 900, srcset: '/_notion/x-480.webp 480w' }));
+		const out = await mapNovedad(
+			page('a', novedadProps({ Galería: prop.files([{ name: 'g.jpg', url: 'https://s3/g.jpg' }]) })),
+			deps({ resolveImage }),
+		);
+		expect(out!.data.imagen).toMatchObject({ width: 1600, height: 900, alt: 'Participantes armando naves' });
+		expect(out!.data.galeria[0]).toMatchObject({ alt: 'LEAD TARS (foto 1)' });
+		expect(resolveImage).toHaveBeenCalledTimes(2);
+	});
+
 	it('mapea una novedad completa y pasa la validación del esquema', async () => {
 		const d = deps();
 		const out = await mapNovedad(page('31a6acb1-45f5-804a-90db-f4f7d52f0078', novedadProps()), d);
@@ -217,6 +254,7 @@ describe('otros mapeadores', () => {
 				Pilar: prop.relation(['4196acb1-45f5-811b-851c-c603674d8fab']),
 				Bio: prop.text(''),
 				Foto: prop.files([]),
+				'Autoriza uso de imagen': prop.checkbox(false),
 				Correo: prop.email('privado@gmail.com'),
 				Instagram: prop.url('https://instagram.com/axel'),
 				LinkedIn: prop.url(null),
@@ -229,6 +267,26 @@ describe('otros mapeadores', () => {
 		const parsed = miembroSchema.parse(out!.data);
 		expect(JSON.stringify(parsed)).not.toContain('privado@gmail.com');
 		expect(parsed).toMatchObject({ pilares: [PILAR], web: null, instagram: 'https://instagram.com/axel', orden: 999 });
+	});
+
+	it('miembro: sin "Autoriza uso de imagen" la foto no se publica', async () => {
+		const miembro = (autoriza: boolean) =>
+			page('m', {
+				Nombre: prop.title('Ana'),
+				Cargo: prop.text(''),
+				Rol: prop.select(null),
+				Pilar: prop.relation([]),
+				Bio: prop.text(''),
+				Foto: prop.files([{ name: 'ana.jpg', url: 'https://s3/ana.jpg?sig=1' }]),
+				'Autoriza uso de imagen': prop.checkbox(autoriza),
+				Instagram: prop.url(null),
+				LinkedIn: prop.url(null),
+				'Web personal': prop.url(null),
+				'Mostrar en la web': prop.checkbox(true),
+				Orden: prop.number(1),
+			});
+		expect((await mapMiembro(miembro(false), base))!.data.foto).toBeNull();
+		expect((await mapMiembro(miembro(true), base))!.data.foto).toMatchObject({ src: '/_notion/x.jpg', alt: 'Ana' });
 	});
 
 	const testimonioProps = (publicar: boolean, autoriza: boolean) => ({

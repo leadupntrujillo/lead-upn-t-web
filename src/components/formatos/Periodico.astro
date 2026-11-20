@@ -18,7 +18,8 @@ const d = entry.data;
 	</header>
 
 	<figure class="contenedor portada">
-		<Cover imagen={d.imagen} ratio="16 / 9" prioridad />
+		<Cover imagen={d.imagen} ratio="16 / 9" prioridad sizes="(min-width: 72rem) 72rem, 100vw" />
+		{d.creditos && <figcaption class="creditos">{d.creditos}</figcaption>}
 	</figure>
 
 	<div class="contenedor cuerpo">
@@ -65,7 +66,7 @@ const d = entry.data;
 		max-width: 44rem;
 		font-size: clamp(1.1rem, 2vw, 1.35rem);
 		line-height: 1.55;
-		font-weight: 500;
+		font-weight: 400;
 		color: var(--tinta-suave);
 	}
 	.portada {

@@ -10,6 +10,8 @@ const { entry, pilar, autor, html, relacionadas, pilares } = Astro.props as Form
 const d = entry.data;
 const fotos = [...d.galeria];
 if (d.imagen && !fotos.some((f) => f.src === d.imagen!.src)) fotos.unshift(d.imagen);
+// En el visor se usa la versión más grande de cada foto (la última del srcset).
+const enGrande = fotos.map((f) => ({ src: f.srcset ? (f.srcset.split(', ').at(-1)?.split(' ')[0] ?? f.src) : f.src, alt: f.alt }));
 const esVistaPrevia = d.estado !== 'publicado';
 ---
 
@@ -34,7 +36,16 @@ const esVistaPrevia = d.estado !== 'publicado';
 					{fotos.map((f, i) => (
 						<li>
 							<button type="button" class="foto" data-indice={i} aria-label={`Ampliar foto ${i + 1} de ${fotos.length}`}>
-								<img src={f.src} alt={f.alt} loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
+								<img
+										src={f.src}
+										srcset={f.srcset || undefined}
+										sizes={f.srcset ? '(min-width: 72rem) 24rem, (min-width: 40rem) 50vw, 100vw' : undefined}
+										width={f.width ?? undefined}
+										height={f.height ?? undefined}
+										alt={f.alt}
+										loading={i < 3 ? 'eager' : 'lazy'}
+										decoding="async"
+									/>
 							</button>
 						</li>
 					))}
@@ -56,7 +67,7 @@ const esVistaPrevia = d.estado !== 'publicado';
 		}
 	</section>
 
-	<dialog class="visor" aria-label="Foto ampliada">
+	<dialog class="visor" aria-label="Foto ampliada" data-fotos={JSON.stringify(enGrande)}>
 		<form method="dialog" class="visor__barra">
 			<p class="visor__cuenta" aria-live="polite"></p>
 			<button class="visor__cerrar" aria-label="Cerrar">Cerrar</button>
@@ -71,25 +82,29 @@ const esVistaPrevia = d.estado !== 'publicado';
 
 <Pie {entry} {autor} {relacionadas} {pilares} />
 
-<script is:inline define:vars={{ fotos }}>
-	const visor = document.querySelector('dialog.visor');
+<script>
+	// Visor: los datos de las fotos van en `data-fotos` del <dialog> (sin scripts en línea, compatible con la CSP).
+	const visor = document.querySelector<HTMLDialogElement>('dialog.visor');
+	const fotos: Array<{ src: string; alt: string }> = JSON.parse(visor?.dataset.fotos ?? '[]');
 	if (visor && fotos.length) {
-		const img = visor.querySelector('.visor__img');
-		const cuenta = visor.querySelector('.visor__cuenta');
+		const img = visor.querySelector<HTMLImageElement>('.visor__img')!;
+		const cuenta = visor.querySelector('.visor__cuenta')!;
 		let actual = 0;
-		const mostrar = (i) => {
+		const mostrar = (i: number) => {
 			actual = (i + fotos.length) % fotos.length;
-			img.src = fotos[actual].src;
-			img.alt = fotos[actual].alt;
+			img.src = fotos[actual]!.src;
+			img.alt = fotos[actual]!.alt;
 			cuenta.textContent = `${actual + 1} de ${fotos.length}`;
 		};
-		document.querySelectorAll('.foto').forEach((b) =>
+		document.querySelectorAll<HTMLButtonElement>('.foto').forEach((b) =>
 			b.addEventListener('click', () => {
 				mostrar(Number(b.dataset.indice));
 				visor.showModal();
 			}),
 		);
-		visor.querySelectorAll('[data-ir]').forEach((b) => b.addEventListener('click', () => mostrar(actual + Number(b.dataset.ir))));
+		visor.querySelectorAll<HTMLButtonElement>('[data-ir]').forEach((b) =>
+			b.addEventListener('click', () => mostrar(actual + Number(b.dataset.ir))),
+		);
 		visor.addEventListener('keydown', (e) => {
 			if (e.key === 'ArrowRight') mostrar(actual + 1);
 			if (e.key === 'ArrowLeft') mostrar(actual - 1);
@@ -118,7 +133,7 @@ const esVistaPrevia = d.estado !== 'publicado';
 		align-items: center;
 		gap: 0.8rem;
 		font-size: 0.9rem;
-		font-weight: 500;
+		font-weight: 400;
 		color: var(--tinta-suave);
 	}
 	.intro {

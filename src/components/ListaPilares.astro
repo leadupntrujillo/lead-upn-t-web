@@ -1,0 +1,73 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { colorPilar } from '../lib/pilares';
+
+/** Pilares como lista (no una rejilla de tarjetas): nombre, descripción y enlace a sus novedades. */
+interface Props {
+	pilares: CollectionEntry<'pilares'>[];
+	novedades: CollectionEntry<'novedades'>[];
+}
+
+const { pilares, novedades } = Astro.props;
+const totalPor = (pilarId: string) => novedades.filter((n) => n.data.pilar?.id === pilarId).length;
+---
+
+<ul class="pilares">
+	{
+		pilares.map((p) => {
+			const total = totalPor(p.id);
+			return (
+				<li style={`--punto:${colorPilar(p.data.color)}`}>
+					<h3 class="pilar__nombre titulo">{p.data.nombre}</h3>
+					<p class="pilar__desc">{p.data.descripcion}</p>
+					{total > 0 && (
+						<a class="pilar__ver flechas" href={`/novedades?pilar=${p.data.slug}`}>
+							{total === 1 ? '1 novedad' : `${total} novedades`}
+						</a>
+					)}
+				</li>
+			);
+		})
+	}
+</ul>
+
+<style>
+	.pilares {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		border-top: 1px solid var(--linea);
+	}
+	.pilares li {
+		display: grid;
+		gap: 0.4rem 2rem;
+		align-items: baseline;
+		padding: 1.4rem 0 1.4rem 1.25rem;
+		border-bottom: 1px solid var(--linea);
+		border-left: 6px solid var(--punto);
+	}
+	@media (min-width: 52rem) {
+		.pilares li {
+			grid-template-columns: 17rem minmax(0, 1fr) auto;
+		}
+	}
+	.pilar__nombre {
+		font-size: 1.7rem;
+	}
+	.pilar__desc {
+		color: var(--tinta-suave);
+		max-width: 42rem;
+	}
+	.pilar__ver {
+		font-size: 0.9rem;
+		font-weight: 600;
+		text-decoration: none;
+		color: var(--magenta);
+		white-space: nowrap;
+	}
+	.pilar__ver:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.25em;
+	}
+
+</style>

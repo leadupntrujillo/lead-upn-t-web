@@ -39,7 +39,8 @@ const mapa = d.lugar
 
 	<div class="contenedor grilla">
 		<div class="principal">
-			<Cover imagen={d.imagen} ratio="16 / 9" prioridad />
+			<Cover imagen={d.imagen} ratio="16 / 9" prioridad sizes="(min-width: 72rem) 46rem, 100vw" />
+			{d.creditos && <p class="creditos">{d.creditos}</p>}
 			<div class="prose" set:html={html} />
 		</div>
 
@@ -123,7 +124,7 @@ const mapa = d.lugar
 	.entradilla {
 		max-width: 42rem;
 		font-size: clamp(1.1rem, 2vw, 1.3rem);
-		font-weight: 500;
+		font-weight: 400;
 		color: var(--tinta-suave);
 	}
 	.grilla {

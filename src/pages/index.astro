@@ -1,10 +1,11 @@
 ---
+import ListaPilares from '../components/ListaPilares.astro';
 import NovedadCard from '../components/NovedadCard.astro';
+import Unete from '../components/Unete.astro';
 import Layout from '../layouts/Layout.astro';
 import { partesDeFecha } from '../lib/format';
 import { proximos } from '../lib/novedades';
 import { FORMATOS_INFO } from '../lib/notion/formatos';
-import { colorPilar } from '../lib/pilares';
 import { getAliados, getCifras, getNovedades, getPilares, getPilaresPorId, getPortada, getTestimonios } from '../lib/queries';
 
 const [novedades, portada, pilares, pilaresPorId, cifras, testimonios, aliados] = await Promise.all([
@@ -22,7 +23,6 @@ const masNovedades = [...destacadas, ...recientes].slice(0, 6);
 const fechas = proximos(novedades).slice(0, 3);
 const pilarDe = (n: (typeof novedades)[number]) => (n.data.pilar ? pilaresPorId.get(n.data.pilar.id) : undefined);
 
-const totalPor = (pilarId: string) => novedades.filter((n) => n.data.pilar?.id === pilarId).length;
 const numero = (c: (typeof cifras)[number]) => `${c.data.prefijo}${c.data.valor.toLocaleString('es-PE')}${c.data.sufijo}`;
 
 const lema = [
@@ -37,7 +37,15 @@ const lema = [
 	<!-- Hero: el lema de LEAD y Auki despegando -->
 	<section class="hero">
 		<div class="hero__arte" aria-hidden="true">
-			<img src="/brand/auki-cohete.webp" alt="" width="1100" height="692" fetchpriority="high" />
+			<img
+				src="/brand/auki-cohete.webp"
+				srcset="/brand/auki-cohete-640.webp 640w, /brand/auki-cohete.webp 1100w"
+				sizes="(max-width: 48rem) 100vw, 66vw"
+				alt=""
+				width="1100"
+				height="692"
+				fetchpriority="high"
+			/>
 		</div>
 		<div class="contenedor hero__contenido">
 			<h1 class="lema titulo">
@@ -145,24 +153,7 @@ const lema = [
 		<div class="seccion__cabeza">
 			<h2 id="t-pilares" class="seccion__titulo titulo">Nuestros pilares</h2>
 		</div>
-		<ul class="pilares">
-			{
-				pilares.map((p) => {
-					const total = totalPor(p.id);
-					return (
-						<li style={`--punto:${colorPilar(p.data.color)}`}>
-							<h3 class="pilar__nombre titulo">{p.data.nombre}</h3>
-							<p class="pilar__desc">{p.data.descripcion}</p>
-							{total > 0 && (
-								<a class="pilar__ver flechas" href={`/novedades?pilar=${p.data.slug}`}>
-									{total === 1 ? '1 novedad' : `${total} novedades`}
-								</a>
-							)}
-						</li>
-					);
-				})
-			}
-		</ul>
+		<ListaPilares {pilares} {novedades} />
 	</section>
 
 	<!-- Testimonios -->
@@ -217,15 +208,7 @@ const lema = [
 	}
 
 	<!-- Súmate -->
-	<section id="unete" class="unete">
-		<div class="contenedor unete__fila">
-			<h2 class="titulo">Súmate a la familia <span class="caja">LEAD</span></h2>
-			<p>Síguenos en Instagram para enterarte de las próximas convocatorias y actividades.</p>
-			<a class="btn btn--primario" href="https://www.instagram.com/leadupn_trujillo/" rel="noopener noreferrer" target="_blank">
-				@leadupn_trujillo
-			</a>
-		</div>
-	</section>
+	<Unete />
 </Layout>
 
 <style>
@@ -413,45 +396,6 @@ const lema = [
 		color: rgb(255 255 255 / 0.7);
 	}
 
-	/* ---------- Pilares: una lista, no una rejilla de tarjetas ---------- */
-	.pilares {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		border-top: 1px solid var(--linea);
-	}
-	.pilares li {
-		display: grid;
-		gap: 0.4rem 2rem;
-		align-items: baseline;
-		padding: 1.4rem 0 1.4rem 1.25rem;
-		border-bottom: 1px solid var(--linea);
-		border-left: 6px solid var(--punto);
-	}
-	@media (min-width: 52rem) {
-		.pilares li {
-			grid-template-columns: 17rem minmax(0, 1fr) auto;
-		}
-	}
-	.pilar__nombre {
-		font-size: 1.7rem;
-	}
-	.pilar__desc {
-		color: var(--tinta-suave);
-		max-width: 42rem;
-	}
-	.pilar__ver {
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-decoration: none;
-		color: var(--magenta);
-		white-space: nowrap;
-	}
-	.pilar__ver:hover {
-		text-decoration: underline;
-		text-underline-offset: 0.25em;
-	}
-
 	/* ---------- Testimonios y aliados ---------- */
 	.testimonios {
 		list-style: none;
@@ -511,27 +455,4 @@ const lema = [
 		object-fit: contain;
 	}
 
-	/* ---------- Súmate ---------- */
-	.unete {
-		background: var(--degradado-boton);
-		color: var(--blanco);
-		padding-block: clamp(2.5rem, 7vw, 4.5rem);
-	}
-	.unete__fila {
-		display: grid;
-		gap: 1rem;
-		justify-items: start;
-	}
-	.unete h2 {
-		font-size: clamp(2.2rem, 6vw, 4rem);
-		line-height: 1.1;
-	}
-	.unete p {
-		max-width: 34rem;
-		font-size: 1.1rem;
-	}
-	.unete .btn {
-		background: var(--blanco);
-		color: var(--marino);
-	}
 </style>
