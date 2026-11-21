@@ -12,7 +12,7 @@
 |---|---|
 | Astro 6 | Framework (SSG) |
 | Notion API | Fuente de contenido |
-| Vercel | Hosting |
+| Cloudflare Pages | Hosting |
 | pnpm | Gestor de paquetes |
 | Node.js `>=22.12.0` | Runtime |
 
@@ -43,17 +43,12 @@ NOTION_ALIADOS_ID=
 NOTION_CIFRAS_ID=
 NOTION_SITIO_ID=
 
-# Cloudflare Turnstile (antispam del formulario de contacto, Sprint 3).
-# La clave pública puede verse en el sitio; la secreta solo va en .env y en Vercel.
-PUBLIC_TURNSTILE_SITE_KEY=
-TURNSTILE_SECRET_KEY=
-
 # OPCIONAL, solo en tu computadora: `pnpm dev` también muestra Borrador y En revisión.
-# Se ignora en `pnpm build` y en Vercel.
+# Se ignora en `pnpm build` y en Cloudflare Pages.
 # NOTION_PREVIEW=true
 ```
 
-**`pnpm dev` y `pnpm build` leen Notion**, así que necesitan `.env` completo (el token y los 7 IDs). Si falta algo, fallan con un mensaje que indica qué variable falta. En Vercel se cargan en *Settings → Environment Variables*.
+**`pnpm dev` y `pnpm build` leen Notion**, así que necesitan `.env` completo (el token y los 7 IDs). Si falta algo, fallan con un mensaje que indica qué variable falta. En Cloudflare Pages se cargan en *Settings → Variables and Secrets*.
 
 ## Cómo funciona el backend
 
@@ -73,7 +68,7 @@ Cada tabla de Notion es una colección de Astro con datos tipados: `novedades`, 
 - **Si cambia la estructura de Notion** (columna renombrada o de otro tipo) el build falla con un mensaje claro. **Si falta contenido** (novedad sin título o resumen) esa fila se omite con un aviso en el log.
 - El contenido nuevo aparece en la web en el siguiente build (ver Paso 4: recompilación automática).
 - **Los 9 formatos** (Periódico, Anuncio, Post IG, Evento, Convocatoria, Galería, Logros, Entrevista, Breve) están definidos en `src/lib/notion/formatos.ts`. Si a una novedad le falta algo que su formato necesita (p. ej. una Convocatoria sin link para postular), se publica igual y el build avisa.
-- **Vista previa:** con `NOTION_PREVIEW=true` en tu `.env`, `pnpm dev` muestra también Borrador y En revisión para revisarlas antes de publicar. Se ignora en `pnpm build` y en Vercel.
+- **Vista previa:** con `NOTION_PREVIEW=true` en tu `.env`, `pnpm dev` muestra también Borrador y En revisión para revisarlas antes de publicar. Se ignora en `pnpm build` y en Cloudflare Pages.
 - **Para las páginas:** pide los datos con `src/lib/queries.ts` (`getNovedades`, `getPortada`, `getPilares`…).
 
 ## Contenido (Notion)
@@ -104,7 +99,7 @@ src/pages/          Inicio, /nosotros, /contacto, /novedades (con filtros), /nov
 src/lib/seo.ts      URLs canónicas y datos estructurados (schema.org)
 src/lib/og/         Generador de las imágenes para compartir (satori)
 scripts/iconos.mjs  Favicon, íconos de la app y Auki para móvil
-vercel.json         Encabezados de seguridad (CSP), caché y redirección de www
+public/_headers     Encabezados de seguridad (CSP) y caché para Cloudflare Pages
 ```
 
 ## Hoja de ruta
@@ -113,4 +108,34 @@ vercel.json         Encabezados de seguridad (CSP), caché y redirección de www
 - [x] Paso 1 — Reorganizar Notion (Formato, Pilares, Miembros, guía y plantilla)
 - [x] Paso 2 — Backend: integración con la API de Notion (pendiente: primera sincronización con el `.env` real)
 - [x] Paso 3 — Frontend: portada, listado con filtros y una página por cada uno de los 9 formatos (pendiente: afinar con contenido e imágenes reales)
-- [ ] Paso 4 — Despliegue en Vercel con recompilación automática
+- [ ] Paso 4 — Despliegue en Cloudflare Pages con recompilación automática
+
+## Manual de operación
+
+### Publicar contenido
+1. En Notion (tabla Novedades) completa la fila y pon `Estado = Publicado` con `Fecha de publicación` de hoy o anterior.
+2. La web se recompila sola **todos los días a las 6:00 (hora de Lima)** (`.github/workflows/deploy-diario.yml`).
+3. Para publicar **ya**: GitHub → pestaña *Actions* → *Recompilación diaria* → *Run workflow* (o hacer `git push`).
+
+### Qué dispara un build
+`git push` a `main` · tarea diaria de las 6:00 · botón *Run workflow* · Deploy Hook de Cloudflare Pages (secreto `CLOUDFLARE_DEPLOY_HOOK` en GitHub).
+
+### Si el build falla
+- Abre el log en Cloudflare (*Workers & Pages → el proyecto → Deployments → el que falló*). El mensaje dice qué columna o variable falta.
+- "Columna renombrada o de otro tipo" → devuelve el nombre exacto en Notion (ver lista en `CLAUDE.md`). Cloudflare mantiene la versión anterior publicada mientras tanto.
+- "La variable X no está definida" → *Cloudflare Pages → Settings → Variables and Secrets*.
+- Una novedad sin título o resumen no rompe el build: se omite y aparece un aviso en el log.
+
+### Cambiar o rotar un token
+1. Notion → *Integraciones* → regenera el token.
+2. Actualiza `NOTION_TOKEN` en Cloudflare Pages (y en tu `.env`) y vuelve a desplegar (*Retry deployment*).
+3. Nunca pegues tokens en chats, issues ni commits.
+
+### Mensajes de contacto
+La web no tiene formulario: `/contacto` muestra el correo público, WhatsApp y redes de la tabla Sitio. Los mensajes llegan a esos canales.
+
+### Calidad (automática en GitHub Actions)
+Pruebas, tipos, build, enlaces internos y Lighthouse móvil (rendimiento ≥ 90; accesibilidad, SEO y buenas prácticas ≥ 95) en cada push. Los enlaces externos se revisan cada lunes. Falta a mano: probar en un Android y un iPhone reales.
+
+### Lanzar la política de privacidad
+`src/pages/privacidad.astro` es un borrador con `[corchetes]` y `noindex`. Cuando el equipo lo valide: completa los datos, pon `pendiente = false` y quita `privacidad` del filtro del sitemap en `astro.config.mjs`.

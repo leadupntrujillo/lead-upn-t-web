@@ -2,6 +2,7 @@
 import Cover from '../Cover.astro';
 import PilarChip from '../PilarChip.astro';
 import { fechaConDia, hora, partesDeFecha } from '../../lib/format';
+import { eventoCal, googleCalendarUrl } from '../../lib/calendario';
 import Pie from './Pie.astro';
 import type { FormatoProps } from './tipos';
 
@@ -23,6 +24,7 @@ const cuando = ev
 			.replace(/^./, (c) => c.toUpperCase())
 	: null;
 
+const cal = eventoCal(entry, Astro.site!.origin);
 const mapa = d.lugar
 	? d.lugar.lat !== null && d.lugar.lng !== null
 		? `https://www.google.com/maps/search/?api=1&query=${d.lugar.lat},${d.lugar.lng}`
@@ -101,6 +103,18 @@ const mapa = d.lugar
 					</a>
 				)
 			}
+			{
+				cal && (
+					<p class="ficha__cal">
+						<a href={googleCalendarUrl(cal)} target="_blank" rel="noopener noreferrer">
+							Agregar a Google Calendar
+						</a>
+						<a href={`/novedades/${entry.id}.ics`} download>
+							Apple / Outlook (.ics)
+						</a>
+					</p>
+				)
+			}
 		</aside>
 	</div>
 </article>
@@ -108,6 +122,13 @@ const mapa = d.lugar
 <Pie {entry} {autor} {relacionadas} {pilares} sinBoton />
 
 <style>
+	.ficha__cal {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem 1rem;
+		margin: 0;
+		font-size: 0.85rem;
+	}
 	.cabeza {
 		display: grid;
 		gap: 1rem;

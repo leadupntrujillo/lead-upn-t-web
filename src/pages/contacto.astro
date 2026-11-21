@@ -5,8 +5,7 @@ import { getSitio } from '../lib/queries';
 import { migas } from '../lib/seo';
 
 /**
- * Contacto: por ahora, los canales oficiales de la tabla "Sitio".
- * El formulario (con Turnstile) llega en el Sprint 3.
+ * Contacto: los canales oficiales de la tabla "Sitio" (correo, WhatsApp y redes). Sin formulario por ahora.
  */
 const sitio = await getSitio();
 const canales = [

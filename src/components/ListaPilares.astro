@@ -21,7 +21,7 @@ const totalPor = (pilarId: string) => novedades.filter((n) => n.data.pilar?.id =
 					<h3 class="pilar__nombre titulo">{p.data.nombre}</h3>
 					<p class="pilar__desc">{p.data.descripcion}</p>
 					{total > 0 && (
-						<a class="pilar__ver flechas" href={`/novedades?pilar=${p.data.slug}`}>
+						<a class="pilar__ver flechas" href={`/pilares/${p.data.slug}`}>
 							{total === 1 ? '1 novedad' : `${total} novedades`}
 						</a>
 					)}

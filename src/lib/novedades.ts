@@ -86,3 +86,12 @@ export function contarEtiquetas(list: readonly NovedadLike[]): Array<{ etiqueta:
 	for (const n of list) for (const e of n.data.etiquetas) cuenta.set(e, (cuenta.get(e) ?? 0) + 1);
 	return [...cuenta].map(([etiqueta, total]) => ({ etiqueta, total })).sort((a, b) => b.total - a.total || a.etiqueta.localeCompare(b.etiqueta));
 }
+
+/** "Liderazgo Femenino" → "liderazgo-femenino" (para la URL de /etiquetas/…). */
+export const slugEtiqueta = (etiqueta: string): string =>
+	etiqueta
+		.normalize('NFD')
+		.replace(/[̀-ͯ]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');

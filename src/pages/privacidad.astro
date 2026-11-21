@@ -1,0 +1,82 @@
+---
+import CabezaPagina from '../components/CabezaPagina.astro';
+import Layout from '../layouts/Layout.astro';
+import { getSitio } from '../lib/queries';
+import { migas } from '../lib/seo';
+
+/**
+ * BORRADOR: texto de ejemplo para que LEAD lo revise y valide (no es asesoría legal).
+ * Los datos entre [corchetes] los debe completar quien sea responsable del tratamiento.
+ * Mientras tenga corchetes, la página no se indexa (noindex). Quita `pendiente` cuando esté validada.
+ */
+const pendiente = true;
+const sitio = await getSitio();
+const actualizado = '20 de noviembre de 2026';
+const correo = sitio.correo ?? '[correo de contacto]';
+---
+
+<Layout
+	titulo="Política de privacidad"
+	descripcion="Qué datos personales recoge LEAD UPN Trujillo, para qué los usa y cómo puedes ejercer tus derechos."
+	noindex={pendiente}
+	jsonLd={[
+		migas([
+			{ nombre: 'Inicio', ruta: '/' },
+			{ nombre: 'Política de privacidad', ruta: '/privacidad' },
+		]),
+	]}
+>
+	<CabezaPagina titulo="Política de privacidad" antetitulo={`Actualizada el ${actualizado}`}>
+		<p>Cómo cuidamos los datos que nos compartes.</p>
+	</CabezaPagina>
+
+	<div class="contenedor seccion prose">
+		<h2>Quién es el responsable</h2>
+		<p>
+			El responsable del tratamiento de tus datos personales es <strong>[Nombre del responsable: persona o asociación]</strong>,
+			que gestiona la organización estudiantil LEAD UPN Trujillo, con domicilio en <strong>[dirección o ciudad]</strong>. Puedes
+			escribirnos a <a href={`mailto:${correo}`}>{correo}</a>.
+		</p>
+
+		<h2>Qué datos recogemos</h2>
+		<ul>
+			<li>
+				<strong>Si nos escribes</strong> por correo, WhatsApp o redes: tu nombre, tu contacto y lo que nos cuentes. La web no tiene
+				formularios.
+			</li>
+			<li>
+				<strong>Equipo y testimonios:</strong> nombre, cargo, foto y redes de integrantes y de quienes dan su testimonio, solo si
+				nos dieron su autorización por escrito.
+			</li>
+		</ul>
+		<p>No usamos cookies de seguimiento ni herramientas de analítica que te identifiquen.</p>
+
+		<h2>Para qué los usamos</h2>
+		<ul>
+			<li>Responder tu mensaje y darle seguimiento.</li>
+			<li>Publicar en la web a las personas que autorizaron su imagen o testimonio.</li>
+		</ul>
+
+		<h2>Con quién los compartimos</h2>
+		<p>
+			Los datos del equipo y los testimonios se gestionan en Notion y la web se aloja en Cloudflare, proveedor que
+			pueden tratar datos fuera del Perú. No vendemos tus datos ni los usamos para publicidad.
+		</p>
+
+		<h2>Cuánto tiempo los guardamos</h2>
+		<p>
+			Las fotos y testimonios se publican mientras la autorización siga vigente: si la retiras, los quitamos de la web. Los
+			mensajes que nos envíes se conservan por <strong>[plazo, p. ej. 12 meses]</strong>.
+		</p>
+
+		<h2>Tus derechos</h2>
+		<p>
+			Conforme a la Ley N.° 29733, Ley de Protección de Datos Personales, y su reglamento, puedes pedir acceso, rectificación,
+			cancelación u oposición al tratamiento de tus datos escribiendo a <a href={`mailto:${correo}`}>{correo}</a>. Si sientes que
+			no atendimos tu solicitud, puedes acudir a la Autoridad Nacional de Protección de Datos Personales.
+		</p>
+
+		<h2>Cambios</h2>
+		<p>Si actualizamos esta política, cambiaremos la fecha de arriba.</p>
+	</div>
+</Layout>

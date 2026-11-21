@@ -1,4 +1,6 @@
 ---
+import { slugEtiqueta } from '../../lib/novedades';
+import Compartir from '../Compartir.astro';
 import NovedadCard from '../NovedadCard.astro';
 import type { FormatoProps } from './tipos';
 
@@ -36,7 +38,7 @@ const iniciales = (nombre: string) =>
 			<ul class="etiquetas" aria-label="Etiquetas">
 				{d.etiquetas.map((e) => (
 					<li>
-						<a class="pill" href={`/novedades?etiqueta=${encodeURIComponent(e)}`}>
+						<a class="pill" href={`/etiquetas/${slugEtiqueta(e)}`}>
 							{e}
 						</a>
 					</li>
@@ -44,6 +46,8 @@ const iniciales = (nombre: string) =>
 			</ul>
 		)
 	}
+
+	<Compartir titulo={d.titulo} ruta={`/novedades/${entry.id}`} />
 
 	{
 		autor && !sinAutor && (

@@ -23,8 +23,8 @@ export default defineConfig({
 	vite: { build: { assetsInlineLimit: 0 } },
 	integrations: [
 		sitemap({
-			// Ni la 404 ni las redirecciones de slugs anteriores van al sitemap.
-			filter: (page) => !page.includes('/404') && !esRedireccion(page),
+			// Ni la 404, ni la política (hasta validarla; quita 'privacidad' de aquí al publicarla), ni las redirecciones.
+			filter: (page) => !/\/(404|privacidad)$/.test(page.replace(/\/$/, '')) && !esRedireccion(page),
 		}),
 	],
 });

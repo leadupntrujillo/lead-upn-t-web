@@ -1,0 +1,60 @@
+---
+import type { GetStaticPaths } from 'astro';
+import CabezaPagina from '../../components/CabezaPagina.astro';
+import NovedadCard from '../../components/NovedadCard.astro';
+import Layout from '../../layouts/Layout.astro';
+import { conEtiqueta, contarEtiquetas, slugEtiqueta } from '../../lib/novedades';
+import { getNovedades, getPilaresPorId } from '../../lib/queries';
+import { migas } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+	const todas = await getNovedades();
+	return contarEtiquetas(todas).map(({ etiqueta }) => ({
+		params: { etiqueta: slugEtiqueta(etiqueta) },
+		props: { etiqueta, novedades: conEtiqueta(todas, etiqueta) },
+	}));
+}) satisfies GetStaticPaths;
+
+const { etiqueta, novedades } = Astro.props;
+const pilares = await getPilaresPorId();
+const ruta = `/etiquetas/${slugEtiqueta(etiqueta)}`;
+---
+
+<Layout
+	titulo={`#${etiqueta}`}
+	descripcion={`Novedades de LEAD UPN Trujillo sobre ${etiqueta}.`}
+	jsonLd={[
+		migas([
+			{ nombre: 'Inicio', ruta: '/' },
+			{ nombre: 'Novedades', ruta: '/novedades' },
+			{ nombre: etiqueta, ruta },
+		]),
+	]}
+>
+	<CabezaPagina titulo={`#${etiqueta}`} antetitulo="Etiqueta">
+		<p>{novedades.length === 1 ? '1 novedad' : `${novedades.length} novedades`} con esta etiqueta.</p>
+	</CabezaPagina>
+	<div class="contenedor seccion">
+		<ul class="grilla">
+			{
+				novedades.map((n) => (
+					<li>
+						<NovedadCard entry={n} pilar={n.data.pilar ? pilares.get(n.data.pilar.id) : undefined} />
+					</li>
+				))
+			}
+		</ul>
+		<p><a class="btn btn--borde-oscuro" href="/novedades">Ver todas las novedades</a></p>
+	</div>
+</Layout>
+
+<style>
+	.grilla {
+		list-style: none;
+		margin: 0 0 2rem;
+		padding: 0;
+		display: grid;
+		gap: 1.5rem;
+		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+	}
+</style>

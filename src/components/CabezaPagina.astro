@@ -1,0 +1,48 @@
+---
+/** Cabecera marina común a las páginas interiores (Equipo, Pilar, Etiqueta, Privacidad…). */
+interface Props {
+	titulo: string;
+	antetitulo?: string;
+}
+const { titulo, antetitulo } = Astro.props;
+---
+
+<header class="cabeza">
+	<div class="contenedor cabeza__fila">
+		{antetitulo && <p class="cabeza__antetitulo">{antetitulo}</p>}
+		<h1 class="titulo">{titulo}</h1>
+		<div class="cabeza__texto"><slot /></div>
+	</div>
+</header>
+
+<style>
+	.cabeza {
+		background: var(--marino);
+		color: var(--blanco);
+		padding-block: clamp(2.5rem, 7vw, 4.5rem);
+	}
+	.cabeza__fila {
+		display: grid;
+		gap: 1rem;
+	}
+	.cabeza__antetitulo {
+		margin: 0;
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: rgb(255 255 255 / 0.8);
+	}
+	h1 {
+		font-size: clamp(2.6rem, 8vw, 5rem);
+		line-height: 1;
+	}
+	.cabeza__texto {
+		max-width: 40rem;
+		font-size: 1.1rem;
+		color: rgb(255 255 255 / 0.88);
+	}
+	.cabeza__texto :global(p) {
+		margin: 0;
+	}
+</style>
