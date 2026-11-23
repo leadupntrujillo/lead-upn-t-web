@@ -1,0 +1,143 @@
+---
+import Cover from '../Cover.astro';
+import PilarChip from '../PilarChip.astro';
+import { fechaLarga, isoDia } from '../../lib/format';
+import { extraerCita } from '../../lib/html';
+import Pie from './Pie.astro';
+import type { FormatoProps } from './tipos';
+
+/**
+ * Entrevista: la frase más fuerte (la primera cita de la página) abre la nota junto a la foto de
+ * la persona; cada pregunta es un Encabezado 3 y se muestra como diálogo.
+ */
+const { entry, pilar, autor, html, relacionadas, pilares } = Astro.props as FormatoProps;
+const d = entry.data;
+const { cita, html: texto } = extraerCita(html);
+---
+
+<article>
+	<header class="cabeza">
+		<div class="contenedor cabeza__grid">
+			<div class="cabeza__texto">
+				<PilarChip pilar={pilar} oscuro />
+				<h1 class="titulo">{d.titulo}</h1>
+				{cita && <blockquote class="frase">{cita}</blockquote>}
+				<p class="cabeza__meta">
+					<time class="pill pill--oscuro" datetime={isoDia(d.fechaPublicacion)}>{fechaLarga(d.fechaPublicacion)}</time>
+				</p>
+			</div>
+			<div class="retrato">
+				<Cover imagen={d.imagen} ratio="4 / 5" prioridad sizes="(min-width: 52rem) 28rem, 100vw" />
+				{d.creditos && <p class="creditos">{d.creditos}</p>}
+			</div>
+		</div>
+	</header>
+
+	<div class="lectura cuerpo">
+		<p class="resumen">{d.resumen}</p>
+		<div class="prose dialogo" set:html={texto} />
+	</div>
+</article>
+
+<Pie {entry} {autor} {relacionadas} {pilares} sinAutor />
+
+<style>
+	.cabeza {
+		background:
+			radial-gradient(70% 120% at 0% 0%, rgb(214 41 122 / 0.32), transparent 60%),
+			radial-gradient(60% 100% at 100% 100%, rgb(140 63 209 / 0.42), transparent 65%),
+			var(--marino);
+		color: var(--blanco);
+		padding-block: clamp(2.5rem, 7vw, 4.5rem);
+	}
+	.cabeza__grid {
+		display: grid;
+		gap: 2.5rem;
+		align-items: center;
+	}
+	@media (min-width: 52rem) {
+		.cabeza__grid {
+			grid-template-columns: minmax(0, 1fr) 19rem;
+			gap: 4rem;
+		}
+	}
+	.cabeza__texto {
+		display: grid;
+		gap: 1.5rem;
+		justify-items: start;
+	}
+	h1 {
+		font-size: clamp(2rem, 5vw, 3.25rem);
+		line-height: 1.1;
+		max-width: 24ch;
+	}
+	.frase {
+		margin: 0;
+		font-size: clamp(1.4rem, 3.2vw, 2.1rem);
+		font-weight: 700;
+		line-height: 1.35;
+		max-width: 28ch;
+	}
+	.frase::before {
+		content: '“';
+		display: block;
+		height: 3.2rem;
+		font-family: var(--f-display);
+		font-size: 6rem;
+		line-height: 1;
+		background: var(--degradado);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+	/* Retrato con marco de polaroid */
+	.retrato {
+		padding: 0.7rem 0.7rem 2.2rem;
+		background: var(--blanco);
+		box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.6);
+		transform: rotate(2deg);
+		max-width: 19rem;
+		justify-self: center;
+		width: 100%;
+	}
+	.cuerpo {
+		padding-block: clamp(2rem, 5vw, 3.5rem) 0;
+		margin-inline: max(var(--gutter), calc((100% - var(--ancho)) / 2));
+		width: auto;
+		max-width: var(--lectura);
+	}
+	.resumen {
+		margin-bottom: 2rem;
+		font-size: 1.15rem;
+		font-weight: 400;
+		color: var(--tinta-suave);
+	}
+
+	/* Diálogo: cada pregunta lleva una "P" y las respuestas van sangradas */
+	.dialogo :global(h4) {
+		position: relative;
+		margin-top: 2.2em;
+		padding-left: 3rem;
+		font-size: 1.2rem;
+		line-height: 1.4;
+	}
+	.dialogo :global(h4)::before {
+		content: 'P';
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: grid;
+		place-items: center;
+		width: 2.1rem;
+		height: 2.1rem;
+		border-radius: 50%;
+		background: var(--degradado-boton);
+		color: var(--blanco);
+		font-size: 0.9rem;
+		font-weight: 700;
+	}
+	/* Las respuestas van sangradas; las preguntas siguientes no */
+	.dialogo :global(h4 ~ :not(h4)) {
+		margin-left: 3rem;
+	}
+</style>

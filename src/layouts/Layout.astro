@@ -1,174 +1,68 @@
 ---
-export interface Props {
-	title: string;
+// Solo tres pesos de Poppins (400, 600 y 700) y Anton: menos archivos que descargar.
+import '@fontsource/anton/400.css';
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '../styles/global.css';
+import '../styles/prose.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Seo, { type SeoProps } from '../components/Seo.astro';
+import { getSitio } from '../lib/queries';
+
+interface Props extends SeoProps {
+	/** Alias de `titulo` (compatibilidad con las páginas existentes). */
+	title?: string;
+	/** Alias de `descripcion`. */
+	description?: string;
+	/** Texto del estado cuando la página es una vista previa (Borrador, En revisión). */
+	vistaPrevia?: string | null;
 }
 
-const { title } = Astro.props;
+const { title, description, vistaPrevia = null, titulo = title, descripcion = description, noindex, ...seo } = Astro.props;
+const sitio = await getSitio();
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es-PE">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#161a4e" />
+		<meta name="color-scheme" content="light" />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta name="generator" content={Astro.generator} />
-		<meta
-			name="description"
-			content="LEAD UPN Trujillo - Learn, Explore, Aspire, Discover."
-		/>
-		<title>{title}</title>
-
-		<!-- Google Fonts for Tech Aesthetic (from UI-UX-PRO-MAX) -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:labels@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-			rel="stylesheet"
-		/>
+		<Seo {sitio} {titulo} {descripcion} noindex={noindex || Boolean(vistaPrevia)} {...seo} />
+		<slot name="head" />
 	</head>
 	<body>
-		<div class="particles" id="particles"></div>
-		<slot />
-		<script>
-			// Simple particle JS background for subtle floating effect
-			const createParticles = () => {
-				const container = document.getElementById("particles");
-				if (!container) return;
-				for (let i = 0; i < 50; i++) {
-					const particle = document.createElement("div");
-					particle.className = "particle";
-					particle.style.left = `${Math.random() * 100}%`;
-					particle.style.top = `${Math.random() * 100}%`;
-					particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
-					particle.style.animationDelay = `${Math.random() * 5}s`;
-					container.appendChild(particle);
-				}
-			};
-			createParticles();
-		</script>
+		<a class="saltar" href="#contenido">Saltar al contenido</a>
+		{
+			vistaPrevia && (
+				<div class="vista-previa" role="status">
+					Vista previa: {vistaPrevia}. Esta novedad no es pública todavía.
+				</div>
+			)
+		}
+		<Header {sitio} />
+		<main id="contenido">
+			<slot />
+		</main>
+		<Footer {sitio} />
 	</body>
 </html>
 
-<style is:global>
-	:root {
-		/* Colors */
-		--bg-deep: #0a0f2c;
-		--bg-core: #161b3d;
-		--text-title: #ffffff;
-		--text-body: #bcc1d4;
-		--magenta: #e62a6b;
-		--cyan: #2af6ff;
-		--gold: #ffd700;
-
-		/* Spacing System (8px base) */
-		--space-1: 8px;
-		--space-2: 16px;
-		--space-3: 24px;
-		--space-4: 32px;
-		--space-5: 48px;
-		--space-6: 64px;
-		--space-8: 96px;
-
-		/* Fonts */
-		--font-heading: "Space Grotesk", sans-serif;
-		--font-body: "DM Sans", sans-serif;
-	}
-
-	*,
-	*::before,
-	*::after {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
-
-	html {
-		background-color: var(--bg-deep);
-		background-image: radial-gradient(
-			circle at center,
-			var(--bg-core) 0%,
-			var(--bg-deep) 100%
-		);
-		background-attachment: fixed;
-	}
-
-	body {
-		font-family: var(--font-body);
-		background: transparent;
-		color: var(--text-body);
-		min-height: 100vh;
-		overflow-x: hidden;
-		line-height: 1.6;
-	}
-
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		font-family: var(--font-heading);
-		color: var(--text-title);
-		line-height: 1.2;
-		font-weight: 700;
-	}
-
-	a {
-		color: inherit;
-		text-decoration: none;
-	}
-
-	button {
-		font-family: inherit;
-		border: none;
-		cursor: pointer;
-		outline: none;
-	}
-
-	/* Glassmorphism utility */
-	.crystal-fx {
-		background: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		backdrop-filter: blur(15px);
-		-webkit-backdrop-filter: blur(15px);
-		border-radius: 16px;
-	}
-
-	/* Subtle Particle Animations */
-	#particles {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
-		pointer-events: none;
-		overflow: hidden;
-	}
-
-	.particle {
-		position: absolute;
-		width: 3px;
-		height: 3px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 50%;
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-		animation: float infinite ease-in-out alternate;
-	}
-
-	@keyframes float {
-		0% {
-			transform: translateY(0) translateX(0) scale(1);
-			opacity: 0.2;
-		}
-		50% {
-			transform: translateY(-50px) translateX(20px) scale(1.5);
-			opacity: 0.6;
-		}
-		100% {
-			transform: translateY(-100px) translateX(-20px) scale(1);
-			opacity: 0.2;
-		}
+<style>
+	.vista-previa {
+		background: #fdf3cc;
+		color: #5c4300;
+		text-align: center;
+		font-size: 0.85rem;
+		font-weight: 600;
+		padding: 0.5rem var(--gutter);
 	}
 </style>

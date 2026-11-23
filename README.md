@@ -1,395 +1,141 @@
-# LEAD UPN Trujillo — Web Oficial 🚀
+![LEAD UPN Trujillo](./docs/portada.webp)
 
-> **Documento de contexto para agentes de vibe coding.**
-> Lee TODO esto antes de escribir una sola línea de código. Aquí está todo lo que necesitas saber para trabajar en este proyecto sin preguntar nada.
+# LEAD UPN Trujillo — Web Oficial
 
----
+**LEAD** = **L**earn, **E**xplore, **A**spire, **D**iscover. Organización estudiantil de liderazgo con propósito de la Universidad Privada del Norte (UPN), sede Trujillo, Perú.
 
-## 🏛️ ¿Qué es LEAD UPN Trujillo?
+> Proyecto en reconstrucción desde cero. Primero el backend (lectura de Notion), después el frontend.
 
-**LEAD** significa **L**earn, **E**xplore, **A**spire, **D**iscover.
+## Stack
 
-Es la **organización estudiantil de liderazgo con propósito** de la Universidad Privada del Norte (UPN), sede Trujillo, Perú. Promueve espacios de aprendizaje, acción y reflexión que integran competencias profesionales, tecnológicas y personales para **generar impacto** dentro y fuera de la universidad.
-
-### Pilares de especialización
-
-| Pilar | Descripción |
+| Tecnología | Rol |
 |---|---|
-| **Desarrollo Profesional** | Coordinar y ejecutar actividades y eventos formativos. Logística y seguimiento. |
-| **Impacto Comunitario** | Identificar problemáticas sociales. Acciones de educación y servicio. |
-| **Desarrollo De Capítulo** | Integración de nuevos miembros. Cultura de colaboración interna. |
-| **Área De Marketing** | Estrategia de contenidos, redes sociales, diseño y producción. |
+| Astro 6 | Framework (SSG) |
+| Notion API | Fuente de contenido |
+| Cloudflare Pages | Hosting |
+| pnpm | Gestor de paquetes |
+| Node.js `>=22.12.0` | Runtime |
 
----
-
-## ⚙️ Stack Técnico
-
-| Tecnología | Versión | Rol |
-|---|---|---|
-| **Astro** | `^6.0.4` | Framework principal (SSG/SSR) |
-| **Vanilla CSS** | — | Todo el estilo, sin frameworks CSS externos |
-| **TypeScript** | via tsconfig | Tipado básico |
-| **pnpm** | — | Gestor de paquetes |
-| **Node.js** | `>=22.12.0` | Runtime |
-
-**Comandos esenciales:**
+## Empezar
 
 ```bash
-pnpm dev        # Servidor de desarrollo en localhost:4321
-pnpm build      # Build de producción
-pnpm preview    # Preview del build
+pnpm install
+pnpm dev               # http://localhost:4321 (necesita el archivo .env, ver abajo)
 ```
 
-> ⚠️ **NO uses Tailwind**. Todo el CSS es vanilla, escopeado dentro de cada componente `.astro` con `<style>`. Las variables globales están en `src/layouts/Layout.astro` dentro del bloque `<style is:global>`.
+Otros comandos: `pnpm build`, `pnpm preview`, `pnpm check` (tipos), `pnpm test` (pruebas), `pnpm sync` (vuelve a leer Notion), `pnpm iconos` (regenera favicon e íconos desde `public/brand/lead-mark.svg`).
 
----
+## Variables de entorno
 
-## 🎨 Design System — "Glassmorphism Tech"
+Crea un archivo `.env` en la raíz con estas variables (está en `.gitignore`: nunca se sube):
 
-Este es el sistema de diseño establecido y **NO debe cambiarse**. Todo componente nuevo debe adherirse a él.
+```env
+# Token de la integración de Notion (https://www.notion.so/profile/integrations).
+# La integración debe estar conectada a la página "Centro de Datos - LEAD", de preferencia solo lectura.
+NOTION_TOKEN=
 
-### Paleta de colores
+# IDs de las bases de datos (data sources) de Notion
+NOTION_NOVEDADES_ID=
+NOTION_PILARES_ID=
+NOTION_MIEMBROS_ID=
+NOTION_TESTIMONIOS_ID=
+NOTION_ALIADOS_ID=
+NOTION_CIFRAS_ID=
+NOTION_SITIO_ID=
 
-```css
-:root {
-  --bg-deep:    #0A0F2C;   /* Fondo oscuro principal */
-  --bg-core:    #161B3D;   /* Fondo base (gradiente) */
-  --text-title: #FFFFFF;   /* Títulos */
-  --text-body:  #BCC1D4;   /* Cuerpo de texto */
-  --magenta:    #E62A6B;   /* Acento primario (rosa/magenta) */
-  --cyan:       #2AF6FF;   /* Acento secundario (cian) */
-  --gold:       #FFD700;   /* Acento terciario (dorado) */
-}
+# OPCIONAL, solo en tu computadora: `pnpm dev` también muestra Borrador y En revisión.
+# Se ignora en `pnpm build` y en Cloudflare Pages.
+# NOTION_PREVIEW=true
 ```
 
-### Tipografía
+**`pnpm dev` y `pnpm build` leen Notion**, así que necesitan `.env` completo (el token y los 7 IDs). Si falta algo, fallan con un mensaje que indica qué variable falta. En Cloudflare Pages se cargan en *Settings → Variables and Secrets*.
 
-- **Headings:** `Space Grotesk` (400, 500, 600, 700) — Google Fonts
-- **Body:** `DM Sans` (400, 500, 700) — Google Fonts
-- Variables CSS: `--font-heading`, `--font-body`
-
-### Sistema de espaciado (base 8px)
-
-```css
---space-1: 8px;
---space-2: 16px;
---space-3: 24px;
---space-4: 32px;
---space-5: 48px;
---space-6: 64px;
---space-8: 96px;
-```
-
-### Efecto Glassmorphism — `.crystal-fx`
-
-Clase utilitaria global disponible en cualquier componente:
-
-```css
-.crystal-fx {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: 16px;
-}
-```
-
-### Background global
-
-El `body` tiene un `radial-gradient` fijo de `--bg-core` a `--bg-deep` con `background-attachment: fixed`. No toques esto.
-
-### Partículas de fondo
-
-`Layout.astro` genera 50 partículas flotantes con JS puro que quedan en `position: fixed; z-index: -1`. Son decorativas, no las elimines.
-
----
-
-## 📁 Arquitectura de archivos
+## Cómo funciona el backend
 
 ```
-lead-upn-t-web/
-├── public/                     # Assets estáticos
-│   ├── lead-tr-upn.svg         # Logo vectorial oficial
-│   ├── lead-tr-upn.ico         # Favicon
-│   ├── lead_upn_tru.png        # Logo en PNG
-│   ├── portada-lead.png        # Imagen portada general
-│   ├── instagram.svg           # Icono Instagram
-│   ├── linkedin.svg            # Icono LinkedIn
-│   └── *.gif                   # Animaciones decorativas
-│
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro        # Shell HTML: <head>, CSS global, partículas
-│   ├── pages/
-│   │   └── index.astro         # Homepage — ensambla todos los componentes
-│   └── components/
-│       ├── Header.astro        # Navbar sticky con logo, text loop animado y menú mobile
-│       ├── Metrics.astro       # Cards de métricas (Instagram, WhatsApp, LinkedIn)
-│       ├── CtaButtons.astro    # Fila de botones CTA secundarios
-│       └── Events.astro        # Grid de tarjetas de próximos eventos
-│
-├── .agent/
-│   └── skills/
-│       └── ui-ux-pro-max/      # Skill de diseño UI/UX — LEER SIEMPRE al trabajar UI
-│           ├── SKILL.md        # Instrucciones del skill (leer antes de crear UI)
-│           ├── data/           # Bases de datos de estilos, paletas, tipografías
-│           └── scripts/
-│               └── search.py  # Script de búsqueda del design system
-│
-├── design-system/              # (se crea al usar --persist en el skill)
-│   ├── MASTER.md               # Fuente de verdad del design system persisted
-│   └── pages/                  # Overrides por página
-│
-├── astro.config.mjs
-├── package.json
-├── tsconfig.json
-└── ui-result.md                # Salida del design system generado por el skill
+Notion → loaders (src/lib/notion/) → colecciones (src/content.config.ts) → páginas
 ```
 
----
+Cada tabla de Notion es una colección de Astro con datos tipados: `novedades`, `pilares`, `miembros`, `testimonios`, `aliados` y `cifras`. En las páginas se usan con `getCollection('novedades')`, `getEntry(...)` y `render(entry)`; nunca se llama a la API de Notion directamente.
 
-## 🧩 Inventario de Componentes Existentes
+- **Solo se publica lo marcado para la web:** novedades `Publicado` con fecha ≤ hoy; testimonios con `Publicar en la web` y `Autoriza uso de imagen`; aliados y cifras con `Mostrar en la web`; pilares `Activo`.
+- **El cuerpo de la página de Notion** se convierte a HTML seguro (`entry.rendered.html`).
+- **Las imágenes** se descargan en cada build (las URLs de Notion caducan en 1 h) a `.cache/notion/` y se publican en `public/_notion/` como WebP en 3 anchos (480/960/1600) con su ancho y alto. Una foto de 340 KB queda en unos 30–95 KB según la pantalla.
+- **Tabla "Sitio"**: una sola fila con misión, visión, descripción corta (para Google), redes, correo y el link/texto de "Únete". El cuerpo de esa página es el texto de "Nosotros". Se lee con `getSitio()`.
+- **SEO**: cada página tiene título, descripción, URL canónica, Open Graph, tarjeta de X y datos estructurados (Organización, Noticia o Evento, rutas de navegación). Cada novedad tiene su imagen para compartir (`/og/novedades/<slug>.png`), generada al compilar. También se generan `sitemap-index.xml`, `robots.txt` y `rss.xml`.
+- **Slugs anteriores**: si cambias el Slug de una novedad, pega el anterior en "Slugs anteriores" y el enlace viejo redirige al nuevo.
+- **Avisos de accesibilidad**: el build avisa si una novedad no tiene "Texto alternativo" o si una imagen del texto no tiene pie de foto.
+- **Si cambia la estructura de Notion** (columna renombrada o de otro tipo) el build falla con un mensaje claro. **Si falta contenido** (novedad sin título o resumen) esa fila se omite con un aviso en el log.
+- El contenido nuevo aparece en la web en el siguiente build (ver Paso 4: recompilación automática).
+- **Los 9 formatos** (Periódico, Anuncio, Post IG, Evento, Convocatoria, Galería, Logros, Entrevista, Breve) están definidos en `src/lib/notion/formatos.ts`. Si a una novedad le falta algo que su formato necesita (p. ej. una Convocatoria sin link para postular), se publica igual y el build avisa.
+- **Vista previa:** con `NOTION_PREVIEW=true` en tu `.env`, `pnpm dev` muestra también Borrador y En revisión para revisarlas antes de publicar. Se ignora en `pnpm build` y en Cloudflare Pages.
+- **Para las páginas:** pide los datos con `src/lib/queries.ts` (`getNovedades`, `getPortada`, `getPilares`…).
 
-### `Layout.astro`
-- Wrapper HTML base: `<html lang="es">`, meta SEO, Google Fonts
-- Define **todas las variables CSS globales** en `<style is:global>`
-- Crea el sistema de partículas flotantes en JS
-- Todo componente/página lo usa como envoltorio
+## Contenido (Notion)
 
-### `Header.astro`
-- Navbar sticky con `backdrop-filter: blur(10px)`
-- **Logo:** "LEAD" con la "L" en `--magenta` con glow neón
-- **Text loop animado:** cicla entre LEARN / EXPLORE / ASPIRE / DISCOVER en `--cyan`, con animaciones `translateY` (3s por palabra)
-- **Botón ÚNETE:** gradiente magenta→cyan, hover con inversión del gradiente, accesible (min-height: 44px)
-- **Menú hamburguesa:** off-canvas panel derecho glassmorphism, links: Home, About, Events, Contact (todos con `href="#"` por ahora — aún sin rutas reales)
-- Responsive: el text loop se oculta en mobile (`@media max-width: 768px`)
+Todo el contenido sale de la carpeta **Centro de Datos - LEAD** en Notion:
 
-### `Metrics.astro`
-- Sección con 3 tarjetas glassmorphism usando `.crystal-fx`
-- **Instagram Community:** `+5.2k` en `--magenta`
-- **WhatsApp Members:** `+1.1k` en `--cyan`
-- **LinkedIn Followers:** `+800` en `--gold`
-- Cada tarjeta tiene un `.glow-layer` que aparece on-hover
-- Animación de entrada con `IntersectionObserver` (fade-up desde `translateY(30px)`)
-
-> 🔴 **DATOS HARDCODEADOS.** En el futuro estos vendrán de Google Sheets vía script. Ver sección "Integraciones futuras".
-
-### `CtaButtons.astro`
-- 3 botones CTA secundarios en fila: **OUR PILLARS**, **OUR PROGRESS**, **APPLY NOW**
-- Bordes glassmorphism, hover con gradiente magenta→cyan reveal (`::before`)
-- El botón APPLY NOW tiene borde cian sutil para destacarlo
-
-> 🔴 **SIN FUNCIONALIDAD.** Los botones no tienen `onClick` ni `href` funcionales aún. Se completarán cuando haya páginas de destino.
-
-### `Events.astro`
-- Sección "UPCOMING EVENTS" con 2 tarjetas glassmorphism en grid
-- **LEAD GALA** (Nov 15, 2026) — badge magenta
-- **CONVOCATORIA 2026** (Dic 01, 2026) — badge cyan
-- Animación de entrada con `IntersectionObserver` (scroll reveal)
-- Hover: `translateY(-8px)` + `box-shadow`
-- Imágenes reemplazadas por gradientes decorativos (placeholder)
-
-> 🔴 **DATOS HARDCODEADOS.** En el futuro vendrán de Notion API. Ver sección "Integraciones futuras".
-
----
-
-## 🔮 Integraciones Futuras (Planificadas)
-
-Estas integraciones **NO están implementadas todavía** pero el código debe estar preparado para recibirlas. NO incorpores datos de forma hardcoded en lugares que luego serán dinámicos sin dejar un comentario `// TODO: integrar con [fuente]`.
-
-### 1. Notion API — Base de datos de Eventos
-
-- **Propósito:** Los eventos (LEAD GALA, Convocatorias, Talleres, etc.) se gestionarán en una base de datos de Notion.
-- **Flujo esperado:**
-  - Script de fetching en build-time (Astro SSG) o en endpoint API de Astro
-  - Se llamará a la Notion API con el integration token
-  - Los datos se mapearán a props/interfaces TypeScript
-  - El componente `Events.astro` se volverá dinámico
-
-- **Interfaz de datos esperada:**
-  ```typescript
-  interface Event {
-    id: string;
-    title: string;
-    date: string;           // ISO 8601
-    description: string;
-    badge_color: 'magenta' | 'cyan' | 'gold';
-    image_url?: string;
-    cta_label: string;
-    cta_url: string;
-    is_published: boolean;
-  }
-  ```
-
-- **Dónde integrarlo:** `src/lib/notion.ts` (crear cuando sea necesario)
-- **Astro approach:** usar `getStaticPaths()` o endpoints en `src/pages/api/`
-
-### 2. Google Sheets Script — Métricas de Comunidad
-
-- **Propósito:** Los números de seguidores/miembros (Instagram, WhatsApp, LinkedIn) se actualizarán desde un Google Sheet.
-- **Flujo esperado:**
-  - Un Google Apps Script exportará los datos como JSON endpoint público (o con auth)
-  - El componente `Metrics.astro` consumirá esos datos en build-time
-  - Los números se actualizarán con cada nuevo build
-
-- **Interfaz de datos esperada:**
-  ```typescript
-  interface Metric {
-    platform: 'instagram' | 'whatsapp' | 'linkedin';
-    label: string;    // "INSTAGRAM COMMUNITY"
-    value: string;    // "+5.2k"
-    color: 'magenta' | 'cyan' | 'gold';
-  }
-  ```
-
-- **Dónde integrarlo:** `src/lib/sheets.ts` (crear cuando sea necesario)
-
-> 💡 **Para el agente:** cuando llegue el momento de implementar estas integraciones, crear la carpeta `src/lib/` con los archivos correspondientes y refactorizar los componentes afectados para recibir datos como props.
-
----
-
-## 📐 Reglas de Código — OBLIGATORIAS
-
-Estas reglas aplican siempre. No hay excepciones.
-
-### CSS
-- ✅ **Vanilla CSS únicamente.** Sin Tailwind, sin frameworks.
-- ✅ **Variables CSS** del design system para colores, espaciado y tipografía.
-- ✅ **Scoped styles** dentro de `<style>` en cada componente `.astro`.
-- ✅ **Breakpoints obligatorios:** 375px, 768px, 1024px, 1440px.
-- ✅ **Animaciones:** usar `transition` de 150–300ms. Respetar `prefers-reduced-motion`.
-- ❌ No colores hardcoded directamente (usar variables). Excepción: valores dentro de `rgba()` que ya referencian una variable semánticamente.
-
-### Accesibilidad (a11y)
-- ✅ Todos los elementos interactivos: `cursor: pointer` y tamaño mínimo de 44x44px.
-- ✅ Focus states visibles: `outline: 2px solid var(--cyan)`.
-- ✅ `aria-label` en íconos SVG y botones sin texto visible.
-- ✅ Imágenes reales: siempre con `alt` descriptivo.
-- ✅ Usar `IntersectionObserver` para animaciones de entrada (no `setTimeout` globales).
-- ❌ No emojis como iconos de UI. Usar SVG (Heroicons, Lucide, Simple Icons).
-
-### Astro
-- ✅ Frontmatter (---) en todo componente que lo necesite.
-- ✅ Scripts JS dentro de `<script>` en el componente correspondiente.
-- ✅ Props tipados con `interface Props` cuando un componente recibe datos.
-- ✅ Layout siempre wrapeado en `<Layout title="...">`.
-
-### Semántica HTML
-- ✅ Un solo `<h1>` por página.
-- ✅ Secciones con `<section aria-label="...">` o `aria-labelledby`.
-- ✅ Tarjetas de contenido con `<article>` cuando el contenido es autocontenido.
-- ✅ `tabindex="0"` en tarjetas que sean interactivas (clickeables).
-
----
-
-## 🖥️ Skill UI/UX Pro Max — Cómo usarlo
-
-El proyecto incluye el skill `.agent/skills/ui-ux-pro-max/`. **Úsalo SIEMPRE antes de crear o modificar componentes de UI.**
-
-### Flujo obligatorio al crear nuevo UI
-
-```bash
-# Paso 1: Generar design system para el nuevo componente/página
-python .agent/skills/ui-ux-pro-max/scripts/search.py "education tech landing glassmorphism dark" --design-system -p "LEAD UPN"
-
-# Paso 2 (opcional): Búsquedas de dominio específico
-python .agent/skills/ui-ux-pro-max/scripts/search.py "animation accessibility scroll-reveal" --domain ux
-
-# Paso 3: Implementar siguiendo el design system resultante
-```
-
-**El design system ya persisted (ui-result.md) establece:**
-- Pattern: Horizontal Scroll Journey / Bento Grid Showcase
-- Style: Vibrant & Block-based (glassmorphism dark)
-- Fonts: Space Grotesk + DM Sans ✅ (ya implementado)
-- Effects: Large sections 48px+, bold hover, scroll-snap, 200-300ms transitions
-
----
-
-## 🗺️ Roadmap de la Homepage (index.astro)
-
-El orden de secciones en la homepage es:
-
-```
-[Header] — sticky
-  ├── [Hero Section] — h1 principal + descripción
-  ├── [Metrics] — métricas de comunidad (3 cards)
-  ├── [CtaButtons] — botones secundarios de acción
-  └── [Events] — próximos eventos (2 cards)
-[Footer] — copyright
-```
-
-**Secciones pendientes por crear** (NO implementadas aún):
-
-| Sección | Componente sugerido | Datos | Prioridad |
-|---|---|---|---|
-| About / Quiénes somos | `About.astro` | Estático | Alta |
-| Pilares de especialización | `Pillars.astro` | Estático | Alta |
-| Team / Miembros | `Team.astro` | Notion (futuro) | Media |
-| Testimonios | `Testimonials.astro` | Estático o Notion | Media |
-| Convocatoria CTA | expandir `CtaButtons.astro` | Estático | Alta |
-| Formulario "Únete" | `JoinForm.astro` | Form externo o API | Baja |
-
----
-
-## 📸 Assets Disponibles en `/public`
-
-| Archivo | Uso |
+| Base de datos | Uso en la web |
 |---|---|
-| `lead-tr-upn.svg` | Logo principal vectorial |
-| `lead-tr-upn.ico` | Favicon (ya configurado en Layout) |
-| `lead_upn_tru.png` | Logo alternativo PNG |
-| `portada-lead.png` | Imagen portada general (para og:image) |
-| `instagram.svg` / `linkedin.svg` | Íconos de redes sociales |
-| `rocket.gif` | Animación decorativa |
-| `earth.gif` / `org_emoji_animated.gif` | Animaciones decorativas |
-| `dart_in_the_bullseye.gif` | Animación decorativa |
-| `handshake.gif` | Animación decorativa |
-| `pillars.gif` | Animación decorativa |
+| Novedades | Noticias, eventos, anuncios y convocatorias (solo las `Publicado`) |
+| Pilares | Los pilares y áreas de LEAD |
+| Miembros | Equipo y autores de novedades |
+| Testimonios | Testimonios (solo los marcados `Publicar en la web`) |
+| Aliados | Logos de aliados |
+| Cifras | Números de impacto de la portada |
+| Sitio | Misión, visión, redes, correo y "Únete" (una sola fila) |
 
-> ⚠️ No hay favicon `.svg` en `/public/favicon.svg`. El Layout hace referencia a él, pero el ícono real es `lead-tr-upn.ico`. Revisar y actualizar si es necesario.
+## Estructura
 
----
+```
+public/             Logos e imágenes de marca
+src/content.config.ts   Colecciones (esquemas + loaders)
+src/lib/notion/     Backend: cliente, loaders, mapeadores, conversor de bloques
+src/layouts/        Layout base (cabecera, pie, fuentes)
+src/components/     Logo, tarjetas, portada de imagen y una plantilla por formato (formatos/)
+src/styles/         Tokens de marca (global.css) y estilos del texto de Notion (prose.css)
+src/pages/          Inicio, /nosotros, /contacto, /novedades (con filtros), /novedades/[slug], 404,
+                    imágenes para compartir (og/), robots.txt y rss.xml
+src/lib/seo.ts      URLs canónicas y datos estructurados (schema.org)
+src/lib/og/         Generador de las imágenes para compartir (satori)
+scripts/iconos.mjs  Favicon, íconos de la app y Auki para móvil
+public/_headers     Encabezados de seguridad (CSP) y caché para Cloudflare Pages
+```
 
-## 🌐 SEO
+## Hoja de ruta
 
-El `Layout.astro` ya tiene:
-- `<meta charset="UTF-8">`
-- `<meta name="viewport" ...>`
-- `<meta name="description" content="LEAD UPN Trujillo - Learn, Explore, Aspire, Discover.">`
-- `<title>` dinámico vía prop
+- [x] Paso 0 — Limpieza del repo
+- [x] Paso 1 — Reorganizar Notion (Formato, Pilares, Miembros, guía y plantilla)
+- [x] Paso 2 — Backend: integración con la API de Notion (pendiente: primera sincronización con el `.env` real)
+- [x] Paso 3 — Frontend: portada, listado con filtros y una página por cada uno de los 9 formatos (pendiente: afinar con contenido e imágenes reales)
+- [ ] Paso 4 — Despliegue en Cloudflare Pages con recompilación automática
 
-**Pendiente por implementar:**
-- `og:title`, `og:description`, `og:image` (para compartir en redes)
-- `og:url`, `og:type`
-- `twitter:card`
-- Schema.org / JSON-LD para la organización
+## Manual de operación
 
----
+### Publicar contenido
+1. En Notion (tabla Novedades) completa la fila y pon `Estado = Publicado` con `Fecha de publicación` de hoy o anterior.
+2. La web se recompila sola **todos los días a las 6:00 (hora de Lima)** (`.github/workflows/deploy-diario.yml`).
+3. Para publicar **ya**: GitHub → pestaña *Actions* → *Recompilación diaria* → *Run workflow* (o hacer `git push`).
 
-## 🔗 Links de Redes Sociales (reales)
+### Qué dispara un build
+`git push` a `main` · tarea diaria de las 6:00 · botón *Run workflow* · Deploy Hook de Cloudflare Pages (secreto `CLOUDFLARE_DEPLOY_HOOK` en GitHub).
 
-Estos links son los definitivos para cualquier componente de social media:
+### Si el build falla
+- Abre el log en Cloudflare (*Workers & Pages → el proyecto → Deployments → el que falló*). El mensaje dice qué columna o variable falta.
+- "Columna renombrada o de otro tipo" → devuelve el nombre exacto en Notion (ver lista en `CLAUDE.md`). Cloudflare mantiene la versión anterior publicada mientras tanto.
+- "La variable X no está definida" → *Cloudflare Pages → Settings → Variables and Secrets*.
+- Una novedad sin título o resumen no rompe el build: se omite y aparece un aviso en el log.
 
-| Red | URL |
-|---|---|
-| Instagram | `https://www.instagram.com/lead.upn.trujillo/` |
-| LinkedIn | `https://www.linkedin.com/company/lead-upn-trujillo/` |
-| WhatsApp | *(pendiente — usar el link oficial cuando se proporcione)* |
+### Cambiar o rotar un token
+1. Notion → *Integraciones* → regenera el token.
+2. Actualiza `NOTION_TOKEN` en Cloudflare Pages (y en tu `.env`) y vuelve a desplegar (*Retry deployment*).
+3. Nunca pegues tokens en chats, issues ni commits.
 
----
+### Mensajes de contacto
+La web no tiene formulario: `/contacto` muestra el correo público, WhatsApp y redes de la tabla Sitio. Los mensajes llegan a esos canales.
 
-## ❓ Preguntas Frecuentes para el Agente
+### Calidad (automática en GitHub Actions)
+Pruebas, tipos, build, enlaces internos y Lighthouse móvil (rendimiento ≥ 90; accesibilidad, SEO y buenas prácticas ≥ 95) en cada push. Los enlaces externos se revisan cada lunes. Falta a mano: probar en un Android y un iPhone reales.
 
-**¿Agrego páginas nuevas?**
-> Sí, en `src/pages/`. Cada página usa `<Layout title="...">`. Las rutas de Astro son file-based: `src/pages/about.astro` → `/about`.
-
-**¿Puedo usar integraciones de Astro (plugins)?**
-> Sí si es necesario (ej: `@astrojs/image`, sitemap, etc.). Siempre instalar con `pnpm add` y registrar en `astro.config.mjs`.
-
-**¿Qué hago con los datos hardcodeados?**
-> Déjalos así por ahora. Cuando se integre Notion o Sheets, se refactorizarán los componentes para recibir datos como props. Siempre deja un comentario `// TODO: integrar con Notion` o `// TODO: integrar con Sheets` cuando el dato sea dinámico en el futuro.
-
----
-
-*Última actualización: Marzo 2026 — LEAD UPN Trujillo Web Team*
+### Lanzar la política de privacidad
+`src/pages/privacidad.astro` es un borrador con `[corchetes]` y `noindex`. Cuando el equipo lo valide: completa los datos, pon `pendiente = false` y quita `privacidad` del filtro del sitemap en `astro.config.mjs`.

@@ -1,0 +1,144 @@
+---
+import CabezaPagina from '../components/CabezaPagina.astro';
+import Unete from '../components/Unete.astro';
+import Layout from '../layouts/Layout.astro';
+import { getEquipo, getPilaresPorId } from '../lib/queries';
+import { migas } from '../lib/seo';
+
+/** Equipo: solo miembros con "Mostrar en la web"; sin "Autoriza uso de imagen" no hay foto (se muestran iniciales). */
+const [equipo, pilares] = await Promise.all([getEquipo(), getPilaresPorId()]);
+const iniciales = (n: string) =>
+	n
+		.split(/\s+/)
+		.slice(0, 2)
+		.map((p) => p[0]?.toUpperCase() ?? '')
+		.join('');
+const url = (v: string | null, base: string) => (v ? (/^https?:/.test(v) ? v : base + v.replace(/^@/, '')) : null);
+---
+
+<Layout
+	titulo="Equipo"
+	descripcion="Las personas que hacen LEAD UPN Trujillo: coordinadores y líderes de cada pilar."
+	jsonLd={[
+		migas([
+			{ nombre: 'Inicio', ruta: '/' },
+			{ nombre: 'Equipo', ruta: '/equipo' },
+		]),
+	]}
+>
+	<CabezaPagina titulo="Equipo" antetitulo="Quiénes somos">
+		<p>Estudiantes de la UPN Trujillo que lideran proyectos de tecnología y emprendimiento.</p>
+	</CabezaPagina>
+
+	<section class="contenedor seccion" aria-label="Miembros del equipo">
+		{
+			equipo.length > 0 ? (
+				<ul class="miembros">
+					{equipo.map((m) => {
+						const redes = [
+							{ n: 'Instagram', h: url(m.data.instagram, 'https://www.instagram.com/') },
+							{ n: 'LinkedIn', h: url(m.data.linkedin, 'https://www.linkedin.com/in/') },
+							{ n: 'Web', h: m.data.web },
+						].filter((r): r is { n: string; h: string } => Boolean(r.h));
+						const pilar = m.data.pilares[0] ? pilares.get(m.data.pilares[0].id) : undefined;
+						return (
+							<li class="miembro">
+								{m.data.foto ? (
+									<img
+										src={m.data.foto.src}
+										srcset={m.data.foto.srcset || undefined}
+										sizes="(min-width: 48rem) 14rem, 45vw"
+										width={m.data.foto.width ?? undefined}
+										height={m.data.foto.height ?? undefined}
+										alt={`Foto de ${m.data.nombre}`}
+										loading="lazy"
+										decoding="async"
+									/>
+								) : (
+									<span class="miembro__iniciales" aria-hidden="true">
+										{iniciales(m.data.nombre)}
+									</span>
+								)}
+								<h2 class="miembro__nombre">{m.data.nombre}</h2>
+								<p class="miembro__cargo">
+									{m.data.cargo}
+									{pilar && <> · {pilar.data.nombre}</>}
+								</p>
+								{m.data.bio && <p class="miembro__bio">{m.data.bio}</p>}
+								{redes.length > 0 && (
+									<ul class="miembro__redes" aria-label={`Redes de ${m.data.nombre}`}>
+										{redes.map((r) => (
+											<li>
+												<a href={r.h} target="_blank" rel="noopener noreferrer">
+													{r.n}
+												</a>
+											</li>
+										))}
+									</ul>
+								)}
+							</li>
+						);
+					})}
+				</ul>
+			) : (
+				<p>Pronto presentaremos al equipo.</p>
+			)
+		}
+	</section>
+
+	<Unete />
+</Layout>
+
+<style>
+	.miembros {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 2rem 1.5rem;
+		grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+	}
+	.miembro {
+		display: grid;
+		gap: 0.35rem;
+		align-content: start;
+	}
+	.miembro img,
+	.miembro__iniciales {
+		width: 100%;
+		aspect-ratio: 1;
+		object-fit: cover;
+		border-radius: 1rem;
+		margin-bottom: 0.4rem;
+	}
+	.miembro__iniciales {
+		display: grid;
+		place-items: center;
+		background: var(--marino);
+		color: var(--blanco);
+		font-family: 'Anton', sans-serif;
+		font-size: 3rem;
+	}
+	.miembro__nombre {
+		margin: 0;
+		font-size: 1.1rem;
+	}
+	.miembro__cargo {
+		margin: 0;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--tinta-suave);
+	}
+	.miembro__bio {
+		margin: 0.2rem 0 0;
+		font-size: 0.92rem;
+	}
+	.miembro__redes {
+		list-style: none;
+		margin: 0.3rem 0 0;
+		padding: 0;
+		display: flex;
+		gap: 0.8rem;
+		font-size: 0.85rem;
+	}
+</style>

@@ -1,0 +1,67 @@
+---
+/**
+ * Logo LEAD | UPN Trujillo. El símbolo es una máscara teñida con el degradado de marca;
+ * el nombre se arma con tipografía (el SVG original solo trae el símbolo).
+ */
+---
+
+<a class="logo" href="/" aria-label="LEAD UPN Trujillo, ir al inicio">
+	<span class="logo__marca" aria-hidden="true"></span>
+	<span class="logo__texto" aria-hidden="true">
+		<span class="logo__linea">
+			<span class="logo__lead">LEAD</span>
+			<span class="logo__barra"></span>
+			<span class="logo__upn">UPN</span>
+		</span>
+		<span class="logo__sede">Trujillo</span>
+	</span>
+</a>
+
+<style>
+	.logo {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.7rem;
+		text-decoration: none;
+		color: var(--blanco);
+	}
+	.logo__marca {
+		width: 3rem;
+		aspect-ratio: 720 / 430;
+		background: var(--degradado-vertical);
+		-webkit-mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+		mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+	}
+	.logo__texto {
+		display: grid;
+		gap: 0.1rem;
+		line-height: 1;
+	}
+	.logo__linea {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+	.logo__lead {
+		font-weight: 600;
+		font-size: 1rem;
+		letter-spacing: 0.3em;
+	}
+	.logo__barra {
+		width: 2px;
+		height: 1.05em;
+		background: var(--magenta);
+	}
+	.logo__upn {
+		font-family: var(--f-display);
+		font-size: 1.15rem;
+		letter-spacing: 0.04em;
+	}
+	.logo__sede {
+		font-size: 0.58rem;
+		font-weight: 400;
+		letter-spacing: 0.55em;
+		text-transform: uppercase;
+		opacity: 0.85;
+	}
+</style>

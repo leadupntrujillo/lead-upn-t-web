@@ -1,0 +1,108 @@
+---
+import PilarChip from '../PilarChip.astro';
+import { fechaLarga, isoDia } from '../../lib/format';
+import { extraerCifras } from '../../lib/html';
+import Pie from './Pie.astro';
+import type { FormatoProps } from './tipos';
+
+/**
+ * Logros: resultados y premios. Las cifras salen de la primera lista cuyos ítems empiezan con
+ * un número en negrita ("**120** asistentes"); el resto de la página se muestra como texto.
+ */
+const { entry, pilar, autor, html, relacionadas, pilares } = Astro.props as FormatoProps;
+const d = entry.data;
+const { cifras, html: texto } = extraerCifras(html);
+---
+
+<article>
+	<header class="cabeza">
+		<div class="contenedor cabeza__fila">
+			<PilarChip pilar={pilar} oscuro />
+			<h1 class="titulo">{d.titulo}</h1>
+			<p class="cabeza__resumen">{d.resumen}</p>
+			<time class="pill pill--oscuro" datetime={isoDia(d.fechaPublicacion)}>{fechaLarga(d.fechaPublicacion)}</time>
+		</div>
+
+		{
+			cifras.length > 0 && (
+				<div class="contenedor">
+					<ul class="cifras" style={`--n:${Math.min(cifras.length, 4)}`}>
+						{cifras.map((c) => (
+							<li>
+								<span class="cifra__valor">{c.valor}</span>
+								<span class="cifra__texto">{c.etiqueta}</span>
+							</li>
+						))}
+					</ul>
+				</div>
+			)
+		}
+	</header>
+
+	<div class="lectura cuerpo">
+		<div class="prose" set:html={texto} />
+	</div>
+</article>
+
+<Pie {entry} {autor} {relacionadas} {pilares} />
+
+<style>
+	.cabeza {
+		background:
+			radial-gradient(60% 100% at 100% 0%, rgb(140 63 209 / 0.4), transparent 65%),
+			var(--marino);
+		color: var(--blanco);
+		padding-block: clamp(2.5rem, 7vw, 4.5rem);
+		display: grid;
+		gap: 3rem;
+	}
+	.cabeza__fila {
+		display: grid;
+		gap: 1.25rem;
+		justify-items: start;
+	}
+	h1 {
+		max-width: 20ch;
+		font-size: clamp(2.5rem, 7vw, 4.75rem);
+		line-height: 1.05;
+	}
+	.cabeza__resumen {
+		max-width: 40rem;
+		font-size: clamp(1.05rem, 2vw, 1.25rem);
+		line-height: 1.55;
+		color: rgb(255 255 255 / 0.88);
+	}
+	.cifras {
+		display: grid;
+		gap: 1.75rem 2rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+	}
+	.cifras li {
+		display: grid;
+		gap: 0.5rem;
+		align-content: start;
+		padding-top: 1rem;
+		border-top: 4px solid transparent;
+		border-image: var(--degradado) 1;
+	}
+	.cifra__valor {
+		font-family: var(--f-display);
+		font-size: clamp(3.5rem, 9vw, 6rem);
+		line-height: 1;
+	}
+	.cifra__texto {
+		font-size: 1rem;
+		font-weight: 400;
+		line-height: 1.4;
+		color: rgb(255 255 255 / 0.85);
+	}
+	.cuerpo {
+		padding-block: clamp(2rem, 5vw, 3.5rem) 0;
+		margin-inline: max(var(--gutter), calc((100% - var(--ancho)) / 2));
+		width: auto;
+		max-width: var(--lectura);
+	}
+</style>

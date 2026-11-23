@@ -1,0 +1,334 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { fechaCorta, minutosDeLectura, partesDeFecha } from '../lib/format';
+import { extraerCifras, extraerCita } from '../lib/html';
+import { finDelEvento } from '../lib/novedades';
+import Cover from './Cover.astro';
+import PilarChip from './PilarChip.astro';
+
+/**
+ * Tarjeta de una novedad. Su esqueleto cambia según el formato:
+ *  periódico y galería → portada + texto · anuncio → bloque marino · post IG → foto cuadrada con marco
+ *  evento y convocatoria → hojita de fecha · logros → cifra grande · entrevista → foto redonda y cita · breve → línea compacta
+ */
+interface Props {
+	entry: CollectionEntry<'novedades'>;
+	pilar?: CollectionEntry<'pilares'>;
+	variante?: 'grande' | 'normal';
+}
+
+const { entry, pilar, variante = 'normal' } = Astro.props;
+const d = entry.data;
+const f = d.formato;
+const href = `/novedades/${entry.id}`;
+const html = entry.rendered?.html ?? '';
+
+const conPortada = !['anuncio', 'breve', 'logros', 'entrevista'].includes(f);
+const cifra = f === 'logros' ? extraerCifras(html).cifras[0] : undefined;
+const cita = f === 'entrevista' ? extraerCita(html).cita : null;
+
+const evento = d.fechaEvento;
+const hojita = (f === 'evento' || f === 'convocatoria') && evento ? partesDeFecha(evento.inicio, evento.conHora) : null;
+const cerrada = f === 'convocatoria' && evento ? (finDelEvento(entry) ?? Infinity) < Date.now() : false;
+
+const ratio = f === 'post-ig' ? '1 / 1' : variante === 'grande' ? '16 / 10' : '16 / 9';
+const aviso = d.estado === 'borrador' ? 'Borrador' : d.estado === 'en-revision' ? 'En revisión' : null;
+const fotos = d.galeria.length + (d.imagen ? 1 : 0);
+---
+
+<article class:list={['tarjeta', `tarjeta--${f}`, `tarjeta--${variante}`]}>
+	{
+		conPortada && (
+			<div class="tarjeta__media">
+				<Cover imagen={d.imagen ?? d.galeria[0] ?? null} ratio={ratio} />
+				{hojita && (
+					<span class="hojita" aria-hidden="true">
+						<span class="hojita__dia">{hojita.dia}</span>
+						<span class="hojita__mes">{hojita.mes}</span>
+					</span>
+				)}
+				{f === 'galeria' && fotos > 0 && <span class="pill pill--oscuro tarjeta__badge">{fotos} fotos</span>}
+			</div>
+		)
+	}
+
+	<div class="tarjeta__cuerpo">
+		<div class="tarjeta__fila">
+			<PilarChip pilar={pilar} oscuro={f === 'anuncio' || f === 'logros'} />
+			{aviso && <span class="pill tarjeta__aviso">{aviso}</span>}
+		</div>
+
+		{
+			cifra && (
+				<p class="tarjeta__cifra">
+					<strong>{cifra.valor}</strong>
+					<span>{cifra.etiqueta}</span>
+				</p>
+			)
+		}
+
+		<h3 class="tarjeta__titulo titulo"><a href={href}>{d.titulo}</a></h3>
+
+		{f !== 'breve' && <p class="tarjeta__resumen">{d.resumen}</p>}
+		{cita && <blockquote class="tarjeta__cita">{cita}</blockquote>}
+
+		<p class="tarjeta__meta">
+			{
+				f === 'convocatoria' && evento ? (
+					<span class:list={['pill', 'pill--borde', { 'tarjeta__cerrada': cerrada }]}>
+						{cerrada ? 'Cerrada' : `Cierra el ${fechaCorta(evento.inicio, evento.conHora)}`}
+					</span>
+				) : (
+					<time datetime={d.fechaPublicacion.toISOString()}>{fechaCorta(d.fechaPublicacion)}</time>
+				)
+			}
+			{f === 'periodico' && <span>{minutosDeLectura(d.tiempoLectura)}</span>}
+			{f === 'evento' && d.modalidad && <span class="pill">{d.modalidad === 'hibrido' ? 'Híbrido' : d.modalidad === 'virtual' ? 'Virtual' : 'Presencial'}</span>}
+		</p>
+	</div>
+</article>
+
+<style>
+	.tarjeta {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		background: var(--blanco);
+		border-radius: 1rem;
+		overflow: hidden;
+		box-shadow: var(--sombra);
+		transition: transform 0.2s, box-shadow 0.2s;
+	}
+	.tarjeta:hover {
+		transform: translateY(-3px);
+	}
+	.tarjeta:focus-within {
+		outline: 3px solid var(--coral);
+		outline-offset: 3px;
+	}
+
+	.tarjeta__media {
+		position: relative;
+	}
+	.tarjeta__cuerpo {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding: 1.1rem 1.25rem 1.3rem;
+		flex: 1;
+	}
+	.tarjeta__fila {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+		min-height: 1.4rem;
+	}
+	.tarjeta__titulo {
+		font-size: 1.55rem;
+	}
+	/* El enlace del título cubre toda la tarjeta */
+	.tarjeta__titulo a {
+		text-decoration: none;
+	}
+	.tarjeta__titulo a::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+	}
+	.tarjeta__titulo a:focus-visible {
+		outline: none;
+	}
+	.tarjeta__resumen {
+		font-size: 0.95rem;
+		line-height: 1.6;
+		color: var(--tinta-suave);
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.tarjeta__meta {
+		margin-top: auto;
+		padding-top: 0.4rem;
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		flex-wrap: wrap;
+		font-size: 0.8125rem;
+		font-weight: 400;
+		color: var(--tinta-suave);
+	}
+	.tarjeta__aviso {
+		background: #fdf3cc;
+		color: #5c4300;
+		position: relative;
+		z-index: 2;
+	}
+	.tarjeta__badge {
+		position: absolute;
+		right: 0.75rem;
+		bottom: 0.75rem;
+		backdrop-filter: blur(6px);
+		background: rgb(22 26 78 / 0.75);
+	}
+
+	/* Hojita de calendario (evento y convocatoria) */
+	.hojita {
+		position: absolute;
+		left: 0.9rem;
+		top: 0.9rem;
+		display: grid;
+		justify-items: center;
+		min-width: 3.4rem;
+		padding: 0.35rem 0.6rem 0.4rem;
+		border-radius: 0.75rem;
+		background: var(--blanco);
+		color: var(--marino);
+		line-height: 1;
+		box-shadow: 0 4px 14px rgb(22 26 78 / 0.25);
+	}
+	.hojita__dia {
+		font-family: var(--f-display);
+		font-size: 1.7rem;
+	}
+	.hojita__mes {
+		margin-top: 0.15rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--magenta);
+	}
+	.tarjeta__cerrada {
+		color: var(--tinta-suave);
+	}
+
+	/* ----- Periódico y galería: en "grande" la portada va al costado ----- */
+	@media (min-width: 52rem) {
+		.tarjeta--grande {
+			flex-direction: row;
+		}
+		.tarjeta--grande .tarjeta__media {
+			flex: 1.25;
+		}
+		.tarjeta--grande .tarjeta__media {
+			max-height: 30rem;
+			overflow: hidden;
+		}
+		.tarjeta--grande .tarjeta__media :global(.cover) {
+			height: 100%;
+			max-height: 30rem;
+			aspect-ratio: auto !important;
+			min-height: 22rem;
+			/* Los afiches llevan el título arriba: se recorta por abajo */
+			object-position: center top;
+		}
+		.tarjeta--grande .tarjeta__cuerpo {
+			flex: 1;
+			justify-content: center;
+			padding: 2rem;
+			gap: 0.9rem;
+		}
+		.tarjeta--grande .tarjeta__titulo {
+			font-size: clamp(2rem, 3.2vw, 2.9rem);
+		}
+		.tarjeta--grande .tarjeta__resumen {
+			font-size: 1.05rem;
+			-webkit-line-clamp: 4;
+		}
+	}
+
+	/* ----- Anuncio: bloque marino, sin foto ----- */
+	.tarjeta--anuncio {
+		background: var(--marino);
+		color: var(--blanco);
+		border-top: 6px solid transparent;
+		border-image: var(--degradado) 1;
+		border-radius: 0;
+	}
+	.tarjeta--anuncio .tarjeta__resumen,
+	.tarjeta--anuncio .tarjeta__meta {
+		color: rgb(255 255 255 / 0.8);
+	}
+	.tarjeta--anuncio .tarjeta__cuerpo {
+		padding-top: 1.4rem;
+	}
+
+	/* ----- Post IG: foto cuadrada con marco de polaroid ----- */
+	.tarjeta--post-ig {
+		padding: 0.6rem 0.6rem 0;
+		border-radius: 0.4rem;
+		transform: rotate(-0.8deg);
+	}
+	.tarjeta--post-ig:nth-child(even) {
+		transform: rotate(0.8deg);
+	}
+	.tarjeta--post-ig:hover {
+		transform: rotate(0) translateY(-3px);
+	}
+	.tarjeta--post-ig .tarjeta__cuerpo {
+		padding-inline: 0.5rem;
+	}
+	.tarjeta--post-ig .tarjeta__resumen {
+		-webkit-line-clamp: 2;
+	}
+
+	/* ----- Logros: la cifra manda ----- */
+	.tarjeta--logros {
+		background: var(--marino);
+		color: var(--blanco);
+	}
+	.tarjeta--logros .tarjeta__resumen,
+	.tarjeta--logros .tarjeta__meta {
+		color: rgb(255 255 255 / 0.8);
+	}
+	.tarjeta__cifra {
+		display: grid;
+		gap: 0.1rem;
+		line-height: 1;
+	}
+	.tarjeta__cifra strong {
+		font-family: var(--f-display);
+		font-weight: 400;
+		font-size: 4.2rem;
+		color: var(--coral-claro);
+	}
+	.tarjeta__cifra span {
+		font-size: 0.9rem;
+		font-weight: 400;
+		line-height: 1.4;
+	}
+
+	/* ----- Entrevista: frase destacada ----- */
+	.tarjeta--entrevista .tarjeta__cita {
+		margin: 0;
+		padding-left: 1rem;
+		border-left: 4px solid var(--magenta);
+		font-weight: 600;
+		font-size: 1.05rem;
+		line-height: 1.5;
+	}
+	.tarjeta--entrevista .tarjeta__resumen {
+		-webkit-line-clamp: 2;
+	}
+
+	/* ----- Breve: una línea compacta ----- */
+	.tarjeta--breve {
+		background: transparent;
+		box-shadow: none;
+		border-radius: 0;
+		border-left: 4px solid var(--magenta);
+	}
+	.tarjeta--breve:hover {
+		transform: none;
+	}
+	.tarjeta--breve .tarjeta__cuerpo {
+		padding: 0.2rem 0 0.2rem 1rem;
+		gap: 0.3rem;
+	}
+	.tarjeta--breve .tarjeta__titulo {
+		font-size: 1.25rem;
+	}
+</style>

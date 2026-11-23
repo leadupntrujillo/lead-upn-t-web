@@ -1,0 +1,87 @@
+---
+/** Compartir una novedad: WhatsApp, LinkedIn, Facebook y copiar enlace (o el menú del celular si existe). Sin SDKs de terceros. */
+interface Props {
+	titulo: string;
+	ruta: string;
+}
+const { titulo, ruta } = Astro.props;
+const url = new URL(ruta, Astro.site).href;
+const u = encodeURIComponent(url);
+const redes = [
+	{ nombre: 'WhatsApp', href: `https://wa.me/?text=${encodeURIComponent(`${titulo} ${url}`)}` },
+	{ nombre: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
+	{ nombre: 'Facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
+];
+---
+
+<div class="compartir" data-compartir data-url={url} data-titulo={titulo}>
+	<span class="compartir__titulo">Compartir</span>
+	<ul>
+		{
+			redes.map((r) => (
+				<li>
+					<a class="pill pill--borde" href={r.href} target="_blank" rel="noopener noreferrer" data-cta={`compartir-${r.nombre.toLowerCase()}`}>
+						{r.nombre}
+					</a>
+				</li>
+			))
+		}
+		<li>
+			<button class="pill pill--borde" type="button" data-copiar>Copiar enlace</button>
+		</li>
+	</ul>
+	<span class="sr-only" role="status" aria-live="polite" data-estado></span>
+</div>
+
+<script>
+	for (const caja of document.querySelectorAll<HTMLElement>('[data-compartir]')) {
+		const boton = caja.querySelector<HTMLButtonElement>('[data-copiar]');
+		const estado = caja.querySelector<HTMLElement>('[data-estado]');
+		boton?.addEventListener('click', async () => {
+			const { url = '', titulo = '' } = caja.dataset;
+			try {
+				if (navigator.share) await navigator.share({ title: titulo, url });
+				else {
+					await navigator.clipboard.writeText(url);
+					boton.textContent = '¡Enlace copiado!';
+					if (estado) estado.textContent = 'Enlace copiado';
+				}
+			} catch {
+				/* el usuario canceló el menú de compartir */
+			}
+		});
+	}
+</script>
+
+<style>
+	.compartir {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.6rem 1rem;
+		padding-block: 1rem;
+		border-block: 1px solid var(--linea);
+	}
+	.compartir__titulo {
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--tinta-suave);
+	}
+	ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.pill {
+		color: var(--marino);
+		font: inherit;
+		font-size: 0.85rem;
+		cursor: pointer;
+		text-decoration: none;
+	}
+</style>

@@ -10,7 +10,6 @@ out/
 
 # Dependencies
 node_modules/
-pnpm-lock.yaml
 yarn.lock
 package-lock.json
 
@@ -28,6 +27,7 @@ lerna-debug.log*
 .env.local
 .env.*.local
 .env.test
+.env.example
 
 # Python cache and bytecode
 __pycache__/
@@ -65,3 +65,10 @@ ehthumbs.db
 .turbo/
 dist-ssr/
 .nuxt
+
+# Archivos descargados de Notion en build y config local de Claude
+public/_notion/
+.claude/settings.local.json
+
+# Archivos fuente pesados (modelos 3D sin optimizar): no van al repo ni a la web
+fuentes-3d/

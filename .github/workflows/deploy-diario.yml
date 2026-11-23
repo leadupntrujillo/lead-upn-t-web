@@ -1,0 +1,18 @@
+# Recompila la web todos los días a las 6:00 (Lima) para publicar las novedades programadas.
+# Lima = UTC-5 (sin horario de verano) → 11:00 UTC.
+name: Recompilación diaria
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar al Deploy Hook de Cloudflare Pages
+        env:
+          HOOK: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}
+        run: |
+          test -n "$HOOK" || { echo "Falta el secreto CLOUDFLARE_DEPLOY_HOOK"; exit 1; }
+          curl --fail --silent --show-error -X POST "$HOOK"

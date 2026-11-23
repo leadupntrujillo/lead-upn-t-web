@@ -1,0 +1,48 @@
+---
+import { getSitio } from '../lib/queries';
+
+/** Franja final "Súmate a la familia LEAD": la acción principal del sitio (Únete). */
+const sitio = await getSitio();
+const externo = /^https?:/.test(sitio.unete.url);
+const esInstagram = sitio.unete.url.includes('instagram.com');
+---
+
+<section id="unete" class="unete" aria-labelledby="t-unete">
+	<div class="contenedor unete__fila">
+		<h2 id="t-unete" class="titulo">Súmate a la familia <span class="caja">LEAD</span></h2>
+		<p>{sitio.unete.texto}</p>
+		<a
+			class="btn btn--claro"
+			href={sitio.unete.url}
+			data-cta="unete"
+			{...externo ? { rel: 'noopener noreferrer', target: '_blank' } : {}}
+		>
+			{esInstagram ? 'Síguenos en Instagram' : 'Únete a LEAD'}
+		</a>
+	</div>
+</section>
+
+<style>
+	.unete {
+		background: var(--degradado-boton);
+		color: var(--blanco);
+		padding-block: clamp(2.5rem, 7vw, 4.5rem);
+	}
+	.unete__fila {
+		display: grid;
+		gap: 1rem;
+		justify-items: start;
+	}
+	.unete h2 {
+		font-size: clamp(2.2rem, 6vw, 4rem);
+		line-height: 1.1;
+	}
+	.unete p {
+		max-width: 34rem;
+		font-size: 1.1rem;
+	}
+	.unete .btn {
+		background: var(--blanco);
+		color: var(--marino);
+	}
+</style>

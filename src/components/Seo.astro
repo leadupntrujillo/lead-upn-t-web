@@ -1,0 +1,69 @@
+---
+import { absoluta, grafo, jsonLdSeguro, NOMBRE, OG_POR_DEFECTO, organizacion, recortar, sitioWeb } from '../lib/seo';
+import type { Sitio } from '../lib/queries';
+
+/**
+ * Etiquetas para Google y para compartir: título, descripción, URL canónica, Open Graph,
+ * tarjeta de X y datos estructurados (JSON-LD). La organización va en todas las páginas
+ * porque las noticias y eventos la citan como editora u organizadora.
+ */
+export interface SeoProps {
+	titulo?: string;
+	descripcion?: string;
+	/** Ruta de la imagen para compartir (1200×630). */
+	imagen?: string;
+	imagenAlt?: string;
+	tipo?: 'website' | 'article';
+	/** Nodos extra de schema.org (Noticia, Evento, migas…). */
+	jsonLd?: object[];
+	publicado?: Date;
+	modificado?: Date;
+	noindex?: boolean;
+}
+
+interface Props extends SeoProps {
+	sitio: Sitio;
+}
+
+const { sitio, titulo, descripcion, imagen = OG_POR_DEFECTO, imagenAlt, tipo = 'website', jsonLd = [], publicado, modificado, noindex = false } =
+	Astro.props;
+
+const base = Astro.site?.toString() ?? 'https://leadupntrujillo.com';
+const tituloCompleto = titulo ? `${titulo} | ${NOMBRE}` : `${NOMBRE}: liderazgo con propósito`;
+const desc = recortar(descripcion || sitio.descripcion, 160);
+// Con `build.format: 'file'` la ruta puede terminar en .html: la URL canónica va sin extensión ni barra final.
+const ruta = Astro.url.pathname.replace(/\.html$/, '').replace(/(.)\/$/, '$1').replace(/\/index$/, '/') || '/';
+const canonica = absoluta(ruta, base);
+const imagenAbs = absoluta(imagen, base);
+const esHome = ruta === '/';
+
+const ld = grafo(organizacion(sitio, base), ...(esHome ? [sitioWeb(NOMBRE, base)] : []), ...jsonLd);
+---
+
+<title>{tituloCompleto}</title>
+<meta name="description" content={desc} />
+<link rel="canonical" href={canonica} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta property="og:site_name" content={NOMBRE} />
+<meta property="og:locale" content="es_PE" />
+<meta property="og:type" content={tipo} />
+<meta property="og:title" content={titulo ?? tituloCompleto} />
+<meta property="og:description" content={desc} />
+<meta property="og:url" content={canonica} />
+<meta property="og:image" content={imagenAbs} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={imagenAlt ?? titulo ?? NOMBRE} />
+{publicado && <meta property="article:published_time" content={publicado.toISOString()} />}
+{modificado && <meta property="article:modified_time" content={modificado.toISOString()} />}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={titulo ?? tituloCompleto} />
+<meta name="twitter:description" content={desc} />
+<meta name="twitter:image" content={imagenAbs} />
+
+<link rel="alternate" type="application/rss+xml" title={`Novedades de ${NOMBRE}`} href="/rss.xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<script type="application/ld+json" is:inline set:html={jsonLdSeguro(ld)} />

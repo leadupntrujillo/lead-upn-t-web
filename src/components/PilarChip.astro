@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { colorPilar } from '../lib/pilares';
+
+interface Props {
+	pilar?: CollectionEntry<'pilares'>;
+	/** En fondos oscuros el chip usa letras claras. */
+	oscuro?: boolean;
+	enlace?: boolean;
+}
+
+const { pilar, oscuro = false, enlace = true } = Astro.props;
+const Etiqueta = enlace ? 'a' : 'span';
+---
+
+{
+	pilar && (
+		<Etiqueta
+			class:list={['chip', { 'chip--oscuro': oscuro }]}
+			href={enlace ? `/novedades?pilar=${pilar.data.slug}` : undefined}
+			style={`--punto:${colorPilar(pilar.data.color)}`}
+		>
+			<span class="chip__punto" aria-hidden="true" />
+			{pilar.data.nombre}
+		</Etiqueta>
+	)
+}
+
+<style>
+	.chip {
+		position: relative;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		line-height: 1.4;
+		text-decoration: none;
+		color: var(--marino);
+	}
+	.chip--oscuro {
+		color: var(--blanco);
+	}
+	a.chip:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+	.chip__punto {
+		width: 0.7rem;
+		height: 0.7rem;
+		flex: none;
+		border-radius: 50%;
+		background: var(--punto);
+		box-shadow: 0 0 0 2px var(--blanco);
+	}
+	.chip--oscuro .chip__punto {
+		box-shadow: 0 0 0 2px rgb(255 255 255 / 0.25);
+	}
+</style>

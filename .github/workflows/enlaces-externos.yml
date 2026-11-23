@@ -1,0 +1,15 @@
+# Revisa una vez por semana que los enlaces externos del sitio publicado sigan vivos.
+name: Enlaces externos
+on:
+  schedule:
+    - cron: '0 13 * * 1'
+  workflow_dispatch:
+
+jobs:
+  enlaces:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --max-concurrency 4 --accept 200,201,204,301,302,403,429 'https://leadupntrujillo.com/sitemap-0.xml'
+          fail: true

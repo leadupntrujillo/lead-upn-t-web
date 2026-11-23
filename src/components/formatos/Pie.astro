@@ -1,0 +1,156 @@
+---
+import { slugEtiqueta } from '../../lib/novedades';
+import Compartir from '../Compartir.astro';
+import NovedadCard from '../NovedadCard.astro';
+import type { FormatoProps } from './tipos';
+
+/** Cierre común a todos los formatos: etiquetas, autor y novedades relacionadas. */
+type Props = Pick<FormatoProps, 'entry' | 'autor' | 'relacionadas' | 'pilares'> & {
+	sinAutor?: boolean;
+	/** Los formatos con botón propio (evento, convocatoria, post IG) lo ocultan aquí. */
+	sinBoton?: boolean;
+};
+
+const { entry, autor, relacionadas, pilares, sinAutor = false, sinBoton = false } = Astro.props;
+const d = entry.data;
+
+const iniciales = (nombre: string) =>
+	nombre
+		.split(/\s+/)
+		.slice(0, 2)
+		.map((p) => p[0]?.toUpperCase() ?? '')
+		.join('');
+---
+
+<div class="pie-novedad">
+	{
+		d.boton && !sinBoton && (
+			<p>
+				<a class="btn btn--primario" href={d.boton.url} rel="noopener noreferrer" target="_blank">
+					{d.boton.texto}
+				</a>
+			</p>
+		)
+	}
+
+	{
+		d.etiquetas.length > 0 && (
+			<ul class="etiquetas" aria-label="Etiquetas">
+				{d.etiquetas.map((e) => (
+					<li>
+						<a class="pill" href={`/etiquetas/${slugEtiqueta(e)}`}>
+							{e}
+						</a>
+					</li>
+				))}
+			</ul>
+		)
+	}
+
+	<Compartir titulo={d.titulo} ruta={`/novedades/${entry.id}`} />
+
+	{
+		autor && !sinAutor && (
+			<aside class="autor" aria-label="Autor">
+				{autor.data.foto ? (
+					<img class="autor__foto" src={autor.data.foto.src} alt="" loading="lazy" decoding="async" />
+				) : (
+					<span class="autor__foto autor__foto--iniciales" aria-hidden="true">
+						{iniciales(autor.data.nombre)}
+					</span>
+				)}
+				<div>
+					<p class="autor__nombre">{autor.data.nombre}</p>
+					{autor.data.cargo && <p class="autor__cargo">{autor.data.cargo}</p>}
+					{autor.data.bio && <p class="autor__bio">{autor.data.bio}</p>}
+				</div>
+			</aside>
+		)
+	}
+
+	{
+		relacionadas.length > 0 && (
+			<section class="relacionadas" aria-labelledby="mas-novedades">
+				<h2 id="mas-novedades" class="titulo">
+					Sigue leyendo
+				</h2>
+				<div class="relacionadas__grid">
+					{relacionadas.map((n) => (
+						<NovedadCard entry={n} pilar={n.data.pilar ? pilares.get(n.data.pilar.id) : undefined} />
+					))}
+				</div>
+			</section>
+		)
+	}
+</div>
+
+<style>
+	.pie-novedad {
+		width: min(100% - 2 * var(--gutter), var(--ancho));
+		margin-inline: auto;
+		padding-block: 3rem 4rem;
+		display: grid;
+		gap: 2.5rem;
+	}
+	.etiquetas {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-width: var(--lectura);
+	}
+	.etiquetas .pill {
+		text-decoration: none;
+	}
+	.etiquetas .pill:hover {
+		background: var(--marino);
+		color: var(--blanco);
+	}
+	.autor {
+		display: flex;
+		gap: 1rem;
+		align-items: flex-start;
+		max-width: var(--lectura);
+		padding: 1.25rem;
+		border-radius: 1rem;
+		background: var(--blanco);
+		box-shadow: var(--sombra);
+	}
+	.autor__foto {
+		flex: none;
+		width: 3.5rem;
+		height: 3.5rem;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+	.autor__foto--iniciales {
+		display: grid;
+		place-items: center;
+		background: var(--degradado-boton);
+		color: var(--blanco);
+		font-weight: 700;
+	}
+	.autor__nombre {
+		font-weight: 700;
+		line-height: 1.3;
+	}
+	.autor__cargo {
+		font-size: 0.875rem;
+		color: var(--tinta-suave);
+	}
+	.autor__bio {
+		margin-top: 0.4rem;
+		font-size: 0.9rem;
+	}
+	.relacionadas h2 {
+		font-size: clamp(1.8rem, 4vw, 2.5rem);
+		margin-bottom: 1.25rem;
+	}
+	.relacionadas__grid {
+		display: grid;
+		gap: 1.5rem;
+		grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+	}
+</style>

@@ -1,0 +1,46 @@
+---
+import PilarChip from '../PilarChip.astro';
+import { fechaLarga, isoDia } from '../../lib/format';
+import Pie from './Pie.astro';
+import type { FormatoProps } from './tipos';
+
+/** Breve: noticia de uno o dos párrafos. Sin portada ni adornos: título, texto y listo. */
+const { entry, pilar, autor, html, relacionadas, pilares } = Astro.props as FormatoProps;
+const d = entry.data;
+---
+
+<article class="lectura breve">
+	<p class="breve__cabeza">
+		<span class="pill pill--borde">Breve</span>
+		<time datetime={isoDia(d.fechaPublicacion)}>{fechaLarga(d.fechaPublicacion)}</time>
+		<PilarChip pilar={pilar} />
+	</p>
+	<h1 class="titulo">{d.titulo}</h1>
+	<div class="prose" set:html={html} />
+</article>
+
+<Pie {entry} {autor} {relacionadas} {pilares} sinAutor />
+
+<style>
+	.breve {
+		padding-top: clamp(2rem, 5vw, 3.5rem);
+		display: grid;
+		gap: 1.25rem;
+	}
+	.breve__cabeza {
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		flex-wrap: wrap;
+		font-size: 0.85rem;
+		font-weight: 400;
+		color: var(--tinta-suave);
+	}
+	h1 {
+		font-size: clamp(2.2rem, 6vw, 3.4rem);
+		line-height: 1.08;
+	}
+	.breve :global(.prose) {
+		font-size: 1.125rem;
+	}
+</style>

@@ -1,0 +1,39 @@
+name: CI
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_NOVEDADES_ID: ${{ secrets.NOTION_NOVEDADES_ID }}
+      NOTION_PILARES_ID: ${{ secrets.NOTION_PILARES_ID }}
+      NOTION_MIEMBROS_ID: ${{ secrets.NOTION_MIEMBROS_ID }}
+      NOTION_TESTIMONIOS_ID: ${{ secrets.NOTION_TESTIMONIOS_ID }}
+      NOTION_ALIADOS_ID: ${{ secrets.NOTION_ALIADOS_ID }}
+      NOTION_CIFRAS_ID: ${{ secrets.NOTION_CIFRAS_ID }}
+      NOTION_SITIO_ID: ${{ secrets.NOTION_SITIO_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm check
+      - run: pnpm build
+      - name: Enlaces internos rotos
+        run: node scripts/enlaces.mjs
+      - name: Lighthouse (móvil)
+        run: pnpm dlx @lhci/cli@0.14.0 autorun
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dist
+          path: dist
+          retention-days: 3

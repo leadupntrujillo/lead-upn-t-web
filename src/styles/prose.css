@@ -1,0 +1,199 @@
+/*
+ * Estilos del texto que viene de Notion (HTML generado en src/lib/notion/blocks.ts).
+ * Los encabezados de Notion bajan un nivel: Encabezado 1 → h2, 2 → h3, 3 → h4.
+ */
+.prose {
+	max-width: var(--lectura);
+	font-size: 1.0625rem;
+	line-height: 1.8;
+	color: var(--tinta);
+}
+
+.prose > * + * {
+	margin-top: 1.1em;
+}
+
+.prose h2 {
+	font-family: var(--f-display);
+	font-weight: 400;
+	text-transform: uppercase;
+	font-size: clamp(1.75rem, 3.6vw, 2.25rem);
+	line-height: 1.12;
+	margin-top: 2em;
+}
+
+.prose h3 {
+	font-size: 1.3rem;
+	line-height: 1.35;
+	font-weight: 700;
+	margin-top: 1.8em;
+}
+
+.prose h4 {
+	font-size: 1.1rem;
+	line-height: 1.4;
+	font-weight: 700;
+	margin-top: 1.6em;
+}
+
+.prose :is(h2, h3, h4) + * {
+	margin-top: 0.7em;
+}
+
+.prose a {
+	color: var(--magenta);
+	font-weight: 400;
+	text-decoration-thickness: 0.08em;
+	text-underline-offset: 0.2em;
+}
+
+.prose strong {
+	font-weight: 700;
+}
+
+.prose :is(ul, ol) {
+	padding-left: 1.4em;
+}
+.prose li + li {
+	margin-top: 0.4em;
+}
+.prose ul li::marker {
+	color: var(--magenta);
+}
+.prose ul.todo {
+	list-style: none;
+	padding-left: 0;
+}
+
+.prose blockquote {
+	margin-inline: 0;
+	padding: 0.15rem 0 0.15rem 1.25rem;
+	border-left: 4px solid;
+	border-image: var(--degradado-vertical) 1;
+	font-size: 1.2rem;
+	font-weight: 400;
+	line-height: 1.6;
+}
+
+.prose figure {
+	margin-inline: 0;
+}
+.prose img {
+	width: 100%;
+	height: auto;
+	border-radius: 0.5rem;
+}
+.prose figcaption {
+	margin-top: 0.5rem;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	color: var(--tinta-suave);
+}
+
+.prose hr {
+	border: 0;
+	border-top: 1px solid var(--linea);
+	margin-block: 2.2rem;
+}
+
+.prose pre {
+	overflow-x: auto;
+	padding: 1rem 1.2rem;
+	border-radius: 0.6rem;
+	background: var(--marino);
+	color: var(--blanco);
+	font-size: 0.9rem;
+	line-height: 1.6;
+}
+.prose code {
+	font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+.prose :not(pre) > code {
+	padding: 0.1em 0.35em;
+	border-radius: 0.3rem;
+	background: var(--lavanda);
+	font-size: 0.9em;
+}
+
+.prose details {
+	padding: 0.75rem 1rem;
+	border: 1px solid var(--linea);
+	border-radius: 0.6rem;
+}
+.prose summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.prose .table-wrap {
+	overflow-x: auto;
+}
+.prose table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+.prose :is(th, td) {
+	padding: 0.65rem 0.85rem;
+	border-bottom: 1px solid var(--linea);
+	text-align: left;
+}
+.prose th {
+	background: var(--lavanda);
+	font-weight: 700;
+}
+
+.prose .columns {
+	display: grid;
+	gap: 1.5rem;
+	grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.prose .callout {
+	display: flex;
+	gap: 0.85rem;
+	padding: 1rem 1.2rem;
+	border-radius: 0.8rem;
+	background: var(--lavanda);
+	font-size: 1rem;
+	line-height: 1.65;
+}
+.prose .callout-icon {
+	font-size: 1.25rem;
+	line-height: 1.5;
+}
+.prose .callout-body > * + * {
+	margin-top: 0.6em;
+}
+
+.prose .file a,
+.prose .link a {
+	display: inline-block;
+	padding: 0.45rem 1rem;
+	border-radius: 999px;
+	background: var(--lavanda);
+	color: var(--marino);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+/* Colores de Notion: texto en tonos oscuros (contraste sobre blanco) y fondos suaves */
+.prose .nt-gray { color: #626785; }
+.prose .nt-brown { color: #7a4e2d; }
+.prose .nt-orange { color: #b45309; }
+.prose .nt-yellow { color: #8a6500; }
+.prose .nt-green { color: #1f7a3d; }
+.prose .nt-blue { color: #1d58c9; }
+.prose .nt-purple { color: #7b2fc0; }
+.prose .nt-pink { color: #b81f6f; }
+.prose .nt-red { color: #c0262f; }
+.prose .nt-gray_background { background: #ecebf3; }
+.prose .nt-brown_background { background: #f1e7df; }
+.prose .nt-orange_background { background: #fdebd5; }
+.prose .nt-yellow_background { background: #fdf3cc; }
+.prose .nt-green_background { background: #def3e4; }
+.prose .nt-blue_background { background: #dce8fc; }
+.prose .nt-purple_background { background: #eadffa; }
+.prose .nt-pink_background { background: #fbe0ee; }
+.prose .nt-red_background { background: #fce0e2; }

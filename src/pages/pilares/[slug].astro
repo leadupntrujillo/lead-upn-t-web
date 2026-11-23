@@ -1,0 +1,104 @@
+---
+import type { GetStaticPaths } from 'astro';
+import CabezaPagina from '../../components/CabezaPagina.astro';
+import NovedadCard from '../../components/NovedadCard.astro';
+import Unete from '../../components/Unete.astro';
+import Layout from '../../layouts/Layout.astro';
+import { delPilar } from '../../lib/novedades';
+import { getEquipo, getNovedades, getPilares } from '../../lib/queries';
+import { migas } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+	const [pilares, novedades, equipo] = await Promise.all([getPilares(), getNovedades(), getEquipo()]);
+	return pilares.map((pilar) => ({
+		params: { slug: pilar.data.slug },
+		props: {
+			pilar,
+			novedades: delPilar(novedades, pilar.id),
+			equipo: equipo.filter((m) => m.data.pilares.some((p) => p.id === pilar.id)),
+		},
+	}));
+}) satisfies GetStaticPaths;
+
+const { pilar, novedades, equipo } = Astro.props;
+const d = pilar.data;
+---
+
+<Layout
+	titulo={d.nombre}
+	descripcion={d.descripcion || `Pilar ${d.nombre} de LEAD UPN Trujillo.`}
+	jsonLd={[
+		migas([
+			{ nombre: 'Inicio', ruta: '/' },
+			{ nombre: 'Pilares', ruta: '/#pilares' },
+			{ nombre: d.nombre, ruta: `/pilares/${d.slug}` },
+		]),
+	]}
+>
+	<CabezaPagina titulo={d.nombre} antetitulo="Pilar">
+		<p>{d.descripcion}</p>
+	</CabezaPagina>
+
+	{
+		equipo.length > 0 && (
+			<section class="contenedor seccion" aria-labelledby="equipo-pilar">
+				<h2 id="equipo-pilar" class="titulo">
+					Quiénes lo hacen posible
+				</h2>
+				<ul class="equipo">
+					{equipo.map((m) => (
+						<li>
+							<strong>{m.data.nombre}</strong>
+							<span>{m.data.cargo}</span>
+						</li>
+					))}
+				</ul>
+			</section>
+		)
+	}
+
+	<section class="contenedor seccion" aria-labelledby="nov-pilar">
+		<h2 id="nov-pilar" class="titulo">Novedades del pilar</h2>
+		{
+			novedades.length > 0 ? (
+				<ul class="grilla">
+					{novedades.map((n) => (
+						<li>
+							<NovedadCard entry={n} pilar={pilar} />
+						</li>
+					))}
+				</ul>
+			) : (
+				<p>Todavía no hay novedades de este pilar. Vuelve pronto.</p>
+			)
+		}
+	</section>
+
+	<Unete />
+</Layout>
+
+<style>
+	.grilla {
+		list-style: none;
+		margin: 1.5rem 0 0;
+		padding: 0;
+		display: grid;
+		gap: 1.5rem;
+		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+	}
+	.equipo {
+		list-style: none;
+		margin: 1rem 0 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem 2rem;
+	}
+	.equipo li {
+		display: grid;
+	}
+	.equipo span {
+		font-size: 0.9rem;
+		color: var(--tinta-suave);
+	}
+</style>
