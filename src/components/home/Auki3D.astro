@@ -29,7 +29,15 @@ const { glb = '/3d/auki.glb' } = Astro.props;
 	const LIMITE_MS = 6000;
 
 	const contenedor = document.querySelector<HTMLElement>('[data-auki]');
-	const lienzo = contenedor?.querySelector('canvas');
+	let lienzo = contenedor?.querySelector('canvas');
+	let actual: { dispose(): void } | null = null;
+
+	/** Vuelve al póster (el lienzo se funde y el póster reaparece). */
+	const alPoster = () => {
+		if (contenedor) delete contenedor.dataset.listo;
+		actual?.dispose();
+		actual = null;
+	};
 
 	const hayWebGL = () => {
 		try {
@@ -47,6 +55,7 @@ const { glb = '/3d/auki.glb' } = Astro.props;
 		//   ?auki-t=3.2                   congela la línea de tiempo en ese segundo
 		//   ?auki-linterna=320,260        linterna fija en esa posición (px CSS del lienzo)
 		//   ?auki-mouse=-1,0.5            mouse fijo, de -1 a 1 (x a la derecha, y hacia arriba)
+		//   ?auki-reducido                como con prefers-reduced-motion: reduce
 		const q = new URLSearchParams(import.meta.env.DEV ? location.search : '');
 		const pedido = q.get('auki');
 		const modo = pedido === 'estandar' || pedido === 'sin-normal' ? pedido : 'capas';
@@ -55,23 +64,44 @@ const { glb = '/3d/auki.glb' } = Astro.props;
 		const linternaFija = Number.isFinite(lx) && Number.isFinite(ly) && q.has('auki-linterna') ? { x: lx!, y: ly! } : undefined;
 		const [mx, my] = (q.get('auki-mouse') ?? '').split(',').map(Number);
 		const mouseFijo = q.has('auki-mouse') && Number.isFinite(mx) && Number.isFinite(my) ? { x: mx!, y: my! } : undefined;
+		const reducido = q.has('auki-reducido') ? true : undefined;
 		let vencido = false;
 		const reloj = window.setTimeout(() => (vencido = true), LIMITE_MS);
 		try {
 			const { iniciarAuki } = await import('../../lib/auki3d/escena');
-			const auki = await iniciarAuki(lienzo, { glb: contenedor.dataset.glb!, modo, tiempoFijo, linternaFija, mouseFijo });
+			const auki = await iniciarAuki(lienzo, {
+				glb: contenedor.dataset.glb!,
+				modo,
+				tiempoFijo,
+				linternaFija,
+				mouseFijo,
+				reducido,
+				alFallar: alPoster,
+			});
 			window.clearTimeout(reloj);
+			// Tardó más de 6 s: se queda el póster (no aparece de golpe a mitad de la lectura)
 			if (vencido) {
 				auki.dispose();
 				return;
 			}
+			actual = auki;
 			contenedor.dataset.listo = '';
-			window.addEventListener('pagehide', () => auki.dispose(), { once: true });
 		} catch (error) {
 			window.clearTimeout(reloj);
 			if (import.meta.env.DEV) console.warn('[auki3d] se queda el póster:', error);
 		}
 	}
+
+	// Al salir de la página se libera todo (geometría, material, texturas y contexto WebGL).
+	// Si se vuelve con "Atrás" (bfcache), se arma de nuevo sobre un lienzo limpio.
+	window.addEventListener('pagehide', alPoster);
+	window.addEventListener('pageshow', (e) => {
+		if (!e.persisted || !lienzo || actual) return;
+		const nuevo = lienzo.cloneNode() as HTMLCanvasElement;
+		lienzo.replaceWith(nuevo);
+		lienzo = nuevo;
+		void cargar();
+	});
 
 	// Después de la primera pintada, cuando el navegador esté libre
 	const enReposo = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 200));

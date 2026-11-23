@@ -45,8 +45,9 @@ Variables en `.env` (lista en el README): `NOTION_TOKEN` y un ID por tabla (`NOT
 Para UI usa la skill `frontend-design`; la línea gráfica está en la skill `contenido-lead-upn-trujillo`. Reglas de marca que ya están aplicadas:
 - **Color:** marino `#161A4E` + degradado coral `#F0606A` → magenta `#D6297A` → morado `#8C3FD1` + blanco (tokens en `src/styles/global.css`). Máximo 3 colores principales. Los botones con texto blanco usan `--degradado-boton` (arranca en magenta) por contraste. El color de cada pilar es solo un punto pequeño (`PilarChip`).
 - **Tipografía:** Anton en mayúsculas para títulos y Poppins para texto (paquetes `@fontsource`, sin Google Fonts). Solo dos familias.
-- **Recursos de marca:** símbolo con máscara + degradado (`public/brand/lead-mark.svg`, componente `Logo`), caja de palabra clave (`.caja`), pills redondeadas, flechas `>>>` (`.flechas`), polaroid. Auki (`public/brand/auki-cohete.webp`) solo en el hero.
-- **Un único momento memorable:** el hero con el lema apilado y Auki. Lo demás es sobrio; evitar animaciones por sección.
+- **Recursos de marca:** símbolo con máscara + degradado (`public/brand/lead-mark.svg`, componente `Logo`), caja de palabra clave (`.caja`), pills redondeadas, flechas `>>>` (`.flechas`), polaroid (`.polaroid`), antetítulo de sección (`.kicker`, «01 · Learn»). Auki solo en el hero.
+- **Un único momento memorable:** el hero con el lema apilado y Auki 3D. Lo demás es sobrio; evitar animaciones por sección.
+- **Auki 3D** (`src/components/home/Auki3D.astro` + `src/lib/auki3d/`, brief en `docs/brief-auki-3d.md`): `three` (versión exacta) es la única dependencia 3D; importar por nombre, nunca `import * as THREE`. El póster `public/brand/auki-cohete.webp` es el LCP y el respaldo (sin WebGL, error o GLB > 6 s). Modelo: `public/3d/auki.glb` (Z arriba: `geometria.ts` lo gira). Las texturas del GLB se decodifican sin URLs `blob:` (`texturas.ts`): sin eso la CSP las bloquea **solo en producción** (`pnpm dev` no aplica `_headers`). Parámetros de prueba solo en `pnpm dev`: `?auki-t=`, `?auki-mouse=`, `?auki-linterna=`, `?auki-reducido`, `?auki=estandar`.
 - **Cada formato tiene su esqueleto** en `src/components/formatos/` (Periodico, Anuncio, PostIG, Evento, Convocatoria, Galeria, Logros, Entrevista, Breve) y la tarjeta (`NovedadCard`) cambia según el formato. Todo debe verse bien **sin imagen** (`Cover` usa un fondo con el símbolo).
 - **Convenciones de contenido que el diseño aprovecha** (están en la guía de Notion): Logros = lista con la cifra en negrita; Entrevista = primera cita como frase destacada y preguntas como Encabezado 3 (`src/lib/html.ts`).
 - Fechas: usar `src/lib/format.ts` (las fechas sin hora se formatean en UTC; las que traen hora, en Lima).
@@ -58,7 +59,7 @@ El vault está en `C:\REPOS\CEREBRO`. Nota del proyecto: `10-Proyectos/LEAD_UPN/
 
 ## SEO y seguridad
 - Cada página pasa `titulo`, `descripcion` y, si aplica, `jsonLd`, `imagen`, `tipo` al `Layout` (componente `Seo.astro`; funciones puras en `src/lib/seo.ts`). Dominio: `https://leadupntrujillo.com` (`site` en `astro.config.mjs`), URLs sin `.html` ni barra final.
-- CSP y demás encabezados en `public/_headers` (Cloudflare Pages; la redirección de `www` es una regla en el panel de Cloudflare): solo scripts propios. Por eso Astro no inlinea scripts (`assetsInlineLimit: 0`) y no se usa `define:vars` ni `is:inline` en scripts: pasa datos por atributos `data-*`.
+- CSP y demás encabezados en `public/_headers` (Cloudflare Pages; la redirección de `www` es una regla en el panel de Cloudflare): solo scripts propios, más `'wasm-unsafe-eval'` (el decodificador meshopt del GLB compila WebAssembly; no habilita `eval` de JS). Por eso Astro no inlinea scripts (`assetsInlineLimit: 0`) y no se usa `define:vars` ni `is:inline` en scripts: pasa datos por atributos `data-*`.
 - Los estilos con alcance de un componente no llegan a los elementos de otro componente: los `<img>` se escriben en el mismo componente que los estiliza.
 - `pnpm add` falla en esta máquina (error `reading 'manifest'` de pnpm 10.22): agrega la dependencia a `package.json` a mano y corre `pnpm install`.
 
