@@ -62,3 +62,13 @@ export function estadoEn(t: number): Estado {
 	if (c < enCapas + volver + pausa) return { fase: 1, sentido: 0 };
 	return { fase: 1 + easeInOutCubic((c - enCapas - volver - pausa) / revelar), sentido: 0 };
 }
+
+/**
+ * Altura del frente de la banda (0 = mentón, 1 = orejas) y si está en movimiento.
+ * Son las mismas cuentas del shader (material.ts); el fondo pone más bloques cerca del frente.
+ */
+export function frenteDeBanda({ fase, sentido }: Estado): { altura: number; activa: boolean } {
+	if (fase <= 1) return { altura: 1 - fase * 1.1, activa: fase > 0 && fase < 1 };
+	const p = sentido === 1 ? 2 - fase : fase - 1;
+	return { altura: 1 - p * 1.16 + 0.08, activa: p > 0.001 && p < 0.999 };
+}

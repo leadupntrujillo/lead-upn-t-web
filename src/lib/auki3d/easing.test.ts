@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CICLO, FIN_INTRO, TIEMPOS, easeInOutCubic, easeOutCubic, estadoEn, lerp, suavizar } from './easing';
+import { CICLO, FIN_INTRO, TIEMPOS, easeInOutCubic, easeOutCubic, estadoEn, frenteDeBanda, lerp, suavizar } from './easing';
 
 describe('easings', () => {
 	it('empiezan en 0, terminan en 1 y no se salen del rango', () => {
@@ -69,5 +69,18 @@ describe('línea de tiempo (§6)', () => {
 			expect(fase).toBeGreaterThanOrEqual(0);
 			expect(fase).toBeLessThanOrEqual(2);
 		}
+	});
+});
+
+describe('frente de la banda', () => {
+	it('baja de arriba abajo y solo está activo mientras se mueve', () => {
+		expect(frenteDeBanda({ fase: 2, sentido: 0 }).activa).toBe(false);
+		expect(frenteDeBanda({ fase: 1, sentido: 0 }).activa).toBe(false);
+		const a = frenteDeBanda({ fase: 1.2, sentido: 0 });
+		const b = frenteDeBanda({ fase: 1.8, sentido: 0 });
+		expect(a.activa && b.activa).toBe(true);
+		expect(a.altura).toBeGreaterThan(b.altura);
+		// De vuelta a Polígonos también baja: al principio de la vuelta está arriba
+		expect(frenteDeBanda({ fase: 1.9, sentido: 1 }).altura).toBeGreaterThan(frenteDeBanda({ fase: 1.1, sentido: 1 }).altura);
 	});
 });

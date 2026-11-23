@@ -46,9 +46,14 @@ const FOV = 30;
 const INERCIA = 0.08;
 /** El paso de tiempo máximo por cuadro: al volver de una pausa, la animación no salta. */
 const DT_MAX = 1 / 20;
-/** Topes del giro de la cabeza y del parallax (§7): con ellos la silueta siempre se lee. */
+/** Topes del giro de la cabeza (§7, en radianes): con ellos la silueta siempre se lee. */
 const GIRO = { y: 0.35, x: 0.22 };
-const PARALLAX = { x: 0.5, y: 0.3 };
+/**
+ * Parallax de cámara (§7: x = -mx·0,5, y = -my·0,3). El brief da esos valores para una cámara a
+ * ~4 unidades; aquí la cámara está más cerca, así que se escalan con la distancia real para que el
+ * ángulo sea el mismo (~7° y ~4°). Sin esto el giro de la cabeza y el de la cámara se suman de más.
+ */
+const PARALLAX = { x: 0.5 / 4, y: 0.3 / 4 };
 
 export async function iniciarAuki(lienzo: HTMLCanvasElement, opciones: OpcionesAuki): Promise<Auki> {
 	const movil = window.matchMedia('(hover: none)').matches;
@@ -122,8 +127,8 @@ export async function iniciarAuki(lienzo: HTMLCanvasElement, opciones: OpcionesA
 		puntero.dentro = puntero.x >= 0 && puntero.y >= 0 && puntero.x <= r.width && puntero.y <= r.height;
 		if (suave.x < -999) Object.assign(suave, { x: puntero.x, y: puntero.y }); // primera vez: sin barrido
 		// Para el giro: posición respecto al centro de Auki, normalizada por media ventana (y hacia arriba)
-		mira.x = clamp(((e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)) * 1.4, -1, 1);
-		mira.y = clamp((-(e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)) * 1.4, -1, 1);
+		mira.x = clamp((e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2), -1, 1);
+		mira.y = clamp(-(e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2), -1, 1);
 	};
 	/** Hacia dónde mira la cabeza: objetivo (mira) y valor con inercia (giro). */
 	const mira = { x: 0, y: 0 };
@@ -176,7 +181,7 @@ export async function iniciarAuki(lienzo: HTMLCanvasElement, opciones: OpcionesA
 		auki.position.y = Math.sin(reloj * 1.2) * 0.012;
 		auki.rotation.z = Math.sin(reloj * 0.8) * 0.018;
 		// La cámara se mueve al revés (parallax), siempre a la misma distancia y mirando al centro
-		ojo.set(-giro.x * PARALLAX.x, -giro.y * PARALLAX.y, distancia).setLength(distancia);
+		ojo.set(-giro.x * PARALLAX.x * distancia, -giro.y * PARALLAX.y * distancia, distancia).setLength(distancia);
 		camara.position.copy(ojo);
 		camara.lookAt(0, 0, 0);
 
