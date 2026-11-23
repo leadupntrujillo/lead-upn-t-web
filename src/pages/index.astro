@@ -1,14 +1,27 @@
 ---
 import ListaPilares from '../components/ListaPilares.astro';
 import NovedadCard from '../components/NovedadCard.astro';
+import Auki3D from '../components/home/Auki3D.astro';
+import PortadaPrincipal from '../components/home/PortadaPrincipal.astro';
+import Testimonios from '../components/home/Testimonios.astro';
 import Unete from '../components/Unete.astro';
 import Layout from '../layouts/Layout.astro';
-import { partesDeFecha } from '../lib/format';
+import { diaYHora, modalidadTexto, partesDeFecha } from '../lib/format';
 import { proximos } from '../lib/novedades';
 import { FORMATOS_INFO } from '../lib/notion/formatos';
-import { getAliados, getCifras, getNovedades, getPilares, getPilaresPorId, getPortada, getTestimonios } from '../lib/queries';
+import {
+	getAliados,
+	getCifras,
+	getNovedades,
+	getPilares,
+	getPilaresPorId,
+	getPortada,
+	getSitio,
+	getTestimonios,
+} from '../lib/queries';
 
-const [novedades, portada, pilares, pilaresPorId, cifras, testimonios, aliados] = await Promise.all([
+const [sitio, novedades, portada, pilares, pilaresPorId, cifras, testimonios, aliados] = await Promise.all([
+	getSitio(),
 	getNovedades(),
 	getPortada(),
 	getPilares(),
@@ -19,101 +32,148 @@ const [novedades, portada, pilares, pilaresPorId, cifras, testimonios, aliados] 
 ]);
 
 const { principal, destacadas, recientes } = portada;
-const masNovedades = [...destacadas, ...recientes].slice(0, 6);
-const fechas = proximos(novedades).slice(0, 3);
+const masNovedades = [...destacadas, ...recientes].slice(0, 4);
+const [proxima, ...otrasFechas] = proximos(novedades).slice(0, 3);
 const pilarDe = (n: (typeof novedades)[number]) => (n.data.pilar ? pilaresPorId.get(n.data.pilar.id) : undefined);
-
-const numero = (c: (typeof cifras)[number]) => `${c.data.prefijo}${c.data.valor.toLocaleString('es-PE')}${c.data.sufijo}`;
+const uneteExterno = /^https?:/.test(sitio.unete.url);
 
 const lema = [
-	{ palabra: 'Learn', color: 'var(--coral-claro)' },
+	{ palabra: 'Learn', color: 'var(--coral)' },
 	{ palabra: 'Explore', color: 'var(--magenta-claro)' },
 	{ palabra: 'Aspire', color: 'var(--morado-claro)' },
 	{ palabra: 'Discover.', color: 'var(--blanco)' },
 ];
+
+/** Datos de la franja "Próxima fecha" y de la lista de fechas. */
+const datosFecha = (n: (typeof novedades)[number]) => {
+	const ev = n.data.fechaEvento!;
+	return {
+		hoja: partesDeFecha(ev.inicio, ev.conHora),
+		cuando: n.data.formato === 'convocatoria' ? 'Fecha límite' : diaYHora(ev.inicio, ev.conHora),
+		lugar: n.data.lugar?.nombre ?? null,
+		modalidad: modalidadTexto(n.data.modalidad),
+	};
+};
+const prox = proxima ? datosFecha(proxima) : null;
+
+const numero = (c: (typeof cifras)[number]) => `${c.data.prefijo}${c.data.valor.toLocaleString('en-US')}${c.data.sufijo}`;
+
+const PALABRAS = ['Cero', 'Un', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis', 'Siete', 'Ocho', 'Nueve', 'Diez'];
+const cuantosPilares = PALABRAS[pilares.length] ?? String(pilares.length);
+
+/** Iniciales para un aliado sin logo: "SpaceAG" → "SA", "Cámara de Comercio" → "CC". */
+const iniciales = (nombre: string) => {
+	const palabras = nombre.split(/\s+/).filter((p) => p.length > 2 || /^[A-ZÁÉÍÓÚÑ]/.test(p));
+	if (palabras.length > 1) return (palabras[0][0] + palabras[1][0]).toUpperCase();
+	const mayus = nombre.match(/[A-ZÁÉÍÓÚÑ]/g) ?? [];
+	return (mayus.length >= 2 ? mayus.slice(0, 2).join('') : nombre.slice(0, 2)).toUpperCase();
+};
 ---
 
 <Layout>
-	<!-- Hero: el lema de LEAD y Auki despegando -->
-	<section class="hero">
-		<div class="hero__arte" aria-hidden="true">
-			<img
-				src="/brand/auki-cohete.webp"
-				srcset="/brand/auki-cohete-640.webp 640w, /brand/auki-cohete.webp 1100w"
-				sizes="(max-width: 48rem) 100vw, 66vw"
-				alt=""
-				width="1100"
-				height="692"
-				fetchpriority="high"
-			/>
-		</div>
-		<div class="contenedor hero__contenido">
-			<h1 class="lema titulo">
-				<span class="sr-only">LEAD UPN Trujillo: </span>
-				{lema.map((l, i) => <span class="lema__linea" style={`--c:${l.color};--i:${i}`}>{l.palabra}</span>)}
-			</h1>
-			<p class="hero__texto">
-				Somos la organización estudiantil de liderazgo con propósito de la UPN en Trujillo. Aprende, explora y descubre
-				con nosotros.
-			</p>
-			<div class="hero__acciones">
-				<a class="btn btn--primario" href="/novedades">Ver novedades</a>
-				<a class="btn btn--borde" href="#pilares">Conoce los pilares</a>
+	<!-- Hero: el lema de LEAD y Auki -->
+	<section class="hero" aria-labelledby="lema">
+		<div class="contenedor hero__grid">
+			<div class="hero__contenido">
+				<p class="kicker hero__kicker">LEAD UPN Trujillo · Parte de LEAD Americas</p>
+				<h1 id="lema" class="lema titulo">
+					<span class="sr-only">LEAD UPN Trujillo: </span>
+					{lema.map((l, i) => <span class="lema__linea" style={`--c:${l.color};--i:${i}`}>{l.palabra}</span>)}
+				</h1>
+				<p class="hero__texto">{sitio.descripcion}</p>
+				<div class="hero__acciones">
+					<a
+						class="btn btn--primario"
+						href={sitio.unete.url}
+						data-cta="unete-hero"
+						{...uneteExterno ? { rel: 'noopener noreferrer', target: '_blank' } : {}}>Súmate a LEAD</a
+					>
+					<a class="btn btn--borde" href="/novedades">Ver novedades</a>
+				</div>
 			</div>
-		</div>
-	</section>
-
-	<!-- Lo último -->
-	<section class="seccion contenedor" aria-labelledby="t-novedades">
-		<div class="seccion__cabeza">
-			<h2 id="t-novedades" class="seccion__titulo titulo">Novedades</h2>
-			<a class="seccion__enlace flechas" href="/novedades">Ver todas</a>
+			<div class="hero__arte">
+				<Auki3D />
+			</div>
 		</div>
 
 		{
-			principal ? (
-				<div class="portada">
-					<NovedadCard entry={principal} pilar={pilarDe(principal)} variante="grande" />
-					{masNovedades.length > 0 && (
-						<ul class="portada__grilla">
-							{masNovedades.map((n) => (
-								<li>
-									<NovedadCard entry={n} pilar={pilarDe(n)} />
-								</li>
-							))}
-						</ul>
-					)}
+			proxima && prox && (
+				<div class="contenedor">
+					<a class="proxima" href={`/novedades/${proxima.id}`}>
+						<span class="proxima__rotulo solo-escritorio">Próxima fecha</span>
+						<span class="proxima__hoja" aria-hidden="true">
+							<span class="proxima__dia titulo">{prox.hoja.dia.padStart(2, '0')}</span>
+							<span class="proxima__mes">{prox.hoja.mes}</span>
+						</span>
+						<span class="proxima__texto">
+							<span class="proxima__rotulo solo-movil">Próxima fecha</span>
+							<span class="proxima__titulo">{proxima.data.titulo}</span>
+							<span class="proxima__meta">
+								{[prox.cuando, prox.lugar].filter(Boolean).join(' · ')}
+								{prox.modalidad && <span class="solo-escritorio"> · {prox.modalidad}</span>}
+							</span>
+						</span>
+						<span class="proxima__ir flechas solo-escritorio">
+							Ver {proxima.data.formato === 'convocatoria' ? 'convocatoria' : 'evento'}
+						</span>
+					</a>
 				</div>
-			) : (
-				<p class="vacio">Todavía no hay novedades publicadas. Vuelve pronto.</p>
 			)
 		}
 	</section>
 
-	<!-- Próximas fechas -->
-	{
-		fechas.length > 0 && (
-			<section class="seccion contenedor" aria-labelledby="t-fechas">
-				<div class="seccion__cabeza">
-					<h2 id="t-fechas" class="seccion__titulo titulo">Próximas fechas</h2>
+	<!-- 01 · Learn: novedades -->
+	<section class="seccion novedades" aria-labelledby="t-novedades">
+		<div class="contenedor novedades__grid">
+			<div class="cabeza">
+				<div class="cabeza__titulos">
+					<p class="kicker">01 · Learn</p>
+					<h2 id="t-novedades" class="cabeza__titulo titulo">Lo que está <span class="caja caja--marino">pasando</span></h2>
 				</div>
+				<a class="seccion__enlace flechas solo-escritorio" href="/novedades">Ver todas las novedades</a>
+			</div>
+
+			{
+				principal ? (
+					<>
+						<PortadaPrincipal entry={principal} pilar={pilarDe(principal)} />
+						{masNovedades.length > 0 && (
+							<ul class="novedades__lista">
+								{masNovedades.map((n) => (
+									<li>
+										<NovedadCard entry={n} pilar={pilarDe(n)} />
+									</li>
+								))}
+							</ul>
+						)}
+					</>
+				) : (
+					<p class="vacio">Todavía no hay novedades publicadas. Vuelve pronto.</p>
+				)
+			}
+			<a class="btn btn--borde-oscuro flechas solo-movil" href="/novedades">Ver todas</a>
+		</div>
+	</section>
+
+	<!-- Más fechas (cuando hay dos o más próximas) -->
+	{
+		otrasFechas.length > 0 && (
+			<section class="contenedor fechas-sec" aria-labelledby="t-fechas">
+				<h2 id="t-fechas" class="kicker">También se viene</h2>
 				<ol class="fechas">
-					{fechas.map((n) => {
-						const ev = n.data.fechaEvento!;
-						const p = partesDeFecha(ev.inicio, ev.conHora);
+					{otrasFechas.map((n) => {
+						const f = datosFecha(n);
 						return (
 							<li>
 								<a class="fecha" href={`/novedades/${n.id}`}>
-									<span class="fecha__hoja" aria-hidden="true">
-										<span class="fecha__dia">{p.dia}</span>
-										<span class="fecha__mes">{p.mes}</span>
+									<span class="proxima__hoja" aria-hidden="true">
+										<span class="proxima__dia titulo">{f.hoja.dia.padStart(2, '0')}</span>
+										<span class="proxima__mes">{f.hoja.mes}</span>
 									</span>
 									<span class="fecha__texto">
 										<span class="fecha__titulo">{n.data.titulo}</span>
 										<span class="fecha__meta">
-											{[n.data.formato === 'convocatoria' ? 'Fecha límite' : FORMATOS_INFO[n.data.formato].nombre, n.data.lugar?.nombre]
-												.filter(Boolean)
-												.join(', ')}
+											{[FORMATOS_INFO[n.data.formato].nombre, f.cuando, f.lugar].filter(Boolean).join(' · ')}
 										</span>
 									</span>
 									<span class="fecha__ir flechas" aria-hidden="true" />
@@ -126,57 +186,60 @@ const lema = [
 		)
 	}
 
-	<!-- Cifras -->
-	{
-		cifras.length > 0 && (
-			<section class="cifras" aria-labelledby="t-cifras">
-				<div class="contenedor">
-					<h2 id="t-cifras" class="sr-only">LEAD en cifras</h2>
-					<ul class="cifras__lista">
-						{cifras.map((c) => (
-							<li>
-								<span class="cifras__valor">{numero(c)}</span>
-								<span class="cifras__nombre">{c.data.nombre}</span>
-								{c.data.descripcion && c.data.descripcion !== c.data.nombre && (
-									<span class="cifras__desc">{c.data.descripcion}</span>
-								)}
-							</li>
-						))}
-					</ul>
-				</div>
-			</section>
-		)
-	}
-
-	<!-- Pilares -->
-	<section id="pilares" class="seccion contenedor" aria-labelledby="t-pilares">
-		<div class="seccion__cabeza">
-			<h2 id="t-pilares" class="seccion__titulo titulo">Nuestros pilares</h2>
+	<!-- 02 · Explore: pilares -->
+	<section id="pilares" class="seccion pilares-sec" aria-labelledby="t-pilares">
+		<div class="contenedor pilares-sec__grid">
+			<div class="pilares-sec__intro">
+				<p class="kicker">02 · Explore</p>
+				<h2 id="t-pilares" class="cabeza__titulo titulo">
+					{cuantosPilares}{' '}
+					<span class="junto"><span class="caja caja--marino">pilares</span><span class="solo-escritorio">, un</span></span><span
+						class="solo-escritorio"
+					>
+						mismo despegue</span
+					>
+				</h2>
+				<p class="pilares-sec__texto solo-escritorio">
+					Cada pilar es un equipo con su propia misión. Entra al que te mueva: ahí están su gente y sus actividades.
+				</p>
+			</div>
+			<div class="pilares-sec__lista">
+				<ListaPilares {pilares} />
+			</div>
 		</div>
-		<ListaPilares {pilares} {novedades} />
 	</section>
 
-	<!-- Testimonios -->
+	<!-- 03 · Aspire: comunidad (cifras + testimonio) -->
 	{
-		testimonios.length > 0 && (
-			<section class="seccion contenedor" aria-labelledby="t-testimonios">
-				<div class="seccion__cabeza">
-					<h2 id="t-testimonios" class="seccion__titulo titulo">Lo que dicen nuestros miembros</h2>
+		(cifras.length > 0 || testimonios.length > 0) && (
+			<section class="seccion aspire" aria-labelledby="t-comunidad">
+				<p class="aspire__fondo titulo" aria-hidden="true">
+					Aspire
+				</p>
+				<div class="contenedor aspire__grid">
+					<div class="cabeza__titulos">
+						<p class="kicker">03 · Aspire</p>
+						<h2 id="t-comunidad" class="cabeza__titulo titulo">
+							Una familia que <span class="caja">crece</span>
+						</h2>
+					</div>
+
+					{cifras.length > 0 && (
+						<ul class="cifras">
+							{cifras.map((c) => (
+								<li>
+									<span class="cifras__valor titulo">{numero(c)}</span>
+									<span class="cifras__nombre">{c.data.nombre}</span>
+									{c.data.descripcion && c.data.descripcion !== c.data.nombre && (
+										<span class="cifras__desc">{c.data.descripcion}</span>
+									)}
+								</li>
+							))}
+						</ul>
+					)}
+
+					{testimonios.length > 0 && <Testimonios {testimonios} />}
 				</div>
-				<ul class="testimonios">
-					{testimonios.map((t) => (
-						<li>
-							<blockquote>{t.data.frase || t.data.testimonio}</blockquote>
-							<p class="testimonio__autor">
-								{t.data.foto && <img src={t.data.foto.src} alt="" width="48" height="48" loading="lazy" />}
-								<span>
-									<strong>{t.data.nombre}</strong>
-									<span>{[t.data.carrera, t.data.rol].filter(Boolean).join(', ')}</span>
-								</span>
-							</p>
-						</li>
-					))}
-				</ul>
 			</section>
 		)
 	}
@@ -184,34 +247,69 @@ const lema = [
 	<!-- Aliados -->
 	{
 		aliados.length > 0 && (
-			<section class="seccion contenedor" aria-labelledby="t-aliados">
-				<div class="seccion__cabeza">
-					<h2 id="t-aliados" class="seccion__titulo titulo">Aliados</h2>
+			<section class="aliados-sec" aria-labelledby="t-aliados">
+				<div class="contenedor aliados-sec__fila">
+					<h2 id="t-aliados" class="aliados-sec__titulo">
+						Nos acompañan
+					</h2>
+					<ul class="aliados">
+						{aliados.map((a) => {
+							const Etiqueta = a.data.sitioWeb ? 'a' : 'span';
+							const extra = [a.data.tipo, a.data.descripcion].filter(Boolean).join(' · ');
+							return (
+								<li>
+									<Etiqueta
+										class="aliado"
+										{...(a.data.sitioWeb ? { href: a.data.sitioWeb, rel: 'noopener noreferrer', target: '_blank' } : {})}
+									>
+										{a.data.logo ? (
+											<img
+												class="aliado__logo"
+												src={a.data.logo.src}
+												width={a.data.logo.width ?? undefined}
+												height={a.data.logo.height ?? undefined}
+												alt=""
+												loading="lazy"
+											/>
+										) : (
+											<span class="aliado__iniciales" aria-hidden="true">
+												{iniciales(a.data.nombre)}
+											</span>
+										)}
+										<span class="aliado__texto">
+											<strong>{a.data.nombre}</strong>
+											{extra && <span>{extra}</span>}
+										</span>
+									</Etiqueta>
+								</li>
+							);
+						})}
+					</ul>
 				</div>
-				<ul class="aliados">
-					{aliados.map((a) => (
-						<li>
-							{a.data.sitioWeb ? (
-								<a href={a.data.sitioWeb} rel="noopener noreferrer" target="_blank" aria-label={a.data.nombre}>
-									{a.data.logo ? <img src={a.data.logo.src} alt={a.data.nombre} loading="lazy" /> : a.data.nombre}
-								</a>
-							) : a.data.logo ? (
-								<img src={a.data.logo.src} alt={a.data.nombre} loading="lazy" />
-							) : (
-								<span>{a.data.nombre}</span>
-							)}
-						</li>
-					))}
-				</ul>
 			</section>
 		)
 	}
 
-	<!-- Súmate -->
-	<Unete />
+	<!-- 04 · Discover: súmate -->
+	<Unete kicker="04 · Discover" />
 </Layout>
 
 <style>
+	@media (min-width: 48.01rem) {
+		.solo-movil {
+			display: none;
+		}
+	}
+	@media (max-width: 48rem) {
+		.solo-escritorio {
+			display: none;
+		}
+	}
+
+	.junto {
+		white-space: nowrap;
+	}
+
 	/* ---------- Hero ---------- */
 	.hero {
 		position: relative;
@@ -219,41 +317,35 @@ const lema = [
 		isolation: isolate;
 		background:
 			radial-gradient(60% 90% at 0% 100%, rgb(214 41 122 / 0.22), transparent 60%),
+			radial-gradient(50% 70% at 80% 30%, rgb(140 63 209 / 0.28), transparent 65%),
 			var(--noche);
 		color: var(--blanco);
-		min-height: min(46rem, 88dvh);
-		display: grid;
+		padding-bottom: 2.5rem;
+	}
+	.hero__grid {
+		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-	}
-	.hero__arte {
-		position: absolute;
-		inset: 0 0 0 auto;
-		width: min(66%, 62rem);
-		z-index: -1;
-		-webkit-mask-image: linear-gradient(to right, transparent 0%, #000 42%);
-		mask-image: linear-gradient(to right, transparent 0%, #000 42%);
-	}
-	.hero__arte img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		object-position: 62% 40%;
+		gap: 1.5rem;
+		padding-block: 4.5rem 2.5rem;
 	}
 	.hero__contenido {
+		position: relative;
+		z-index: 2;
+		flex: 1 1 28.75rem;
 		display: grid;
 		gap: 1.75rem;
 		justify-items: start;
-		padding-block: clamp(3rem, 9vw, 6rem);
 	}
 	.lema {
 		display: grid;
-		font-size: clamp(3.6rem, 11.5vw, 8.5rem);
-		line-height: 0.98;
+		font-size: clamp(4.75rem, 10.5vw, 9.5rem);
+		line-height: 0.9;
 	}
 	.lema__linea {
 		display: block;
 		color: var(--c);
-		/* Único movimiento de la portada: las cuatro palabras entran una tras otra */
+		/* Las cuatro palabras entran una tras otra */
 		animation: entra 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 		animation-delay: calc(var(--i) * 110ms);
 	}
@@ -264,8 +356,8 @@ const lema = [
 		}
 	}
 	.hero__texto {
-		max-width: 30rem;
-		font-size: clamp(1.05rem, 2vw, 1.25rem);
+		max-width: 29.375rem;
+		font-size: 1.1875rem;
 		line-height: 1.6;
 		color: rgb(255 255 255 / 0.9);
 	}
@@ -274,31 +366,178 @@ const lema = [
 		gap: 0.75rem;
 		flex-wrap: wrap;
 	}
+	.hero__arte {
+		flex: 1 1 32.5rem;
+		display: grid;
+		place-items: center;
+		min-height: 35rem;
+	}
+
+	/* Franja "Próxima fecha" */
+	.proxima {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+		flex-wrap: wrap;
+		padding: 1.125rem 1.5rem;
+		border-radius: 1.25rem;
+		background: rgb(255 255 255 / 0.06);
+		box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+		color: var(--blanco);
+		text-decoration: none;
+		transition: background 0.2s;
+	}
+	.proxima:hover {
+		background: rgb(255 255 255 / 0.1);
+	}
+	.proxima__rotulo {
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--morado-claro);
+	}
+	.proxima__hoja {
+		display: grid;
+		justify-items: center;
+		min-width: 4rem;
+		padding: 0.5rem 0.625rem;
+		border-radius: 0.75rem;
+		background: var(--blanco);
+		color: var(--marino);
+		line-height: 1;
+	}
+	.proxima__dia {
+		font-size: 1.875rem;
+		line-height: 1;
+	}
+	.proxima__mes {
+		margin-top: 0.2rem;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--magenta);
+	}
+	.proxima__texto {
+		flex: 1 1 20rem;
+		display: grid;
+	}
+	.proxima__titulo {
+		font-weight: 700;
+		font-size: 1.125rem;
+	}
+	.proxima__meta {
+		font-size: 0.875rem;
+		color: var(--morado-claro);
+	}
+	.proxima__ir {
+		font-weight: 600;
+		font-size: 0.9375rem;
+	}
+
 	@media (max-width: 48rem) {
+		.hero {
+			background:
+				radial-gradient(90% 60% at 50% 20%, rgb(140 63 209 / 0.3), transparent 70%),
+				var(--noche);
+			padding-bottom: 2rem;
+		}
+		.hero__grid {
+			padding-block: 0.5rem 1.375rem;
+			gap: 1.375rem;
+		}
+		.hero__kicker {
+			display: none;
+		}
+		.hero__contenido {
+			gap: 1.375rem;
+			justify-items: stretch;
+		}
+		.hero__texto {
+			font-size: 1rem;
+		}
+		.hero__acciones {
+			display: grid;
+			gap: 0.625rem;
+		}
 		.hero__arte {
-			width: 100%;
-			opacity: 0.4;
-			-webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
-			mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+			order: -1;
+			flex-basis: 100%;
+			min-height: 0;
+		}
+		.proxima {
+			flex-wrap: nowrap;
+			gap: 0.875rem;
+			padding: 0.875rem;
+			border-radius: 1rem;
+		}
+		.proxima__hoja {
+			min-width: 3.375rem;
+			padding: 0.375rem;
+			border-radius: 0.625rem;
+		}
+		.proxima__dia {
+			font-size: 1.625rem;
+		}
+		.proxima__texto {
+			flex: 1;
+			line-height: 1.35;
+		}
+		.proxima__rotulo {
+			font-size: 0.6875rem;
+			letter-spacing: 0.14em;
+		}
+		.proxima__titulo {
+			font-size: 1rem;
+		}
+		.proxima__meta {
+			font-size: 0.8125rem;
 		}
 	}
 
-	/* ---------- Novedades ---------- */
-	.portada {
-		display: grid;
+	/* ---------- Cabeceras de sección ---------- */
+	.cabeza {
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
 		gap: 1.5rem;
+		flex-wrap: wrap;
 	}
-	.portada__grilla {
+	.cabeza__titulos {
+		display: grid;
+		gap: 1rem;
+		justify-items: start;
+	}
+	.cabeza__titulo {
+		font-size: clamp(3rem, 6vw, 5rem);
+		line-height: 0.95;
+	}
+
+	/* ---------- 01 · Learn ---------- */
+	.novedades {
+		padding-block: 6rem 5.5rem;
+	}
+	.novedades__grid {
+		display: grid;
+		gap: 2.5rem;
+	}
+	.novedades__lista {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: grid;
 		gap: 1.5rem;
-		grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(16.25rem, 1fr));
 		align-items: start;
 	}
 
-	/* ---------- Próximas fechas ---------- */
+	/* Fechas adicionales */
+	.fechas-sec {
+		display: grid;
+		gap: 1.25rem;
+		padding-bottom: 4rem;
+	}
 	.fechas {
 		list-style: none;
 		margin: 0;
@@ -315,32 +554,13 @@ const lema = [
 		border-radius: 1rem;
 		box-shadow: var(--sombra);
 		text-decoration: none;
-		transition: transform 0.2s;
 	}
-	.fecha:hover {
-		transform: translateX(4px);
-	}
-	.fecha__hoja {
-		display: grid;
-		justify-items: center;
-		min-width: 4rem;
-		padding: 0.5rem 0.6rem;
-		border-radius: 0.75rem;
+	.fecha .proxima__hoja {
 		background: var(--marino);
 		color: var(--blanco);
-		line-height: 1;
 	}
-	.fecha__dia {
-		font-family: var(--f-display);
-		font-size: 2rem;
-	}
-	.fecha__mes {
-		margin-top: 0.2rem;
-		font-size: 0.75rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--coral-claro);
+	.fecha .proxima__mes {
+		color: var(--magenta-claro);
 	}
 	.fecha__texto {
 		display: grid;
@@ -349,8 +569,7 @@ const lema = [
 	}
 	.fecha__titulo {
 		font-weight: 700;
-		font-size: 1.1rem;
-		line-height: 1.3;
+		font-size: 1.05rem;
 	}
 	.fecha__meta {
 		font-size: 0.875rem;
@@ -358,86 +577,162 @@ const lema = [
 	}
 	.fecha__ir {
 		color: var(--magenta);
-		font-weight: 700;
 	}
 
-	/* ---------- Cifras ---------- */
-	.cifras {
+	@media (max-width: 48rem) {
+		.novedades {
+			padding-block: 3.5rem;
+		}
+		.novedades__grid {
+			gap: 1.5rem;
+		}
+		.novedades__lista {
+			gap: 1rem;
+		}
+		/* En el celular, la principal y dos más; el resto en "Ver todas" */
+		.novedades__lista li:nth-child(n + 3) {
+			display: none;
+		}
+		.cabeza__titulo {
+			font-size: 3rem;
+		}
+	}
+
+	/* ---------- 02 · Explore ---------- */
+	.pilares-sec {
+		background: var(--blanco);
+		padding-block: 6rem;
+	}
+	.pilares-sec__grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 3.5rem;
+	}
+	.pilares-sec__intro {
+		flex: 1 1 20rem;
+		display: grid;
+		gap: 1.25rem;
+		align-content: start;
+		justify-items: start;
+	}
+	.pilares-sec__texto {
+		max-width: 23.75rem;
+		font-size: 1.0625rem;
+		color: var(--tinta-suave);
+	}
+	.pilares-sec__lista {
+		flex: 2 1 35rem;
+	}
+	@media (max-width: 48rem) {
+		.pilares-sec {
+			padding-block: 3.5rem;
+		}
+		.pilares-sec__grid,
+		.pilares-sec__intro {
+			gap: 1.25rem;
+		}
+		.pilares-sec__intro {
+			flex-basis: 100%;
+		}
+		.pilares-sec__lista {
+			flex-basis: 100%;
+		}
+	}
+
+	/* ---------- 03 · Aspire ---------- */
+	.aspire {
+		position: relative;
+		overflow: hidden;
+		isolation: isolate;
 		background: var(--marino);
 		color: var(--blanco);
-		padding-block: clamp(2.5rem, 6vw, 4rem);
+		padding-block: 6rem;
 	}
-	.cifras__lista {
+	.aspire__fondo {
+		position: absolute;
+		right: -1.25rem;
+		top: 2.5rem;
+		z-index: -1;
+		font-size: clamp(8rem, 18vw, 16.25rem);
+		line-height: 0.8;
+		color: rgb(255 255 255 / 0.04);
+		white-space: nowrap;
+		pointer-events: none;
+	}
+	.aspire__grid {
+		display: grid;
+		gap: 4rem;
+	}
+	.cifras {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: grid;
-		gap: 2rem;
-		grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+		gap: 2.5rem;
+		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 	}
-	.cifras__lista li {
+	.cifras li {
 		display: grid;
-		gap: 0.25rem;
+		gap: 0.375rem;
 		align-content: start;
-		padding-top: 1rem;
+		padding-top: 1.125rem;
 		border-top: 4px solid transparent;
 		border-image: var(--degradado) 1;
 	}
 	.cifras__valor {
-		font-family: var(--f-display);
-		font-size: clamp(3.5rem, 8vw, 5.5rem);
+		font-size: clamp(4rem, 8vw, 6.5rem);
 		line-height: 1;
 	}
 	.cifras__nombre {
 		font-weight: 600;
+		font-size: 1.0625rem;
 	}
 	.cifras__desc {
 		font-size: 0.875rem;
-		color: rgb(255 255 255 / 0.7);
+		color: var(--morado-claro);
+	}
+	@media (max-width: 48rem) {
+		.aspire {
+			padding-block: 3.5rem;
+		}
+		.aspire__fondo,
+		.cifras__desc {
+			display: none;
+		}
+		.aspire__grid {
+			gap: 1.75rem;
+		}
+		.cifras {
+			gap: 1.375rem;
+		}
+		.cifras li {
+			gap: 0;
+			padding-top: 0.75rem;
+		}
+		.cifras__valor {
+			font-size: 4rem;
+		}
+		.cifras__nombre {
+			font-size: 1rem;
+		}
 	}
 
-	/* ---------- Testimonios y aliados ---------- */
-	.testimonios {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		gap: 1.5rem;
-		grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+	/* ---------- Aliados ---------- */
+	.aliados-sec {
+		padding-block: 4rem;
 	}
-	.testimonios li {
-		display: grid;
-		gap: 1.25rem;
-		align-content: space-between;
-		padding: 1.5rem;
-		background: var(--blanco);
-		border-radius: 1rem;
-		box-shadow: var(--sombra);
-	}
-	.testimonios blockquote {
-		margin: 0;
-		font-size: 1.2rem;
-		font-weight: 600;
-		line-height: 1.5;
-	}
-	.testimonio__autor {
+	.aliados-sec__fila {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.8rem;
-		font-size: 0.9rem;
+		gap: 2rem 4rem;
 	}
-	.testimonio__autor img {
-		width: 3rem;
-		height: 3rem;
-		border-radius: 50%;
-		object-fit: cover;
-	}
-	.testimonio__autor > span {
-		display: grid;
+	.aliados-sec__titulo {
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
 		color: var(--tinta-suave);
-	}
-	.testimonio__autor strong {
-		color: var(--tinta);
 	}
 	.aliados {
 		list-style: none;
@@ -446,13 +741,51 @@ const lema = [
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 1.5rem 3rem;
+		gap: 1.5rem 3.5rem;
 	}
-	.aliados img {
-		height: 3rem;
+	.aliado {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-decoration: none;
+	}
+	a.aliado:hover strong {
+		color: var(--magenta);
+	}
+	.aliado__logo {
+		height: 3.5rem;
 		width: auto;
 		max-width: 10rem;
 		object-fit: contain;
 	}
-
+	.aliado__iniciales {
+		display: grid;
+		place-items: center;
+		width: 3.5rem;
+		height: 3.5rem;
+		border-radius: 0.875rem;
+		background: var(--lavanda);
+		font-weight: 700;
+		font-size: 0.9375rem;
+		color: var(--marino);
+	}
+	.aliado__texto {
+		display: grid;
+		line-height: 1.3;
+	}
+	.aliado__texto strong {
+		font-size: 1.0625rem;
+	}
+	.aliado__texto span {
+		font-size: 0.8125rem;
+		color: var(--tinta-suave);
+	}
+	@media (max-width: 48rem) {
+		.aliados-sec {
+			padding-block: 3rem;
+		}
+		.aliados-sec__fila {
+			gap: 1.25rem;
+		}
+	}
 </style>

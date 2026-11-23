@@ -11,7 +11,7 @@ export interface RenderCtx {
 	/** Convierte un archivo de Notion en una URL pública (descargándolo si hace falta). */
 	resolveFile(file: FileRef): Promise<string>;
 	/** Si está, las imágenes del texto se optimizan (WebP + srcset + ancho/alto). */
-	resolveImage?(file: FileRef, alt: string): Promise<ImageRef>;
+	resolveImage?(file: FileRef, alt: string): Promise<ImageRef | null>;
 	warn?(message: string): void;
 }
 
@@ -142,9 +142,13 @@ async function renderBlock(node: BlockNode, ctx: RenderCtx): Promise<string> {
 			const altText = plainText(img.caption);
 			// El pie de foto hace de texto alternativo: sin él, la imagen queda sin describir.
 			if (!altText) ctx.warn?.('una imagen del texto no tiene pie de foto (se usa como texto alternativo).');
-			const ref: ImageRef = ctx.resolveImage
+			const ref: ImageRef | null = ctx.resolveImage
 				? await ctx.resolveImage(file, altText)
 				: { src: await ctx.resolveFile(file), alt: altText, width: null, height: null, srcset: '' };
+			if (!ref) {
+				ctx.warn?.('una imagen del texto no lleva a una imagen (¿enlace privado de Google Drive?); se omite.');
+				return '';
+			}
 			const attrs =
 				`src="${esc(ref.src)}" alt="${esc(altText)}"` +
 				(ref.srcset ? ` srcset="${esc(ref.srcset)}" sizes="(min-width: 44rem) 42rem, 100vw"` : '') +

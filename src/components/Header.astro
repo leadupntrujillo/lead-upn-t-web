@@ -82,13 +82,18 @@ const uneteExterno = /^https?:/.test(sitio.unete.url);
 		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
-		min-height: 4rem;
+		min-height: 4.25rem;
+	}
+	@media (min-width: 52.01rem) {
+		.sitio__fila {
+			min-height: 5.25rem;
+		}
 	}
 	.sitio__nav,
 	.sitio__nav ul {
 		display: flex;
 		align-items: center;
-		gap: 1.5rem;
+		gap: 1.75rem;
 	}
 	.sitio__nav ul {
 		list-style: none;

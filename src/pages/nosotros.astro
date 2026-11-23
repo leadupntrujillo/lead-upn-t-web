@@ -2,10 +2,10 @@
 import ListaPilares from '../components/ListaPilares.astro';
 import Unete from '../components/Unete.astro';
 import Layout from '../layouts/Layout.astro';
-import { getNovedades, getPilares, getSitio } from '../lib/queries';
+import { getPilares, getSitio } from '../lib/queries';
 import { migas } from '../lib/seo';
 
-const [sitio, pilares, novedades] = await Promise.all([getSitio(), getPilares(), getNovedades()]);
+const [sitio, pilares] = await Promise.all([getSitio(), getPilares()]);
 
 // Misión y visión salen de la tabla "Sitio" de Notion. En local se avisa si faltan.
 const bloques = [
@@ -81,7 +81,7 @@ const lema = ['Learn', 'Explore', 'Aspire', 'Discover'];
 				<div class="seccion__cabeza">
 					<h2 id="t-pilares" class="seccion__titulo titulo">Nuestros pilares</h2>
 				</div>
-				<ListaPilares {pilares} {novedades} />
+				<ListaPilares {pilares} />
 			</section>
 		)
 	}

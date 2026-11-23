@@ -1,0 +1,147 @@
+---
+/**
+ * Auki 3D en el hero. El póster (`auki-cohete.webp`) es el LCP y se ve desde el primer momento;
+ * el módulo 3D se importa en diferido (requestIdleCallback) y, cuando Auki está listo, el póster
+ * se funde. Sin WebGL, si falla la carga o si tarda más de 6 s, se queda el póster.
+ */
+interface Props {
+	glb?: string;
+}
+
+const { glb = '/3d/auki.glb' } = Astro.props;
+---
+
+<div class="auki" data-auki data-glb={glb} aria-hidden="true">
+	<img
+		class="auki__poster"
+		src="/brand/auki-cohete.webp"
+		srcset="/brand/auki-cohete-640.webp 640w, /brand/auki-cohete.webp 1100w"
+		sizes="(max-width: 48rem) 100vw, 40rem"
+		alt=""
+		width="1100"
+		height="692"
+		fetchpriority="high"
+	/>
+	<canvas class="auki__lienzo"></canvas>
+</div>
+
+<script>
+	const LIMITE_MS = 6000;
+
+	const contenedor = document.querySelector<HTMLElement>('[data-auki]');
+	let lienzo = contenedor?.querySelector('canvas');
+	let actual: { dispose(): void } | null = null;
+
+	/** Vuelve al póster (el lienzo se funde y el póster reaparece). */
+	const alPoster = () => {
+		if (contenedor) delete contenedor.dataset.listo;
+		actual?.dispose();
+		actual = null;
+	};
+
+	const hayWebGL = () => {
+		try {
+			const c = document.createElement('canvas');
+			return Boolean(c.getContext('webgl2') ?? c.getContext('webgl'));
+		} catch {
+			return false;
+		}
+	};
+
+	async function cargar() {
+		if (!contenedor || !lienzo || !hayWebGL()) return;
+		// Solo en desarrollo, para comparar y capturar:
+		//   ?auki=estandar | sin-normal   material de la fase 1
+		//   ?auki-t=3.2                   congela la línea de tiempo en ese segundo
+		//   ?auki-linterna=320,260        linterna fija en esa posición (px CSS del lienzo)
+		//   ?auki-mouse=-1,0.5            mouse fijo, de -1 a 1 (x a la derecha, y hacia arriba)
+		//   ?auki-reducido                como con prefers-reduced-motion: reduce
+		const q = new URLSearchParams(import.meta.env.DEV ? location.search : '');
+		const pedido = q.get('auki');
+		const modo = pedido === 'estandar' || pedido === 'sin-normal' ? pedido : 'capas';
+		const tiempoFijo = q.has('auki-t') ? Number(q.get('auki-t')) : undefined;
+		const [lx, ly] = (q.get('auki-linterna') ?? '').split(',').map(Number);
+		const linternaFija = Number.isFinite(lx) && Number.isFinite(ly) && q.has('auki-linterna') ? { x: lx!, y: ly! } : undefined;
+		const [mx, my] = (q.get('auki-mouse') ?? '').split(',').map(Number);
+		const mouseFijo = q.has('auki-mouse') && Number.isFinite(mx) && Number.isFinite(my) ? { x: mx!, y: my! } : undefined;
+		const reducido = q.has('auki-reducido') ? true : undefined;
+		let vencido = false;
+		const reloj = window.setTimeout(() => (vencido = true), LIMITE_MS);
+		try {
+			const { iniciarAuki } = await import('../../lib/auki3d/escena');
+			const auki = await iniciarAuki(lienzo, {
+				glb: contenedor.dataset.glb!,
+				modo,
+				tiempoFijo,
+				linternaFija,
+				mouseFijo,
+				reducido,
+				alFallar: alPoster,
+			});
+			window.clearTimeout(reloj);
+			// Tardó más de 6 s: se queda el póster (no aparece de golpe a mitad de la lectura)
+			if (vencido) {
+				auki.dispose();
+				return;
+			}
+			actual = auki;
+			contenedor.dataset.listo = '';
+		} catch (error) {
+			window.clearTimeout(reloj);
+			if (import.meta.env.DEV) console.warn('[auki3d] se queda el póster:', error);
+		}
+	}
+
+	// Al salir de la página se libera todo (geometría, material, texturas y contexto WebGL).
+	// Si se vuelve con "Atrás" (bfcache), se arma de nuevo sobre un lienzo limpio.
+	window.addEventListener('pagehide', alPoster);
+	window.addEventListener('pageshow', (e) => {
+		if (!e.persisted || !lienzo || actual) return;
+		const nuevo = lienzo.cloneNode() as HTMLCanvasElement;
+		lienzo.replaceWith(nuevo);
+		lienzo = nuevo;
+		void cargar();
+	});
+
+	// Después de la primera pintada, cuando el navegador esté libre
+	const enReposo = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 200));
+	enReposo(() => void cargar(), { timeout: 2000 });
+</script>
+
+<style>
+	.auki {
+		position: relative;
+		display: grid;
+		width: min(100%, 40rem);
+		aspect-ratio: 1;
+	}
+	.auki > * {
+		grid-area: 1 / 1;
+		width: 100%;
+		height: 100%;
+	}
+	/* Póster: recortado en cuadrado y fundido con el fondo del hero */
+	.auki__poster {
+		object-fit: cover;
+		object-position: 58% 45%;
+		-webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent);
+		mask-image: radial-gradient(closest-side, #000 62%, transparent);
+		transition: opacity 0.4s ease;
+	}
+	.auki__lienzo {
+		display: block;
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+	[data-listo] .auki__poster {
+		opacity: 0;
+	}
+	[data-listo] .auki__lienzo {
+		opacity: 1;
+	}
+	@media (max-width: 48rem) {
+		.auki {
+			width: min(100%, 21.25rem, 42vh);
+		}
+	}
+</style>
