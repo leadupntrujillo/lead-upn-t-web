@@ -53,3 +53,18 @@ export function diasRestantes(limite: Date, ahora: Date = new Date(), conHora?: 
 	const fin = Date.parse(dia(limite, zona(limite, conHora)));
 	return Math.round((fin - hoy) / 86_400_000);
 }
+
+/** "Sábado 18:00" (con hora, en Lima) o "Sábado" (fecha sin hora). Para la franja "Próxima fecha". */
+export function diaYHora(d: Date, conHora?: boolean): string {
+	const lima = conHora ?? !esSoloDia(d);
+	const dia = fmt(d, { weekday: 'long' }, lima);
+	const texto = dia.charAt(0).toUpperCase() + dia.slice(1);
+	if (!lima) return texto;
+	const h = new Intl.DateTimeFormat('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: LIMA }).format(d);
+	return `${texto} ${h}`;
+}
+
+const MODALIDADES = { presencial: 'Presencial', virtual: 'Virtual', hibrido: 'Híbrido' } as const;
+
+/** "Presencial" | "Virtual" | "Híbrido" */
+export const modalidadTexto = (m: keyof typeof MODALIDADES | null | undefined): string | null => (m ? MODALIDADES[m] : null);

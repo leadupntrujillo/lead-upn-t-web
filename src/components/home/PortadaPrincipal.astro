@@ -1,0 +1,237 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { fechaCorta, fechaLarga, modalidadTexto } from '../../lib/format';
+import { slugEtiqueta } from '../../lib/novedades';
+import { FORMATOS_INFO } from '../../lib/notion/formatos';
+import PilarChip from '../PilarChip.astro';
+
+/**
+ * Novedad principal de la portada: a la izquierda la foto como polaroid girada sobre marino;
+ * a la derecha pilar, título, resumen, datos y etiquetas. Sin foto, la polaroid lleva el símbolo.
+ */
+interface Props {
+	entry: CollectionEntry<'novedades'>;
+	pilar?: CollectionEntry<'pilares'>;
+}
+
+const { entry, pilar } = Astro.props;
+const d = entry.data;
+const href = `/novedades/${entry.id}`;
+const imagen = d.imagen ?? d.galeria[0] ?? null;
+const modalidad = modalidadTexto(d.modalidad);
+const aviso = d.estado === 'borrador' ? 'Borrador' : d.estado === 'en-revision' ? 'En revisión' : null;
+---
+
+<article class="principal">
+	<div class="principal__media">
+		{
+			imagen ? (
+				<img
+					class="polaroid principal__foto"
+					src={imagen.src}
+					srcset={imagen.srcset || undefined}
+					sizes={imagen.srcset ? '(min-width: 52rem) 22rem, 15rem' : undefined}
+					width={imagen.width ?? undefined}
+					height={imagen.height ?? undefined}
+					alt={imagen.alt}
+					decoding="async"
+				/>
+			) : (
+				<span class="polaroid principal__foto principal__foto--vacia" aria-hidden="true">
+					<span class="principal__marca" />
+				</span>
+			)
+		}
+		<span class="pill principal__formato">{FORMATOS_INFO[d.formato].nombre} · Portada</span>
+	</div>
+
+	<div class="principal__cuerpo">
+		<p class="principal__fila">
+			<PilarChip pilar={pilar} />
+			{aviso && <span class="pill principal__aviso">{aviso}</span>}
+		</p>
+		<h3 class="principal__titulo titulo"><a href={href}>{d.titulo}</a></h3>
+		<p class="principal__resumen">{d.resumen}</p>
+		<p class="principal__meta">
+			<time datetime={d.fechaPublicacion.toISOString()}>
+				<span class="solo-escritorio">{fechaLarga(d.fechaPublicacion)}</span>
+				<span class="solo-movil">{fechaCorta(d.fechaPublicacion)}</span>
+			</time>
+			{d.tiempoLectura > 0 && <span>{d.tiempoLectura} min<span class="solo-escritorio"> de lectura</span></span>}
+			{modalidad && <span class="pill solo-escritorio">{modalidad}</span>}
+		</p>
+		{
+			d.etiquetas.length > 0 && (
+				<ul class="principal__etiquetas" aria-label="Etiquetas">
+					{d.etiquetas.map((e) => (
+						<li>
+							<a class="pill pill--borde" href={`/etiquetas/${slugEtiqueta(e)}`}>
+								#{e}
+							</a>
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</div>
+</article>
+
+<style>
+	.principal {
+		position: relative;
+		display: flex;
+		flex-wrap: wrap;
+		background: var(--blanco);
+		border-radius: 1.75rem;
+		overflow: hidden;
+		box-shadow:
+			0 1px 2px rgb(22 26 78 / 0.08),
+			0 24px 48px -24px rgb(22 26 78 / 0.35);
+		transition: transform 0.2s;
+	}
+	.principal:hover {
+		transform: translateY(-4px);
+	}
+	.principal:focus-within {
+		outline: 3px solid var(--coral);
+		outline-offset: 3px;
+	}
+	.principal__media {
+		position: relative;
+		flex: 1 1 26rem;
+		display: grid;
+		place-items: center;
+		padding: 2.5rem;
+		min-height: 26rem;
+		background: var(--marino);
+	}
+	.principal__foto {
+		width: min(100%, 21.25rem);
+		height: auto;
+		aspect-ratio: 4 / 5;
+		object-fit: cover;
+		/* Los afiches llevan el título arriba */
+		object-position: center top;
+	}
+	.principal__foto--vacia {
+		display: grid;
+		place-items: center;
+		background:
+			radial-gradient(120% 90% at 85% 0%, rgb(140 63 209 / 0.45), transparent 60%),
+			var(--marino);
+		background-clip: padding-box;
+	}
+	.principal__marca {
+		width: 45%;
+		aspect-ratio: 720 / 430;
+		background: var(--degradado-vertical);
+		-webkit-mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+		mask: url('/brand/lead-mark.svg') center / contain no-repeat;
+	}
+	.principal__formato {
+		position: absolute;
+		top: 1.5rem;
+		left: 1.5rem;
+		background: var(--blanco);
+	}
+	.principal__cuerpo {
+		flex: 1 1 26rem;
+		display: grid;
+		gap: 1.1rem;
+		align-content: center;
+		padding: 3rem;
+	}
+	.principal__fila {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+	.principal__aviso {
+		background: #fdf3cc;
+		color: #5c4300;
+	}
+	.principal__titulo {
+		font-size: clamp(2.5rem, 5vw, 4.75rem);
+		line-height: 0.95;
+	}
+	.principal__titulo a {
+		text-decoration: none;
+	}
+	/* El título cubre toda la tarjeta; el pilar y las etiquetas quedan por encima */
+	.principal__titulo a::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+	}
+	.principal__titulo a:focus-visible {
+		outline: none;
+	}
+	.principal__resumen {
+		max-width: 32.5rem;
+		font-size: 1.125rem;
+		color: var(--tinta-suave);
+	}
+	.principal__meta {
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		flex-wrap: wrap;
+		font-size: 0.8125rem;
+		color: var(--tinta-suave);
+	}
+	.principal__etiquetas {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+	.principal__etiquetas a {
+		position: relative;
+		z-index: 2;
+		color: var(--tinta-suave);
+		text-decoration: none;
+	}
+	.principal__etiquetas a:hover {
+		color: var(--magenta);
+	}
+	.solo-movil {
+		display: none;
+	}
+
+	@media (max-width: 48rem) {
+		.principal {
+			border-radius: 1.375rem;
+		}
+		.principal__media {
+			min-height: 0;
+			padding: 1.75rem;
+		}
+		.principal__foto {
+			width: min(100%, 14.5rem);
+			border-width: 0.5rem 0.5rem 1.75rem;
+		}
+		.principal__formato,
+		.principal__etiquetas,
+		.solo-escritorio {
+			display: none;
+		}
+		.solo-movil {
+			display: inline;
+		}
+		.principal__cuerpo {
+			gap: 0.625rem;
+			padding: 1.25rem;
+		}
+		.principal__resumen {
+			font-size: 0.95rem;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+	}
+</style>

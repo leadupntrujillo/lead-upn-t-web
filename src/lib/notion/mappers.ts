@@ -32,7 +32,7 @@ export interface MappedEntry<T> {
 export interface BaseDeps {
 	resolveFile(file: FileRef): Promise<string>;
 	/** Descarga y optimiza una imagen (WebP en varios anchos). Sin ella se usa `resolveFile` tal cual. */
-	resolveImage?(file: FileRef, alt: string): Promise<ImageRef>;
+	resolveImage?(file: FileRef, alt: string): Promise<ImageRef | null>;
 	warn(message: string): void;
 }
 
@@ -52,7 +52,11 @@ const NO_ORDER = 999;
 
 async function toImage(file: FileRef | undefined, alt: string, deps: BaseDeps): Promise<ImageRef | null> {
 	if (!file) return null;
-	if (deps.resolveImage) return deps.resolveImage(file, alt);
+	if (deps.resolveImage) {
+		const ref = await deps.resolveImage(file, alt);
+		if (!ref) deps.warn(`"${alt}": el enlace de la imagen no lleva a una imagen (¿un enlace privado de Google Drive?). Se publica sin foto; súbela directo a Notion.`);
+		return ref;
+	}
 	return { src: await deps.resolveFile(file), alt, width: null, height: null, srcset: '' };
 }
 

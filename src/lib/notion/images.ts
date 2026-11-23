@@ -42,11 +42,19 @@ export function anchoBase(anchos: number[]): number {
 	return anchos.filter((w) => w <= ANCHO_BASE).at(-1) ?? anchos[0]!;
 }
 
+/** El enlace respondió con algo que no es una imagen (p. ej. la página de inicio de sesión de Google Drive). */
+class NoEsImagen extends Error {}
+
+/** true si el archivo descargado es en realidad una página web. */
+export const pareceHtml = (inicio: Buffer): boolean => /^\s*(<!doctype html|<html|<head|<body)/i.test(inicio.toString('utf8', 0, 256));
+
 async function descargar(file: FileRef, hash: string, ext: string): Promise<string> {
 	const dest = join(CACHE_DIR, `${hash}${ext}`);
 	if (existsSync(dest)) return dest;
 	const res = await fetch(file.url);
 	if (!res.ok) throw new Error(`No se pudo descargar una imagen de Notion (HTTP ${res.status}).`);
+	const tipo = res.headers.get('content-type') ?? '';
+	if (/^text\/html/i.test(tipo)) throw new NoEsImagen();
 	await mkdir(CACHE_DIR, { recursive: true });
 	await writeFile(dest, Buffer.from(await res.arrayBuffer()));
 	return dest;
@@ -54,20 +62,28 @@ async function descargar(file: FileRef, hash: string, ext: string): Promise<stri
 
 const sinOptimizar = (src: string, alt: string): ImageRef => ({ src, alt, width: null, height: null, srcset: '' });
 
-export async function resolveImage(file: FileRef, alt: string): Promise<ImageRef> {
+/**
+ * Descarga y optimiza una imagen. Devuelve `null` si el enlace no lleva a una imagen
+ * (por ejemplo, un enlace privado de Google Drive): quien llama decide qué mostrar y avisa en el log.
+ */
+export async function resolveImage(file: FileRef, alt: string): Promise<ImageRef | null> {
 	const source = new URL(file.url);
 	// Las URLs de Notion llevan una firma que cambia: el nombre sale de la ruta sin la firma.
-	const hash = createHash('sha1').update(source.origin + source.pathname).digest('hex').slice(0, 16);
+	// En los enlaces externos la consulta sí distingue archivos (drive.google.com/open?id=…).
+	const clave = file.hosted ? source.origin + source.pathname : source.href;
+	const hash = createHash('sha1').update(clave).digest('hex').slice(0, 16);
 	const ext = extname(source.pathname).toLowerCase().replace(/[^.a-z0-9]/g, '').slice(0, 6) || '.bin';
 
 	let original: string;
 	try {
 		original = await descargar(file, hash, ext);
 	} catch (error) {
+		if (error instanceof NoEsImagen) return null;
 		// Un enlace externo caído no debe romper el build: se deja la URL tal cual.
 		if (!file.hosted) return sinOptimizar(file.url, alt);
 		throw error;
 	}
+	if (pareceHtml(await readFile(original))) return null;
 
 	await mkdir(OUT_DIR, { recursive: true });
 

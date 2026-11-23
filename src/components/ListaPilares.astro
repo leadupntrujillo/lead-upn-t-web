@@ -2,72 +2,107 @@
 import type { CollectionEntry } from 'astro:content';
 import { colorPilar } from '../lib/pilares';
 
-/** Pilares como lista (no una rejilla de tarjetas): nombre, descripción y enlace a sus novedades. */
+/** Pilares como lista numerada 01–07: número, punto de color, nombre, descripción y enlace a su página. */
 interface Props {
 	pilares: CollectionEntry<'pilares'>[];
-	novedades: CollectionEntry<'novedades'>[];
 }
 
-const { pilares, novedades } = Astro.props;
-const totalPor = (pilarId: string) => novedades.filter((n) => n.data.pilar?.id === pilarId).length;
+const { pilares } = Astro.props;
+const numero = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
-<ul class="pilares">
+<ol class="pilares">
 	{
-		pilares.map((p) => {
-			const total = totalPor(p.id);
-			return (
-				<li style={`--punto:${colorPilar(p.data.color)}`}>
-					<h3 class="pilar__nombre titulo">{p.data.nombre}</h3>
-					<p class="pilar__desc">{p.data.descripcion}</p>
-					{total > 0 && (
-						<a class="pilar__ver flechas" href={`/pilares/${p.data.slug}`}>
-							{total === 1 ? '1 novedad' : `${total} novedades`}
-						</a>
-					)}
-				</li>
-			);
-		})
+		pilares.map((p, i) => (
+			<li>
+				<a class="pilar" href={`/pilares/${p.data.slug}`} style={`--punto:${colorPilar(p.data.color)}`}>
+					<span class="pilar__numero titulo" aria-hidden="true">
+						{numero(i)}
+					</span>
+					<span class="pilar__texto">
+						<span class="pilar__nombre">
+							<span class="pilar__punto" aria-hidden="true" />
+							{p.data.nombre}
+						</span>
+						{p.data.descripcion && <span class="pilar__desc">{p.data.descripcion}</span>}
+					</span>
+					<span class="pilar__ir flechas" aria-hidden="true" />
+				</a>
+			</li>
+		))
 	}
-</ul>
+</ol>
 
 <style>
 	.pilares {
 		list-style: none;
 		margin: 0;
 		padding: 0;
-		border-top: 1px solid var(--linea);
+		border-top: 2px solid var(--marino);
 	}
-	.pilares li {
+	.pilar {
 		display: grid;
-		gap: 0.4rem 2rem;
-		align-items: baseline;
-		padding: 1.4rem 0 1.4rem 1.25rem;
+		grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+		gap: 1.25rem;
+		align-items: center;
+		padding: 1.375rem 0;
 		border-bottom: 1px solid var(--linea);
-		border-left: 6px solid var(--punto);
+		text-decoration: none;
 	}
-	@media (min-width: 52rem) {
-		.pilares li {
-			grid-template-columns: 17rem minmax(0, 1fr) auto;
-		}
+	.pilar__numero {
+		font-size: 2.5rem;
+		line-height: 1;
+		color: var(--morado);
+	}
+	.pilar__texto {
+		display: grid;
+		gap: 0.125rem;
 	}
 	.pilar__nombre {
-		font-size: 1.7rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.625rem;
+		font-weight: 700;
+		font-size: 1.25rem;
+		line-height: 1.3;
+	}
+	.pilar__punto {
+		flex: none;
+		width: 0.7rem;
+		height: 0.7rem;
+		border-radius: 50%;
+		background: var(--punto);
 	}
 	.pilar__desc {
+		font-size: 0.875rem;
 		color: var(--tinta-suave);
-		max-width: 42rem;
 	}
-	.pilar__ver {
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-decoration: none;
+	.pilar__ir {
 		color: var(--magenta);
-		white-space: nowrap;
+		transition: transform 0.2s;
 	}
-	.pilar__ver:hover {
-		text-decoration: underline;
-		text-underline-offset: 0.25em;
+	.pilar:hover .pilar__ir {
+		transform: translateX(6px);
+	}
+	.pilar:hover .pilar__nombre {
+		color: var(--magenta);
 	}
 
+	@media (max-width: 48rem) {
+		.pilar {
+			grid-template-columns: 2.25rem minmax(0, 1fr);
+			gap: 0.875rem;
+			padding: 1rem 0;
+		}
+		.pilar__numero {
+			font-size: 1.75rem;
+		}
+		.pilar__nombre {
+			font-size: 1rem;
+		}
+		.pilar__desc,
+		.pilar__ir {
+			display: none;
+		}
+	}
 </style>

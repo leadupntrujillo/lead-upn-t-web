@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { diasRestantes, esSoloDia, fechaCorta, fechaLarga, hora, partesDeFecha } from './format';
+import { diaYHora, diasRestantes, esSoloDia, fechaCorta, fechaLarga, hora, modalidadTexto, partesDeFecha } from './format';
 
 describe('fechas', () => {
 	it('una fecha sin hora no se corre al día anterior (medianoche UTC)', () => {
@@ -33,5 +33,18 @@ describe('diasRestantes', () => {
 	it('de noche en Lima sigue siendo el mismo día', () => {
 		const tarde = new Date('2026-12-11T03:00:00Z'); // 10 dic, 22:00 en Lima
 		expect(diasRestantes(new Date('2026-12-10'), tarde)).toBe(0);
+	});
+});
+
+describe('franja de próxima fecha', () => {
+	it('día de la semana y hora de 24 h en Lima', () => {
+		expect(diaYHora(new Date('2026-12-05T18:00:00-05:00'))).toBe('Sábado 18:00');
+	});
+	it('sin hora, solo el día (sin correrse por la zona)', () => {
+		expect(diaYHora(new Date('2026-12-05'))).toBe('Sábado');
+	});
+	it('modalidad con tilde', () => {
+		expect(modalidadTexto('hibrido')).toBe('Híbrido');
+		expect(modalidadTexto(null)).toBeNull();
 	});
 });
