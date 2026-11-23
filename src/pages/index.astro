@@ -1,6 +1,7 @@
 ---
 import ListaPilares from '../components/ListaPilares.astro';
 import NovedadCard from '../components/NovedadCard.astro';
+import Auki3D from '../components/home/Auki3D.astro';
 import PortadaPrincipal from '../components/home/PortadaPrincipal.astro';
 import Testimonios from '../components/home/Testimonios.astro';
 import Unete from '../components/Unete.astro';
@@ -90,16 +91,8 @@ const iniciales = (nombre: string) => {
 					<a class="btn btn--borde" href="/novedades">Ver novedades</a>
 				</div>
 			</div>
-			<div class="hero__arte" aria-hidden="true">
-				<img
-					src="/brand/auki-cohete.webp"
-					srcset="/brand/auki-cohete-640.webp 640w, /brand/auki-cohete.webp 1100w"
-					sizes="(max-width: 48rem) 100vw, 50vw"
-					alt=""
-					width="1100"
-					height="692"
-					fetchpriority="high"
-				/>
+			<div class="hero__arte">
+				<Auki3D />
 			</div>
 		</div>
 
@@ -379,15 +372,6 @@ const iniciales = (nombre: string) => {
 		place-items: center;
 		min-height: 35rem;
 	}
-	/* Póster: se funde con el fondo del hero (después, el canvas 3D va encima) */
-	.hero__arte img {
-		width: min(100%, 40rem);
-		aspect-ratio: 1;
-		object-fit: cover;
-		object-position: 58% 45%;
-		-webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent);
-		mask-image: radial-gradient(closest-side, #000 62%, transparent);
-	}
 
 	/* Franja "Próxima fecha" */
 	.proxima {
@@ -481,10 +465,6 @@ const iniciales = (nombre: string) => {
 			order: -1;
 			flex-basis: 100%;
 			min-height: 0;
-		}
-		.hero__arte img {
-			width: auto;
-			height: min(21.25rem, 42vh);
 		}
 		.proxima {
 			flex-wrap: nowrap;
