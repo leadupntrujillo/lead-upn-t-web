@@ -1,14 +1,14 @@
 ---
-import ListaPilares from '../components/ListaPilares.astro';
-import NovedadCard from '../components/NovedadCard.astro';
-import Auki3D from '../components/home/Auki3D.astro';
-import PortadaPrincipal from '../components/home/PortadaPrincipal.astro';
-import Testimonios from '../components/home/Testimonios.astro';
-import Unete from '../components/Unete.astro';
-import Layout from '../layouts/Layout.astro';
-import { diaYHora, modalidadTexto, partesDeFecha } from '../lib/format';
-import { proximos } from '../lib/novedades';
-import { FORMATOS_INFO } from '../lib/notion/formatos';
+import ListaPilares from "../components/ListaPilares.astro";
+import NovedadCard from "../components/NovedadCard.astro";
+import Auki3D from "../components/home/Auki3D.astro";
+import PortadaPrincipal from "../components/home/PortadaPrincipal.astro";
+import Testimonios from "../components/home/Testimonios.astro";
+import Unete from "../components/Unete.astro";
+import Layout from "../layouts/Layout.astro";
+import { diaYHora, modalidadTexto, partesDeFecha } from "../lib/format";
+import { proximos } from "../lib/novedades";
+import { FORMATOS_INFO } from "../lib/notion/formatos";
 import {
 	getAliados,
 	getCifras,
@@ -18,9 +18,18 @@ import {
 	getPortada,
 	getSitio,
 	getTestimonios,
-} from '../lib/queries';
+} from "../lib/queries";
 
-const [sitio, novedades, portada, pilares, pilaresPorId, cifras, testimonios, aliados] = await Promise.all([
+const [
+	sitio,
+	novedades,
+	portada,
+	pilares,
+	pilaresPorId,
+	cifras,
+	testimonios,
+	aliados,
+] = await Promise.all([
 	getSitio(),
 	getNovedades(),
 	getPortada(),
@@ -34,14 +43,15 @@ const [sitio, novedades, portada, pilares, pilaresPorId, cifras, testimonios, al
 const { principal, destacadas, recientes } = portada;
 const masNovedades = [...destacadas, ...recientes].slice(0, 4);
 const [proxima, ...otrasFechas] = proximos(novedades).slice(0, 3);
-const pilarDe = (n: (typeof novedades)[number]) => (n.data.pilar ? pilaresPorId.get(n.data.pilar.id) : undefined);
+const pilarDe = (n: (typeof novedades)[number]) =>
+	n.data.pilar ? pilaresPorId.get(n.data.pilar.id) : undefined;
 const uneteExterno = /^https?:/.test(sitio.unete.url);
 
 const lema = [
-	{ palabra: 'Learn', color: 'var(--coral)' },
-	{ palabra: 'Explore', color: 'var(--magenta-claro)' },
-	{ palabra: 'Aspire', color: 'var(--morado-claro)' },
-	{ palabra: 'Discover.', color: 'var(--blanco)' },
+	{ palabra: "Learn", color: "var(--coral)" },
+	{ palabra: "Explore", color: "var(--magenta-claro)" },
+	{ palabra: "Aspire", color: "var(--morado-claro)" },
+	{ palabra: "Discover.", color: "var(--blanco)" },
 ];
 
 /** Datos de la franja "Próxima fecha" y de la lista de fechas. */
@@ -49,24 +59,45 @@ const datosFecha = (n: (typeof novedades)[number]) => {
 	const ev = n.data.fechaEvento!;
 	return {
 		hoja: partesDeFecha(ev.inicio, ev.conHora),
-		cuando: n.data.formato === 'convocatoria' ? 'Fecha límite' : diaYHora(ev.inicio, ev.conHora),
+		cuando:
+			n.data.formato === "convocatoria"
+				? "Fecha límite"
+				: diaYHora(ev.inicio, ev.conHora),
 		lugar: n.data.lugar?.nombre ?? null,
 		modalidad: modalidadTexto(n.data.modalidad),
 	};
 };
 const prox = proxima ? datosFecha(proxima) : null;
 
-const numero = (c: (typeof cifras)[number]) => `${c.data.prefijo}${c.data.valor.toLocaleString('en-US')}${c.data.sufijo}`;
+const numero = (c: (typeof cifras)[number]) =>
+	`${c.data.prefijo}${c.data.valor.toLocaleString("en-US")}${c.data.sufijo}`;
 
-const PALABRAS = ['Cero', 'Un', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis', 'Siete', 'Ocho', 'Nueve', 'Diez'];
+const PALABRAS = [
+	"Cero",
+	"Un",
+	"Dos",
+	"Tres",
+	"Cuatro",
+	"Cinco",
+	"Seis",
+	"Siete",
+	"Ocho",
+	"Nueve",
+	"Diez",
+];
 const cuantosPilares = PALABRAS[pilares.length] ?? String(pilares.length);
 
 /** Iniciales para un aliado sin logo: "SpaceAG" → "SA", "Cámara de Comercio" → "CC". */
 const iniciales = (nombre: string) => {
-	const palabras = nombre.split(/\s+/).filter((p) => p.length > 2 || /^[A-ZÁÉÍÓÚÑ]/.test(p));
-	if (palabras.length > 1) return (palabras[0][0] + palabras[1][0]).toUpperCase();
+	const palabras = nombre
+		.split(/\s+/)
+		.filter((p) => p.length > 2 || /^[A-ZÁÉÍÓÚÑ]/.test(p));
+	if (palabras.length > 1)
+		return (palabras[0][0] + palabras[1][0]).toUpperCase();
 	const mayus = nombre.match(/[A-ZÁÉÍÓÚÑ]/g) ?? [];
-	return (mayus.length >= 2 ? mayus.slice(0, 2).join('') : nombre.slice(0, 2)).toUpperCase();
+	return (
+		mayus.length >= 2 ? mayus.slice(0, 2).join("") : nombre.slice(0, 2)
+	).toUpperCase();
 };
 ---
 
@@ -75,10 +106,19 @@ const iniciales = (nombre: string) => {
 	<section class="hero" aria-labelledby="lema">
 		<div class="contenedor hero__grid">
 			<div class="hero__contenido">
-				<p class="kicker hero__kicker">LEAD UPN Trujillo · Parte de LEAD Americas</p>
+				<p class="kicker hero__kicker">
+					LEAD UPN Trujillo · Chapter of LEAD Americas
+				</p>
 				<h1 id="lema" class="lema titulo">
 					<span class="sr-only">LEAD UPN Trujillo: </span>
-					{lema.map((l, i) => <span class="lema__linea" style={`--c:${l.color};--i:${i}`}>{l.palabra}</span>)}
+					{lema.map((l, i) => (
+						<span
+							class="lema__linea"
+							style={`--c:${l.color};--i:${i}`}
+						>
+							{l.palabra}
+						</span>
+					))}
 				</h1>
 				<p class="hero__texto">{sitio.descripcion}</p>
 				<div class="hero__acciones">
@@ -86,9 +126,15 @@ const iniciales = (nombre: string) => {
 						class="btn btn--primario"
 						href={sitio.unete.url}
 						data-cta="unete-hero"
-						{...uneteExterno ? { rel: 'noopener noreferrer', target: '_blank' } : {}}>Súmate a LEAD</a
+						{...(uneteExterno
+							? { rel: "noopener noreferrer", target: "_blank" }
+							: {})}
 					>
-					<a class="btn btn--borde" href="/novedades">Ver novedades</a>
+						Súmate a LEAD
+					</a>
+					<a class="btn btn--borde" href="/novedades">
+						Ver novedades
+					</a>
 				</div>
 			</div>
 			<div class="hero__arte">
@@ -96,30 +142,46 @@ const iniciales = (nombre: string) => {
 			</div>
 		</div>
 
-		{
-			proxima && prox && (
-				<div class="contenedor">
-					<a class="proxima" href={`/novedades/${proxima.id}`}>
-						<span class="proxima__rotulo solo-escritorio">Próxima fecha</span>
-						<span class="proxima__hoja" aria-hidden="true">
-							<span class="proxima__dia titulo">{prox.hoja.dia.padStart(2, '0')}</span>
-							<span class="proxima__mes">{prox.hoja.mes}</span>
+		{proxima && prox && (
+			<div class="contenedor">
+				<a class="proxima" href={`/novedades/${proxima.id}`}>
+					<span class="proxima__rotulo solo-escritorio">
+						Próxima fecha
+					</span>
+					<span class="proxima__hoja" aria-hidden="true">
+						<span class="proxima__dia titulo">
+							{prox.hoja.dia.padStart(2, "0")}
 						</span>
-						<span class="proxima__texto">
-							<span class="proxima__rotulo solo-movil">Próxima fecha</span>
-							<span class="proxima__titulo">{proxima.data.titulo}</span>
-							<span class="proxima__meta">
-								{[prox.cuando, prox.lugar].filter(Boolean).join(' · ')}
-								{prox.modalidad && <span class="solo-escritorio"> · {prox.modalidad}</span>}
-							</span>
+						<span class="proxima__mes">{prox.hoja.mes}</span>
+					</span>
+					<span class="proxima__texto">
+						<span class="proxima__rotulo solo-movil">
+							Próxima fecha
 						</span>
-						<span class="proxima__ir flechas solo-escritorio">
-							Ver {proxima.data.formato === 'convocatoria' ? 'convocatoria' : 'evento'}
+						<span class="proxima__titulo">
+							{proxima.data.titulo}
 						</span>
-					</a>
-				</div>
-			)
-		}
+						<span class="proxima__meta">
+							{[prox.cuando, prox.lugar]
+								.filter(Boolean)
+								.join(" · ")}
+							{prox.modalidad && (
+								<span class="solo-escritorio">
+									{" "}
+									· {prox.modalidad}
+								</span>
+							)}
+						</span>
+					</span>
+					<span class="proxima__ir flechas solo-escritorio">
+						Ver{" "}
+						{proxima.data.formato === "convocatoria"
+							? "convocatoria"
+							: "evento"}
+					</span>
+				</a>
+			</div>
+		)}
 	</section>
 
 	<!-- 01 · Learn: novedades -->
@@ -128,79 +190,116 @@ const iniciales = (nombre: string) => {
 			<div class="cabeza">
 				<div class="cabeza__titulos">
 					<p class="kicker">01 · Learn</p>
-					<h2 id="t-novedades" class="cabeza__titulo titulo">Lo que está <span class="caja caja--marino">pasando</span></h2>
+					<h2 id="t-novedades" class="cabeza__titulo titulo">
+						Lo que está{" "}
+						<span class="caja caja--marino">pasando</span>
+					</h2>
 				</div>
-				<a class="seccion__enlace flechas solo-escritorio" href="/novedades">Ver todas las novedades</a>
+				<a
+					class="seccion__enlace flechas solo-escritorio"
+					href="/novedades"
+				>
+					Ver todas las novedades
+				</a>
 			</div>
 
-			{
-				principal ? (
-					<>
-						<PortadaPrincipal entry={principal} pilar={pilarDe(principal)} />
-						{masNovedades.length > 0 && (
-							<ul class="novedades__lista">
-								{masNovedades.map((n) => (
-									<li>
-										<NovedadCard entry={n} pilar={pilarDe(n)} />
-									</li>
-								))}
-							</ul>
-						)}
-					</>
-				) : (
-					<p class="vacio">Todavía no hay novedades publicadas. Vuelve pronto.</p>
-				)
-			}
-			<a class="btn btn--borde-oscuro flechas solo-movil" href="/novedades">Ver todas</a>
+			{principal ? (
+				<>
+					<PortadaPrincipal
+						entry={principal}
+						pilar={pilarDe(principal)}
+					/>
+					{masNovedades.length > 0 && (
+						<ul class="novedades__lista">
+							{masNovedades.map((n) => (
+								<li>
+									<NovedadCard entry={n} pilar={pilarDe(n)} />
+								</li>
+							))}
+						</ul>
+					)}
+				</>
+			) : (
+				<p class="vacio">
+					Todavía no hay novedades publicadas. Vuelve pronto.
+				</p>
+			)}
+			<a
+				class="btn btn--borde-oscuro flechas solo-movil"
+				href="/novedades"
+			>
+				Ver todas
+			</a>
 		</div>
 	</section>
 
 	<!-- Más fechas (cuando hay dos o más próximas) -->
-	{
-		otrasFechas.length > 0 && (
-			<section class="contenedor fechas-sec" aria-labelledby="t-fechas">
-				<h2 id="t-fechas" class="kicker">También se viene</h2>
-				<ol class="fechas">
-					{otrasFechas.map((n) => {
-						const f = datosFecha(n);
-						return (
-							<li>
-								<a class="fecha" href={`/novedades/${n.id}`}>
-									<span class="proxima__hoja" aria-hidden="true">
-										<span class="proxima__dia titulo">{f.hoja.dia.padStart(2, '0')}</span>
-										<span class="proxima__mes">{f.hoja.mes}</span>
+	{otrasFechas.length > 0 && (
+		<section class="contenedor fechas-sec" aria-labelledby="t-fechas">
+			<h2 id="t-fechas" class="kicker">
+				También se viene
+			</h2>
+			<ol class="fechas">
+				{otrasFechas.map((n) => {
+					const f = datosFecha(n);
+					return (
+						<li>
+							<a class="fecha" href={`/novedades/${n.id}`}>
+								<span class="proxima__hoja" aria-hidden="true">
+									<span class="proxima__dia titulo">
+										{f.hoja.dia.padStart(2, "0")}
 									</span>
-									<span class="fecha__texto">
-										<span class="fecha__titulo">{n.data.titulo}</span>
-										<span class="fecha__meta">
-											{[FORMATOS_INFO[n.data.formato].nombre, f.cuando, f.lugar].filter(Boolean).join(' · ')}
-										</span>
+									<span class="proxima__mes">
+										{f.hoja.mes}
 									</span>
-									<span class="fecha__ir flechas" aria-hidden="true" />
-								</a>
-							</li>
-						);
-					})}
-				</ol>
-			</section>
-		)
-	}
+								</span>
+								<span class="fecha__texto">
+									<span class="fecha__titulo">
+										{n.data.titulo}
+									</span>
+									<span class="fecha__meta">
+										{[
+											FORMATOS_INFO[n.data.formato]
+												.nombre,
+											f.cuando,
+											f.lugar,
+										]
+											.filter(Boolean)
+											.join(" · ")}
+									</span>
+								</span>
+								<span
+									class="fecha__ir flechas"
+									aria-hidden="true"
+								/>
+							</a>
+						</li>
+					);
+				})}
+			</ol>
+		</section>
+	)}
 
 	<!-- 02 · Explore: pilares -->
-	<section id="pilares" class="seccion pilares-sec" aria-labelledby="t-pilares">
+	<section
+		id="pilares"
+		class="seccion pilares-sec"
+		aria-labelledby="t-pilares"
+	>
 		<div class="contenedor pilares-sec__grid">
 			<div class="pilares-sec__intro">
 				<p class="kicker">02 · Explore</p>
 				<h2 id="t-pilares" class="cabeza__titulo titulo">
-					{cuantosPilares}{' '}
-					<span class="junto"><span class="caja caja--marino">pilares</span><span class="solo-escritorio">, un</span></span><span
-						class="solo-escritorio"
-					>
-						mismo despegue</span
-					>
+					{cuantosPilares}{" "}
+					<span class="junto">
+						<span class="caja caja--marino">pilares</span>
+						<span class="solo-escritorio">, un</span>
+					</span>
+					<span class="solo-escritorio">mismo despegue</span>
 				</h2>
 				<p class="pilares-sec__texto solo-escritorio">
-					Cada pilar es un equipo con su propia misión. Entra al que te mueva: ahí están su gente y sus actividades.
+					Cada pilar es un equipo con su propia misión. Entra al que
+					te mueva: ahí están su gente y sus actividades.
 				</p>
 			</div>
 			<div class="pilares-sec__lista">
@@ -210,85 +309,103 @@ const iniciales = (nombre: string) => {
 	</section>
 
 	<!-- 03 · Aspire: comunidad (cifras + testimonio) -->
-	{
-		(cifras.length > 0 || testimonios.length > 0) && (
-			<section class="seccion aspire" aria-labelledby="t-comunidad">
-				<p class="aspire__fondo titulo" aria-hidden="true">
-					Aspire
-				</p>
-				<div class="contenedor aspire__grid">
-					<div class="cabeza__titulos">
-						<p class="kicker">03 · Aspire</p>
-						<h2 id="t-comunidad" class="cabeza__titulo titulo">
-							Una familia que <span class="caja">crece</span>
-						</h2>
-					</div>
-
-					{cifras.length > 0 && (
-						<ul class="cifras">
-							{cifras.map((c) => (
-								<li>
-									<span class="cifras__valor titulo">{numero(c)}</span>
-									<span class="cifras__nombre">{c.data.nombre}</span>
-									{c.data.descripcion && c.data.descripcion !== c.data.nombre && (
-										<span class="cifras__desc">{c.data.descripcion}</span>
-									)}
-								</li>
-							))}
-						</ul>
-					)}
-
-					{testimonios.length > 0 && <Testimonios {testimonios} />}
+	{(cifras.length > 0 || testimonios.length > 0) && (
+		<section class="seccion aspire" aria-labelledby="t-comunidad">
+			<p class="aspire__fondo titulo" aria-hidden="true">
+				Aspire
+			</p>
+			<div class="contenedor aspire__grid">
+				<div class="cabeza__titulos">
+					<p class="kicker">03 · Aspire</p>
+					<h2 id="t-comunidad" class="cabeza__titulo titulo">
+						Una familia que <span class="caja">crece</span>
+					</h2>
 				</div>
-			</section>
-		)
-	}
+
+				{cifras.length > 0 && (
+					<ul class="cifras">
+						{cifras.map((c) => (
+							<li>
+								<span class="cifras__valor titulo">
+									{numero(c)}
+								</span>
+								<span class="cifras__nombre">
+									{c.data.nombre}
+								</span>
+								{c.data.descripcion &&
+									c.data.descripcion !== c.data.nombre && (
+										<span class="cifras__desc">
+											{c.data.descripcion}
+										</span>
+									)}
+							</li>
+						))}
+					</ul>
+				)}
+
+				{testimonios.length > 0 && <Testimonios {testimonios} />}
+			</div>
+		</section>
+	)}
 
 	<!-- Aliados -->
-	{
-		aliados.length > 0 && (
-			<section class="aliados-sec" aria-labelledby="t-aliados">
-				<div class="contenedor aliados-sec__fila">
-					<h2 id="t-aliados" class="aliados-sec__titulo">
-						Nos acompañan
-					</h2>
-					<ul class="aliados">
-						{aliados.map((a) => {
-							const Etiqueta = a.data.sitioWeb ? 'a' : 'span';
-							const extra = [a.data.tipo, a.data.descripcion].filter(Boolean).join(' · ');
-							return (
-								<li>
-									<Etiqueta
-										class="aliado"
-										{...(a.data.sitioWeb ? { href: a.data.sitioWeb, rel: 'noopener noreferrer', target: '_blank' } : {})}
-									>
-										{a.data.logo ? (
-											<img
-												class="aliado__logo"
-												src={a.data.logo.src}
-												width={a.data.logo.width ?? undefined}
-												height={a.data.logo.height ?? undefined}
-												alt=""
-												loading="lazy"
-											/>
-										) : (
-											<span class="aliado__iniciales" aria-hidden="true">
-												{iniciales(a.data.nombre)}
-											</span>
-										)}
-										<span class="aliado__texto">
-											<strong>{a.data.nombre}</strong>
-											{extra && <span>{extra}</span>}
+	{aliados.length > 0 && (
+		<section class="aliados-sec" aria-labelledby="t-aliados">
+			<div class="contenedor aliados-sec__fila">
+				<h2 id="t-aliados" class="aliados-sec__titulo">
+					Nos acompañan
+				</h2>
+				<ul class="aliados">
+					{aliados.map((a) => {
+						const Etiqueta = a.data.sitioWeb ? "a" : "span";
+						const extra = [a.data.tipo, a.data.descripcion]
+							.filter(Boolean)
+							.join(" · ");
+						return (
+							<li>
+								<Etiqueta
+									class="aliado"
+									{...(a.data.sitioWeb
+										? {
+												href: a.data.sitioWeb,
+												rel: "noopener noreferrer",
+												target: "_blank",
+											}
+										: {})}
+								>
+									{a.data.logo ? (
+										<img
+											class="aliado__logo"
+											src={a.data.logo.src}
+											width={
+												a.data.logo.width ?? undefined
+											}
+											height={
+												a.data.logo.height ?? undefined
+											}
+											alt=""
+											loading="lazy"
+										/>
+									) : (
+										<span
+											class="aliado__iniciales"
+											aria-hidden="true"
+										>
+											{iniciales(a.data.nombre)}
 										</span>
-									</Etiqueta>
-								</li>
-							);
-						})}
-					</ul>
-				</div>
-			</section>
-		)
-	}
+									)}
+									<span class="aliado__texto">
+										<strong>{a.data.nombre}</strong>
+										{extra && <span>{extra}</span>}
+									</span>
+								</Etiqueta>
+							</li>
+						);
+					})}
+				</ul>
+			</div>
+		</section>
+	)}
 
 	<!-- 04 · Discover: súmate -->
 	<Unete kicker="04 · Discover" />
@@ -316,8 +433,16 @@ const iniciales = (nombre: string) => {
 		overflow: hidden;
 		isolation: isolate;
 		background:
-			radial-gradient(60% 90% at 0% 100%, rgb(214 41 122 / 0.22), transparent 60%),
-			radial-gradient(50% 70% at 80% 30%, rgb(140 63 209 / 0.28), transparent 65%),
+			radial-gradient(
+				60% 90% at 0% 100%,
+				rgb(214 41 122 / 0.22),
+				transparent 60%
+			),
+			radial-gradient(
+				50% 70% at 80% 30%,
+				rgb(140 63 209 / 0.28),
+				transparent 65%
+			),
 			var(--noche);
 		color: var(--blanco);
 		padding-bottom: 2.5rem;
@@ -439,7 +564,11 @@ const iniciales = (nombre: string) => {
 	@media (max-width: 48rem) {
 		.hero {
 			background:
-				radial-gradient(90% 60% at 50% 20%, rgb(140 63 209 / 0.3), transparent 70%),
+				radial-gradient(
+					90% 60% at 50% 20%,
+					rgb(140 63 209 / 0.3),
+					transparent 70%
+				),
 				var(--noche);
 			padding-bottom: 2rem;
 		}
