@@ -36,27 +36,34 @@ const formas = [
 >
 	<header class:list={['cabeza', { 'cabeza--con-bloques': bloques.length > 0 }]}>
 		<div class="contenedor cabeza__fila">
-			<p class="cabeza__antetitulo">Nosotros</p>
-			<h1 class="titulo">Liderazgo con <span class="caja">propósito</span></h1>
-			<p class="cabeza__texto">{sitio.descripcion}</p>
-			<ol class="siglas" aria-label="Qué significa LEAD">
-				{
-					lema.map((palabra) => (
-						<li>
-							<strong>{palabra[0]}</strong>{palabra.slice(1)}
-						</li>
-					))
-				}
-			</ol>
+			<div class="cabeza__titulo">
+				<p class="kicker">Nosotros</p>
+				<h1 class="titulo">Liderazgo con <span class="caja">propósito</span></h1>
+			</div>
+			<div class="cabeza__lado">
+				<p class="cabeza__texto">{sitio.descripcion}</p>
+				<ol class="siglas" aria-label="Qué significa LEAD">
+					{
+						lema.map((palabra) => (
+							<li>
+								<strong>{palabra[0]}</strong>{palabra.slice(1)}
+							</li>
+						))
+					}
+				</ol>
+			</div>
 		</div>
 	</header>
 
 	{
 		bloques.length > 0 && (
 			<section class="contenedor proposito" aria-label="Misión y visión">
-				{bloques.map((b) => (
+				{bloques.map((b, i) => (
 					<article class:list={['proposito__bloque', `proposito__bloque--${b.id}`]} aria-labelledby={`t-${b.id}`}>
 						<h2 id={`t-${b.id}`} class="proposito__etiqueta titulo">
+							<span class="proposito__num" aria-hidden="true">
+								{String(i + 1).padStart(2, '0')}
+							</span>
 							{b.etiqueta}
 						</h2>
 						{b.texto ? (
@@ -105,8 +112,11 @@ const formas = [
 	{
 		pilares.length > 0 && (
 			<section class="seccion contenedor" aria-labelledby="t-pilares">
-				<div class="seccion__cabeza">
-					<h2 id="t-pilares" class="seccion__titulo titulo">Nuestros pilares</h2>
+				<div class="pilares__cabeza">
+					<p class="kicker">Explore</p>
+					<h2 id="t-pilares" class="titulo">
+						Nuestros <span class="caja caja--marino">pilares</span>
+					</h2>
 				</div>
 				<ListaPilares {pilares} />
 			</section>
@@ -120,7 +130,8 @@ const formas = [
 	.cabeza {
 		background:
 			radial-gradient(70% 120% at 100% 0%, rgb(140 63 209 / 0.35), transparent 60%),
-			var(--marino);
+			radial-gradient(60% 90% at 0% 100%, rgb(214 41 122 / 0.28), transparent 65%),
+			var(--noche);
 		color: var(--blanco);
 		padding-block: clamp(3rem, 8vw, 5.5rem);
 	}
@@ -129,37 +140,45 @@ const formas = [
 		padding-bottom: clamp(4.5rem, 10vw, 7rem);
 	}
 	.cabeza__fila {
-		display: grid;
-		gap: 1.25rem;
-		justify-items: start;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 1.75rem 3rem;
 	}
-	.cabeza__antetitulo {
-		font-size: 0.85rem;
-		font-weight: 600;
-		letter-spacing: 0.2em;
-		text-transform: uppercase;
-		color: var(--coral-claro);
+	.cabeza__titulo {
+		display: grid;
+		gap: 1.1rem;
+		justify-items: start;
+		flex: 1 1 28rem;
+	}
+	.cabeza .kicker {
+		color: var(--blanco);
 	}
 	.cabeza h1 {
-		font-size: clamp(2.8rem, 9vw, 6rem);
+		font-size: clamp(3.25rem, 9vw, 7.5rem);
 		line-height: 1;
-		max-width: 14ch;
+	}
+	.cabeza__lado {
+		display: grid;
+		gap: 1.25rem;
+		flex: 0 1 26rem;
+		padding-bottom: 0.5rem;
 	}
 	.cabeza__texto {
-		max-width: 40rem;
-		font-size: clamp(1.05rem, 2vw, 1.25rem);
-		line-height: 1.6;
-		color: rgb(255 255 255 / 0.88);
+		font-size: clamp(1rem, 1.8vw, 1.1875rem);
+		line-height: 1.65;
+		color: rgb(255 255 255 / 0.9);
 	}
 	.siglas {
 		list-style: none;
-		margin: 0.5rem 0 0;
+		margin: 0;
 		padding: 0;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem 1.5rem;
 		font-size: 1rem;
-		color: rgb(255 255 255 / 0.8);
+		color: var(--morado-claro);
 	}
 	.siglas strong {
 		font-family: var(--f-display);
@@ -186,37 +205,43 @@ const formas = [
 		display: grid;
 		gap: 1rem;
 		align-content: start;
+		gap: 1.25rem;
 		padding: clamp(1.5rem, 4vw, 2.5rem);
-		border-radius: 1rem;
+		border-radius: 1.5rem;
 		background: var(--blanco);
-		box-shadow: var(--sombra);
+		box-shadow: 0 24px 48px -24px rgb(22 26 78 / 0.35);
 		position: relative;
-		overflow: hidden;
-	}
-	/* Franja con el degradado de marca (con border-image se perderían las esquinas redondeadas) */
-	.proposito__bloque::before {
-		content: '';
-		position: absolute;
-		inset: 0 0 auto;
-		height: 6px;
-		background: var(--degradado);
 	}
 	.proposito__bloque--vision {
-		background: var(--noche);
+		background: var(--marino);
 		color: var(--blanco);
 	}
+	/* Título grande en Anton, con el número en una pastilla al lado */
 	.proposito__etiqueta {
-		font-size: 1rem;
-		letter-spacing: 0.12em;
-		color: var(--magenta);
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
+		font-size: clamp(2.25rem, 4vw, 3rem);
+		line-height: 1;
+		color: var(--marino);
 	}
 	.proposito__bloque--vision .proposito__etiqueta {
-		color: var(--magenta-claro);
+		color: var(--blanco);
+	}
+	.proposito__num {
+		display: inline-grid;
+		place-items: center;
+		padding: 0.3rem 0.55rem;
+		border-radius: 0.5rem;
+		background: var(--degradado-boton);
+		color: var(--blanco);
+		font-size: 1rem;
+		letter-spacing: 0.04em;
+		line-height: 1;
 	}
 	.proposito__texto {
-		font-size: clamp(1.15rem, 2.2vw, 1.45rem);
-		font-weight: 600;
-		line-height: 1.5;
+		font-size: clamp(1rem, 1.6vw, 1.0625rem);
+		line-height: 1.75;
 	}
 	.proposito__falta {
 		padding: 1rem;
@@ -298,6 +323,18 @@ const formas = [
 		.forma:last-child {
 			padding-right: 0;
 		}
+	}
+
+	/* Encabezado de pilares: mismo patrón que "Aprender haciendo" */
+	.pilares__cabeza {
+		display: grid;
+		gap: 0.875rem;
+		justify-items: start;
+		margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+	}
+	.pilares__cabeza h2 {
+		font-size: clamp(2.75rem, 6vw, 5rem);
+		line-height: 0.95;
 	}
 
 	.lectura .seccion__titulo {
