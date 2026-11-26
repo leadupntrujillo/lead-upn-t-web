@@ -14,6 +14,14 @@ const bloques = [
 ].filter((b) => b.texto || import.meta.env.DEV);
 
 const lema = ['Learn', 'Explore', 'Aspire', 'Discover'];
+
+// "Cómo crecemos": las cuatro formas de aprender en LEAD (texto fijo del diseño; no viene de Notion).
+const formas = [
+	{ nombre: 'Webinars y ponencias', texto: 'Gente de la industria y de la academia que comparte cómo llegó a donde está.' },
+	{ nombre: 'Talleres y retos', texto: 'De la oratoria al origami aeroespacial: habilidades que se practican, no solo se escuchan.' },
+	{ nombre: 'Cine y charlas', texto: 'Espacios para conversar, debatir y conocernos fuera del aula.' },
+	{ nombre: 'Comunidad', texto: 'Actividades recreativas para que nadie avance solo.' },
+];
 ---
 
 <Layout
@@ -63,6 +71,25 @@ const lema = ['Learn', 'Explore', 'Aspire', 'Discover'];
 			</section>
 		)
 	}
+
+	<section class="hacemos" aria-labelledby="t-hacemos">
+		<div class="contenedor hacemos__fila">
+			<div class="hacemos__cabeza">
+				<p class="kicker">Cómo crecemos</p>
+				<h2 id="t-hacemos" class="titulo">Aprender <span class="caja caja--marino">haciendo</span></h2>
+			</div>
+			<ul class="formas">
+				{
+					formas.map((f) => (
+						<li class="forma">
+							<h3 class="forma__nombre titulo">{f.nombre}</h3>
+							<p class="forma__texto">{f.texto}</p>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
 
 	{
 		sitio.historia && (
@@ -198,6 +225,81 @@ const lema = ['Learn', 'Explore', 'Aspire', 'Discover'];
 		font-size: 0.9rem;
 		opacity: 0.75;
 	}
+
+	/* Aprender haciendo: franja blanca con cuatro columnas separadas por filetes */
+	.hacemos {
+		background: var(--blanco);
+		margin-top: clamp(3rem, 8vw, 6rem);
+		padding-block: clamp(3rem, 8vw, 6rem);
+	}
+	.hacemos__fila {
+		display: grid;
+		gap: clamp(1.75rem, 4vw, 2.5rem);
+	}
+	.hacemos__cabeza {
+		display: grid;
+		gap: 0.875rem;
+		justify-items: start;
+	}
+	.hacemos h2 {
+		font-size: clamp(2.75rem, 6vw, 5rem);
+		line-height: 0.95;
+	}
+	.formas {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: 1fr;
+		border-top: 2px solid var(--marino);
+	}
+	.forma {
+		display: grid;
+		gap: 0.625rem;
+		align-content: start;
+		padding: 1.5rem 0;
+		border-bottom: 1px solid var(--linea);
+	}
+	.forma__nombre {
+		font-size: clamp(1.625rem, 3vw, 1.875rem);
+		line-height: 0.95;
+		color: var(--morado);
+	}
+	.forma__texto {
+		font-size: 0.9375rem;
+		color: var(--tinta-suave);
+	}
+	@media (min-width: 40rem) {
+		.formas {
+			grid-template-columns: repeat(2, 1fr);
+		}
+		.forma:nth-child(even) {
+			padding-left: 1.5rem;
+			border-left: 1px solid var(--linea);
+		}
+		.forma:nth-child(odd) {
+			padding-right: 1.5rem;
+		}
+	}
+	@media (min-width: 64rem) {
+		.formas {
+			grid-template-columns: repeat(4, 1fr);
+		}
+		.forma,
+		.forma:nth-child(odd),
+		.forma:nth-child(even) {
+			padding: 1.75rem 1.5rem;
+			border-left: 1px solid var(--linea);
+		}
+		.forma:first-child {
+			padding-left: 0;
+			border-left: 0;
+		}
+		.forma:last-child {
+			padding-right: 0;
+		}
+	}
+
 	.lectura .seccion__titulo {
 		margin-bottom: 1.25rem;
 	}
