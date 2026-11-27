@@ -42,6 +42,12 @@ html {
 	-webkit-text-size-adjust: 100%;
 	scroll-behavior: smooth;
 	scroll-padding-top: 5rem;
+	/* Sin barra de desplazamiento visible (el scroll sigue funcionando) */
+	scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+	display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
