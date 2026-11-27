@@ -324,9 +324,14 @@ const iniciales = (nombre: string) => {
 
 				{cifras.length > 0 && (
 					<ul class="cifras">
-						{cifras.map((c) => (
-							<li>
-								<span class="cifras__valor titulo">
+						{cifras.map((c, i) => (
+							<li style={`--i:${i}`}>
+								<span
+									class="cifras__valor titulo"
+									data-cuenta={c.data.valor}
+									data-prefijo={c.data.prefijo}
+									data-sufijo={c.data.sufijo}
+								>
 									{numero(c)}
 								</span>
 								<span class="cifras__nombre">
@@ -410,6 +415,61 @@ const iniciales = (nombre: string) => {
 	<!-- 04 · Discover: súmate -->
 	<Unete kicker="04 · Discover" />
 </Layout>
+
+<script>
+	// Cifras de "03 · Aspire": cuentan de 0 al valor al entrar en pantalla.
+	// Sin JS (o con movimiento reducido) queda el valor final del HTML.
+	const valores = document.querySelectorAll<HTMLElement>("[data-cuenta]");
+	const reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+	if (valores.length && !reducido && "IntersectionObserver" in window) {
+		const DURACION = 1800;
+		const salida = (t: number) => 1 - Math.pow(1 - t, 4);
+
+		const animar = (el: HTMLElement, retraso: number) => {
+			const meta = Number(el.dataset.cuenta);
+			if (!Number.isFinite(meta)) return;
+			const prefijo = el.dataset.prefijo ?? "";
+			const sufijo = el.dataset.sufijo ?? "";
+			const decimales = (String(meta).split(".")[1] ?? "").length;
+			const pintar = (v: number) => {
+				el.textContent = `${prefijo}${v.toLocaleString("en-US", {
+					minimumFractionDigits: decimales,
+					maximumFractionDigits: decimales,
+				})}${sufijo}`;
+			};
+			const final = el.textContent;
+			el.setAttribute("aria-label", final ?? "");
+			pintar(0);
+			const inicio = performance.now() + retraso;
+			const paso = (ahora: number) => {
+				const t = Math.min(Math.max((ahora - inicio) / DURACION, 0), 1);
+				pintar(meta * salida(t));
+				if (t < 1) requestAnimationFrame(paso);
+				else if (final) el.textContent = final;
+			};
+			requestAnimationFrame(paso);
+		};
+
+		const lista = document.querySelector(".cifras");
+		lista?.classList.add("cifras--anima");
+
+		const obs = new IntersectionObserver(
+			(entradas) => {
+				for (const e of entradas) {
+					if (!e.isIntersecting) continue;
+					obs.unobserve(e.target);
+					e.target.classList.add("cifras--vista");
+					const li = e.target as HTMLElement;
+					const v = li.querySelector<HTMLElement>("[data-cuenta]");
+					if (v) animar(v, Number(li.style.getPropertyValue("--i") || 0) * 150);
+				}
+			},
+			{ threshold: 0.4 },
+		);
+		document.querySelectorAll(".cifras li").forEach((li) => obs.observe(li));
+	}
+</script>
 
 <style>
 	@media (min-width: 48.01rem) {
@@ -811,6 +871,19 @@ const iniciales = (nombre: string) => {
 	.cifras__valor {
 		font-size: clamp(4rem, 8vw, 6.5rem);
 		line-height: 1;
+		font-variant-numeric: tabular-nums;
+	}
+	/* Solo si el script corrió: entrada suave de cada cifra */
+	:global(.cifras--anima) li {
+		opacity: 0;
+		transform: translateY(1.25rem);
+		transition:
+			opacity 0.7s ease calc(var(--i, 0) * 150ms),
+			transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 150ms);
+	}
+	:global(.cifras--anima) li:global(.cifras--vista) {
+		opacity: 1;
+		transform: none;
 	}
 	.cifras__nombre {
 		font-weight: 600;
