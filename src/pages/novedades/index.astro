@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import NovedadCard from '../../components/NovedadCard.astro';
 import { FORMATOS_INFO } from '../../lib/notion/formatos';
+import { colorPilar } from '../../lib/pilares';
 import { getNovedades, getPilaresPorId } from '../../lib/queries';
 import { migas } from '../../lib/seo';
 
@@ -24,48 +25,59 @@ const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.
 	]}
 >
 	<header class="cabeza">
+		<p class="cabeza__marca titulo" aria-hidden="true">Learn</p>
 		<div class="contenedor cabeza__fila">
+			<p class="kicker">01 · Learn</p>
 			<h1 class="titulo">Novedades</h1>
-			<p>Lo que pasa en LEAD UPN Trujillo: eventos, convocatorias, logros y anuncios de todos los pilares.</p>
+			<p class="cabeza__bajada">
+				Eventos, convocatorias, logros y todo lo que pasa en la familia LEAD UPN Trujillo.
+			</p>
 		</div>
-	</header>
 
-	<div class="contenedor listado">
-		<section class="filtros" aria-label="Filtrar novedades">
-			{
-				pilaresUsados.length > 1 && (
-					<div class="filtros__grupo" role="group" aria-label="Pilar">
-						<span class="filtros__titulo">Pilar</span>
-						{pilaresUsados.map((p) => (
-							<a class="pill" href={`?pilar=${p.data.slug}`} data-filtro="pilar" data-valor={p.data.slug}>
-								{p.data.nombre}
-							</a>
-						))}
-					</div>
-				)
-			}
+		<section class="contenedor filtros" aria-label="Filtrar novedades">
 			{
 				formatosUsados.length > 1 && (
-					<div class="filtros__grupo" role="group" aria-label="Tipo">
-						<span class="filtros__titulo">Tipo</span>
+					<div class="filtros__grupo filtros__formatos" role="group" aria-label="Tipo">
+						<a class="filtro" href="/novedades" data-todas>
+							Todas
+						</a>
 						{formatosUsados.map(([id, info]) => (
-							<a class="pill" href={`?formato=${id}`} data-filtro="formato" data-valor={id}>
+							<a class="filtro" href={`?formato=${id}`} data-filtro="formato" data-valor={id}>
 								{info.nombre}
 							</a>
 						))}
 					</div>
 				)
 			}
+			<div class="filtros__grupo filtros__pilares" role="group" aria-label="Pilar">
+				{pilaresUsados.length > 1 && <span class="filtros__titulo">Pilar</span>}
+				{
+					pilaresUsados.length > 1 &&
+						pilaresUsados.map((p) => (
+							<a
+								class="filtro-pilar"
+								href={`?pilar=${p.data.slug}`}
+								data-filtro="pilar"
+								data-valor={p.data.slug}
+								style={`--punto:${colorPilar(p.data.color)}`}
+							>
+								<span class="filtro-pilar__punto" aria-hidden="true" />
+								{p.data.nombre}
+							</a>
+						))
+				}
+				<p class="conteo" role="status" aria-live="polite" data-conteo>
+					{novedades.length === 1 ? '1 novedad' : `${novedades.length} novedades`}
+				</p>
+			</div>
 			<p class="filtros__activo" data-etiqueta hidden>
 				Etiqueta: <strong data-etiqueta-nombre></strong>
 				<a href="/novedades">Quitar</a>
 			</p>
 		</section>
+	</header>
 
-		<p class="conteo" role="status" aria-live="polite" data-conteo>
-			{novedades.length === 1 ? '1 novedad' : `${novedades.length} novedades`}
-		</p>
-
+	<div class="contenedor listado">
 		{
 			novedades.length > 0 ? (
 				<ul class="grilla">
@@ -99,6 +111,7 @@ const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.
 
 	const items = [...document.querySelectorAll<HTMLElement>('[data-item]')];
 	const botones = [...document.querySelectorAll<HTMLAnchorElement>('[data-filtro]')];
+	const todas = document.querySelector<HTMLAnchorElement>('[data-todas]');
 	const conteo = document.querySelector<HTMLElement>('[data-conteo]');
 	const sinResultados = document.querySelector<HTMLElement>('[data-sin-resultados]');
 	const bloqueEtiqueta = document.querySelector<HTMLElement>('[data-etiqueta]');
@@ -122,6 +135,11 @@ const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.
 		for (const b of botones) {
 			if (activo[b.dataset.filtro as Clave] === b.dataset.valor) b.setAttribute('aria-current', 'true');
 			else b.removeAttribute('aria-current');
+		}
+		// "Todas" está activa cuando no hay filtro de formato
+		if (todas) {
+			if (!activo.formato) todas.setAttribute('aria-current', 'true');
+			else todas.removeAttribute('aria-current');
 		}
 		if (conteo) conteo.textContent = visibles === 1 ? '1 novedad' : `${visibles} novedades`;
 		if (sinResultados) sinResultados.hidden = visibles !== 0 || items.length === 0;
@@ -149,39 +167,63 @@ const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.
 		});
 	}
 
+	todas?.addEventListener('click', (e) => {
+		e.preventDefault();
+		activo.formato = null;
+		guardarUrl();
+		pintar();
+	});
+
 	leerUrl();
 	pintar();
 </script>
 
 <style>
+	/* ---------- Cabecera con filtros ---------- */
 	.cabeza {
-		background:
-			radial-gradient(60% 140% at 100% 0%, rgb(140 63 209 / 0.4), transparent 65%),
-			var(--marino);
+		position: relative;
+		overflow: hidden;
+		background: var(--marino);
 		color: var(--blanco);
-		padding-block: clamp(2.5rem, 7vw, 4.5rem);
+		padding-top: clamp(2.75rem, 7vw, 4.5rem);
+	}
+	/* Palabra del lema, enorme y casi invisible, de fondo */
+	.cabeza__marca {
+		position: absolute;
+		right: -0.6rem;
+		top: 0.6rem;
+		font-size: clamp(8rem, 18vw, 17rem);
+		line-height: 0.8;
+		color: rgb(255 255 255 / 0.05);
+		pointer-events: none;
+		user-select: none;
 	}
 	.cabeza__fila {
+		position: relative;
 		display: grid;
-		gap: 0.75rem;
+		gap: 1.1rem;
+		justify-items: start;
 	}
-	h1 {
-		font-size: clamp(3rem, 10vw, 6.5rem);
+	.cabeza .kicker {
+		color: var(--blanco);
+	}
+	.cabeza h1 {
+		font-size: clamp(3.5rem, 8vw, 7rem);
 		line-height: 1;
 	}
-	.cabeza p {
-		max-width: 38rem;
-		font-size: 1.1rem;
-		color: rgb(255 255 255 / 0.85);
+	.cabeza__bajada {
+		max-width: 35rem;
+		font-size: clamp(1rem, 2vw, 1.125rem);
+		color: var(--morado-claro);
 	}
-	.listado {
-		padding-block: 2rem 4rem;
-		display: grid;
-		gap: 1.25rem;
-	}
+
 	.filtros {
+		position: relative;
 		display: grid;
 		gap: 0.9rem;
+		margin-top: clamp(1.75rem, 5vw, 2.5rem);
+		padding-block: 1.25rem 1.75rem;
+		border-top: 1px solid rgb(255 255 255 / 0.12);
 	}
 	.filtros__grupo {
 		display: flex;
@@ -189,37 +231,93 @@ const formatosUsados = Object.entries(FORMATOS_INFO).filter(([id]) => novedades.
 		gap: 0.5rem;
 		flex-wrap: wrap;
 	}
-	.filtros__titulo {
-		min-width: 3rem;
-		font-size: 0.85rem;
-		font-weight: 700;
-	}
-	.filtros .pill {
-		text-decoration: none;
-		cursor: pointer;
-		background: var(--blanco);
-		box-shadow: inset 0 0 0 1.5px var(--linea);
-	}
-	.filtros .pill:hover {
-		box-shadow: inset 0 0 0 1.5px var(--marino);
-	}
-	.filtros .pill[aria-current='true'] {
-		background: var(--marino);
+	/* Formatos: pastillas translúcidas; la activa es blanca */
+	.filtro {
+		padding: 0.5rem 1.05rem;
+		border-radius: 999px;
+		background: rgb(255 255 255 / 0.1);
 		color: var(--blanco);
-		box-shadow: none;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		line-height: 1.2;
+		text-decoration: none;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: background-color 0.15s;
+	}
+	.filtro:hover {
+		background: rgb(255 255 255 / 0.2);
+	}
+	.filtro[aria-current='true'] {
+		background: var(--blanco);
+		color: var(--marino);
+	}
+	/* Pilares: enlaces con punto de color */
+	.filtros__pilares {
+		gap: 0.5rem 1.1rem;
+		font-size: 0.8125rem;
+		color: var(--morado-claro);
+	}
+	.filtros__titulo {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+	.filtro-pilar {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding-block: 0.3rem;
+		border-bottom: 2px solid transparent;
+		font-weight: 600;
+		color: var(--blanco);
+		text-decoration: none;
+	}
+	.filtro-pilar:hover,
+	.filtro-pilar[aria-current='true'] {
+		border-bottom-color: var(--magenta-claro);
+	}
+	.filtro-pilar__punto {
+		width: 0.7rem;
+		height: 0.7rem;
+		flex: none;
+		border-radius: 50%;
+		background: var(--punto);
+		box-shadow: 0 0 0 2px rgb(255 255 255 / 0.25);
 	}
 	.filtros__activo {
 		font-size: 0.9rem;
+		color: var(--blanco);
 	}
 	.filtros__activo a {
 		margin-left: 0.5rem;
 		font-weight: 600;
-		color: var(--magenta);
+		color: var(--magenta-claro);
 	}
 	.conteo {
-		font-size: 0.85rem;
-		font-weight: 400;
-		color: var(--tinta-suave);
+		margin-left: auto;
+		font-size: 0.8125rem;
+		color: var(--morado-claro);
+	}
+	@media (max-width: 40rem) {
+		/* En móvil los formatos se deslizan en una sola fila */
+		.filtros__formatos {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			margin-inline: calc(-1 * var(--gutter));
+			padding-inline: var(--gutter);
+			scrollbar-width: none;
+		}
+		.filtros__formatos::-webkit-scrollbar {
+			display: none;
+		}
+	}
+
+	.listado {
+		padding-block: clamp(2.25rem, 6vw, 3.5rem) clamp(3.5rem, 8vw, 6rem);
+		display: grid;
+		gap: 1.25rem;
 	}
 	.grilla {
 		list-style: none;
