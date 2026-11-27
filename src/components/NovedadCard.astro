@@ -35,15 +35,23 @@ const cerrada = f === 'convocatoria' && evento ? (finDelEvento(entry) ?? Infinit
 const ratio = f === 'post-ig' ? '1 / 1' : variante === 'grande' ? '16 / 10' : '16 / 9';
 const aviso = d.estado === 'borrador' ? 'Borrador' : d.estado === 'en-revision' ? 'En revisión' : null;
 const modalidad = modalidadTexto(d.modalidad);
-/** Logros y Post IG muestran "Formato · fecha" en vez de solo la fecha. */
-const conFormato = f === 'logros' || f === 'post-ig';
+/** Convocatoria sin imagen: portada con el degradado de marca y "Súmate a LEAD". */
+const sinImagenConvocatoria = f === 'convocatoria' && !(d.imagen ?? d.galeria[0]);
 ---
 
 <article class:list={['tarjeta', `tarjeta--${f}`, `tarjeta--${variante}`, { 'tarjeta--hojita': hojita }]}>
 	{
 		conPortada && (
 			<div class="tarjeta__media">
-				<Cover imagen={d.imagen ?? d.galeria[0] ?? null} ratio={ratio} />
+				{sinImagenConvocatoria ? (
+					<div class="tarjeta__convoca" style={`aspect-ratio:${ratio}`} aria-hidden="true">
+						<p class="titulo">
+							Súmate a <span class="caja">LEAD</span>
+						</p>
+					</div>
+				) : (
+					<Cover imagen={d.imagen ?? d.galeria[0] ?? null} ratio={ratio} />
+				)}
 				{hojita && (
 					<span class="hojita" aria-hidden="true">
 						<span class="hojita__dia">{hojita.dia.padStart(2, '0')}</span>
@@ -59,6 +67,7 @@ const conFormato = f === 'logros' || f === 'post-ig';
 		<div class="tarjeta__fila">
 			<PilarChip pilar={pilar} oscuro={f === 'anuncio' || f === 'logros'} />
 			{aviso && <span class="pill tarjeta__aviso">{aviso}</span>}
+			<span class="tarjeta__formato">{FORMATOS_INFO[f].nombre}</span>
 		</div>
 
 		{
@@ -81,13 +90,10 @@ const conFormato = f === 'logros' || f === 'post-ig';
 					<span class:list={['pill', 'pill--borde', { 'tarjeta__cerrada': cerrada }]}>
 						{cerrada ? 'Cerrada' : `Cierra el ${fechaCorta(evento.inicio, evento.conHora)}`}
 					</span>
-				) : f === 'evento' ? (
-					<span>{FORMATOS_INFO.evento.nombre}</span>
+				) : f === 'evento' && evento ? (
+					<time datetime={evento.inicio.toISOString()}>{fechaCorta(evento.inicio, evento.conHora)}</time>
 				) : (
-					<time datetime={d.fechaPublicacion.toISOString()}>
-						{conFormato && `${FORMATOS_INFO[f].nombre} · `}
-						{fechaCorta(d.fechaPublicacion)}
-					</time>
+					<time datetime={d.fechaPublicacion.toISOString()}>{fechaCorta(d.fechaPublicacion)}</time>
 				)
 			}
 			{f === 'periodico' && <span>{minutosDeLectura(d.tiempoLectura)}</span>}
@@ -168,6 +174,31 @@ const conFormato = f === 'logros' || f === 'post-ig';
 		font-size: 0.8125rem;
 		font-weight: 400;
 		color: var(--tinta-suave);
+	}
+	/* Etiqueta del formato, a la derecha de la fila del pilar */
+	.tarjeta__formato {
+		margin-left: auto;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--tinta-suave);
+	}
+	.tarjeta--anuncio .tarjeta__formato,
+	.tarjeta--logros .tarjeta__formato {
+		color: var(--morado-claro);
+	}
+	/* Convocatoria sin imagen */
+	.tarjeta__convoca {
+		display: grid;
+		align-content: end;
+		padding: 1.25rem;
+		background: var(--degradado-boton);
+		color: var(--blanco);
+	}
+	.tarjeta__convoca p {
+		font-size: clamp(2.5rem, 4.5vw, 3.375rem);
+		line-height: 0.9;
 	}
 	.tarjeta__aviso {
 		background: #fdf3cc;
